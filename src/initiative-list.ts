@@ -147,7 +147,7 @@ export class InitiativeList
 
             OBR.popover.open({
                 id: Constants.EXTENSIONSUBMENUID,
-                url: "/submenu.html",
+                url: "/submenu/index.html",
                 height: 700,
                 width: 325,
                 anchorElementId: uid,
