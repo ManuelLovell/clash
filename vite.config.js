@@ -1,12 +1,11 @@
-// vite.config.js
-const { resolve } = require('path')
+import path from 'path'
 
-module.exports = {
+export default {
   build: {
     rollupOptions: {
       input: {
-        main: resolve(__dirname, 'index.html'),
-        submenu: resolve(__dirname, 'submenu/index.html')
+        main: path.resolve(__dirname, 'index.html'),
+        submenu: path.resolve(__dirname, 'submenu/index.html')
       }
     }
   }

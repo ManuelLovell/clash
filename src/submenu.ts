@@ -430,4 +430,4 @@ export class SubMenu
 
 // Render from main list
 const subMenu = new SubMenu();
-await subMenu.renderUnitInfo(document);
+subMenu.renderUnitInfo(document);
