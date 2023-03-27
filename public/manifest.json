@@ -4,6 +4,7 @@
   "manifest_version": 1,
   "action": {
     "title": "Clash!",
+    "description": "An initiave tracker allowing importable monsters and custom stat blocks",
     "icon": "/icon.svg",
     "popover": "/",
     "height": 600,
