@@ -1,0 +1,180 @@
+:root {
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+
+    color-scheme: light dark;
+    color: rgba(255, 255, 255, 0.87);
+    background-color: #242424;
+
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+}
+body {
+    margin: 0;
+    padding: 5px;
+    display: flex;
+    height: 95%;
+    flex-direction: column;
+}
+#submenu
+{
+    height: 100%;
+    overflow-x: scroll;
+}
+#submenu::-webkit-scrollbar{
+    display: none;
+}
+body::-webkit-scrollbar{
+    display: none;
+}
+
+#searchmenu
+{
+    height: 100%;
+    overflow-x: scroll;
+}
+#searchmenu::-webkit-scrollbar{
+    display: none;
+}
+body::-webkit-scrollbar{
+    display: none;
+}
+
+footer {
+    background: linear-gradient(180deg, #A73335, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0));
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    height: 4%;
+    width: 100%;
+    text-align: center;
+}
+.popColor
+{
+    background-color: rgb(34, 38, 57);
+    background-image: linear-gradient(rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.12));
+}
+.monsterNameList {
+    float:left;
+}
+.monsterImportButtonContainer {
+    float:right;
+}
+.HealthInput {
+    width: 30px;
+}
+
+.Icon {
+    vertical-align: text-bottom;
+    height: 20px;
+    width: 20px;
+}
+.searchFloatRight
+{
+    float: right;
+    width: 75%;
+}
+.returnFloatLeft
+{
+    padding-left: 2px;
+    text-align: left;
+    float: left;
+}
+#unitinfo {
+    max-width: 400px;
+    padding: .5rem;
+}
+
+
+.gradient {
+    background: linear-gradient(10deg, #A73335, rgba(255, 255, 255, 0));
+    height: 5px;
+    margin: 7px 0px;
+}
+
+[contenteditable]:empty::before {
+    content: "...";
+    border: 1px solid #A73335;;
+    height: 1.25em;
+    width: 50px;
+    line-height: 1.25;
+}
+.name {
+    font-size: 150%;
+    font-family: Georgia, serif;
+    font-variant: small-caps;
+    font-weight: bold;
+    color: #A73335;
+}
+
+.description {
+    font-style: italic;
+}
+
+.center {
+    text-align: center;
+}
+.floatright {
+    float:right;
+}
+
+.bold {
+    font-weight: bold;
+}
+
+.red {
+    color: #A73335;
+}
+
+table {
+    width: 100%;
+    border: 0px;
+    border-collapse: collapse;
+    color: #A73335;
+}
+
+th,
+td {
+    width: 50px;
+    text-align: center;
+}
+
+.actions {
+    font-size: 175%;
+    font-variant: small-caps;
+    margin: 17px 0px 0px 0px;
+}
+
+.hr {
+    background: #A73335;
+    height: 2px;
+}
+
+.attack,.ability {
+    margin: 5px 0px;
+}
+
+.attackname {
+    font-weight: bold;
+    font-style: italic;
+}
+
+
+@media (prefers-color-scheme: light) {
+    :root {
+        color: #213547;
+        background-color: #ffffff;
+    }
+
+    a:hover {
+        color: #747bff;
+    }
+
+    button {
+        background-color: #f9f9f9;
+    }
+}
