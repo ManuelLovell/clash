@@ -20,6 +20,10 @@ body {
     height: 95%;
     flex-direction: column;
 }
+h2 {
+    text-align: center;
+    color: #A73335;
+}
 #submenu
 {
     height: 100%;
@@ -27,6 +31,12 @@ body {
 }
 #submenu::-webkit-scrollbar{
     display: none;
+}
+#customJsonValueBox
+{
+    width: 98%;
+    height: 500px;
+    resize: none;
 }
 body::-webkit-scrollbar{
     display: none;
@@ -38,6 +48,15 @@ body::-webkit-scrollbar{
     overflow-x: scroll;
 }
 #searchmenu::-webkit-scrollbar{
+    display: none;
+}
+
+#importjsonmenu
+{
+    height: 100%;
+    overflow-x: scroll;
+}
+#importjsonmenu::-webkit-scrollbar{
     display: none;
 }
 body::-webkit-scrollbar{

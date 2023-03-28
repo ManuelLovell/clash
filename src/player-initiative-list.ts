@@ -5,7 +5,7 @@ import UnitInfo from "./unit-info";
 export class PlayerList
 {
     roundCounter: number = 1;
-    turnCounter: number = 0;
+    turnCounter: number = 1;
 
     /**Render the main initiatve list */
     public render(document: Document): void
@@ -37,7 +37,7 @@ export class PlayerList
                 const metadata = item.metadata[`${Constants.EXTENSIONID}/metadata`];
                 const initiative = item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`];
                 const currenthp = item.metadata[`${Constants.EXTENSIONID}/metadata_currenthp`];
-                const trackItem = item.metadata[`${Constants.EXTENSIONID}/metadata_tracker`];
+                const trackItem = item.metadata[`${Constants.EXTENSIONID}/metadata_trackeritem`];
 
                 if (metadata?.unitInfo)
                 {
@@ -114,14 +114,13 @@ export class PlayerList
             {
                 row.classList.remove("turnOutline");
             }
-
-            const totalRows = table.rows.length - 1;
-            const currentTurn = (this.turnCounter % totalRows) + 1;
-            table.rows[currentTurn].className = "turnOutline";
-
-            this.roundCounter = Math.floor(this.turnCounter / totalRows) + 1;
-            const counterHtml = document.getElementById("roundCount")!;
-            counterHtml.innerText = `Round: ${this.roundCounter}`;
+            //console.log(`turn selection count is ${this.turnCounter}`);
+            if (table.rows[this.turnCounter])
+            {
+                table.rows[this.turnCounter].className = "turnOutline";
+                const counterHtml = document.getElementById("roundCount")!;
+                counterHtml.innerText = `Round: ${this.roundCounter}`;
+            }
         }
     }
 }

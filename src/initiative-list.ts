@@ -6,7 +6,7 @@ import Tracker from './turn-tracker-item';
 export class InitiativeList
 {
     roundCounter: number = 1;
-    turnCounter: number = 0;
+    turnCounter: number = 1;
 
     /**Render the main initiatve list */
     public render(document: Document): void
@@ -43,7 +43,7 @@ export class InitiativeList
                 const metadata = item.metadata[`${Constants.EXTENSIONID}/metadata`];
                 const initiative = item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`];
                 const currenthp = item.metadata[`${Constants.EXTENSIONID}/metadata_currenthp`];
-                const trackItem = item.metadata[`${Constants.EXTENSIONID}/metadata_tracker`];
+                const trackItem = item.metadata[`${Constants.EXTENSIONID}/metadata_trackeritem`];
 
                 if (metadata?.unitInfo)
                 {
@@ -124,9 +124,10 @@ export class InitiativeList
                 hpCell.appendChild(document.createTextNode(initiativeItem.unitinfo.maxHP.toString()));
                 acCell.appendChild(document.createTextNode(initiativeItem.unitinfo.armorClass.toString()));
                 optionCell.appendChild(triangleImg);
-
-                this.ShowTurnSelection();
             }
+
+            console.log("Show turn selectino");
+            this.ShowTurnSelection();
         };
 
         this.AppendTurnButtons();
@@ -159,14 +160,13 @@ export class InitiativeList
             {
                 row.classList.remove("turnOutline");
             }
-
-            const totalRows = table.rows.length - 1;
-            const currentTurn = (this.turnCounter % totalRows) + 1;
-            table.rows[currentTurn].className = "turnOutline";
-
-            this.roundCounter = Math.floor(this.turnCounter / totalRows) + 1;
-            const counterHtml = document.getElementById("roundCount")!;
-            counterHtml.innerText = `Round: ${this.roundCounter}`;
+            //console.log(`turn selection count is ${this.turnCounter}`);
+            if (table.rows[this.turnCounter])
+            {
+                table.rows[this.turnCounter].className = "turnOutline";
+                const counterHtml = document.getElementById("roundCount")!;
+                counterHtml.innerText = `Round: ${this.roundCounter}`;
+            }
         }
     }
 
@@ -189,8 +189,19 @@ export class InitiativeList
             if (table.rows?.length > 1)
             {
                 self.turnCounter--;
-                if (self.turnCounter < 0) self.turnCounter = 0;
-                self.ShowTurnSelection();
+                //console.log(`turn count is ${self.turnCounter}`);
+                for (var i = 0, row; row = table.rows[i]; i++) 
+                {
+                    if (row.className == "turnOutline")
+                    {
+                        if (row.parentElement?.firstElementChild === row)
+                        {
+                            self.roundCounter--;
+                            if (self.roundCounter < 1) self.roundCounter = 1;
+                            self.turnCounter = row.parentElement.childElementCount;
+                        }
+                    }
+                }
                 self.Save();
             }
         }
@@ -207,7 +218,18 @@ export class InitiativeList
             if (table.rows?.length > 1)
             {
                 self.turnCounter++;
-                self.ShowTurnSelection();
+                //console.log(`turn count is ${self.turnCounter}`);
+                for (var i = 0, row; row = table.rows[i]; i++) 
+                {
+                    if (row.className == "turnOutline")
+                    {
+                        if (row.parentElement?.lastElementChild === row)
+                        {
+                            self.roundCounter++;
+                            self.turnCounter = 1;
+                        }
+                    }
+                }
                 self.Save();
             }
         }
@@ -232,22 +254,21 @@ export class InitiativeList
         restButton.onclick = function async() 
         {
 
-            self.turnCounter = 0;
+            self.turnCounter = 1;
             self.roundCounter = 1;
             const counterHtml = document.getElementById("roundCount")!;
             counterHtml.innerText = `Round: ${self.roundCounter}`;
 
             OBR.onReady(async () =>
             {
-                await OBR.scene.items.updateItems((item) => item.metadata[`${Constants.EXTENSIONID}/metadata`] != undefined
-                || item.metadata[`${Constants.EXTENSIONID}/metadata_tracker`] != undefined, (items) =>
+                await OBR.scene.items.updateItems((item) => item.metadata[`${Constants.EXTENSIONID}/metadata`] != undefined, (items) =>
                 {
                     for (let item of items)
                     {
                         delete item.metadata[`${Constants.EXTENSIONID}/metadata`];
                         delete item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`];
                         delete item.metadata[`${Constants.EXTENSIONID}/metadata_currenthp`];
-                        delete item.metadata[`${Constants.EXTENSIONID}/metadata_tracker`];
+                        delete item.metadata[`${Constants.EXTENSIONID}/metadata_trackeritem`];
                     }
                 });
             });
@@ -283,7 +304,6 @@ export class InitiativeList
         OBR.onReady(async () =>
         {
             let trackerItem: Tracker = { turn: this.turnCounter, round: this.roundCounter };
-            let trackerFound = false;
 
             const unitsInOrder = document.querySelectorAll(".InitiativeInput");
             unitsInOrder.forEach(async (unit) =>
@@ -305,34 +325,11 @@ export class InitiativeList
                         {
                             item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`] = { initiative };
                             item.metadata[`${Constants.EXTENSIONID}/metadata_currenthp`] = { currenthp };
+                            item.metadata[`${Constants.EXTENSIONID}/metadata_trackeritem`] = { trackerItem };
                         }
                     }
                 );
             });
-
-            await OBR.scene.items.updateItems(
-                (item) => item.id === Constants.TURNTRACKER,
-                (items) =>
-                {
-                    for (let item of items)
-                    {
-                        item.metadata[`${Constants.EXTENSIONID}/metadata_tracker`] = { trackerItem };
-                        trackerFound = true;
-                    }
-                }
-            );
-
-            if (!trackerFound)
-            {
-                const turntracker = buildShape().width(1).height(1).shapeType("CIRCLE").build();
-                turntracker.id = Constants.TURNTRACKER;
-                turntracker.visible = false;
-                turntracker.locked = true;
-                turntracker.metadata[`${Constants.EXTENSIONID}/metadata_tracker`] = { trackerItem };
-
-                OBR.scene.items.addItems([turntracker]);
-            }
-
         });
     }
 }

@@ -2,7 +2,7 @@ import { Constants } from './constants';
 import './mini-style.css'
 import OBR, { Metadata } from '@owlbear-rodeo/sdk';
 import UnitInfo from './unit-info';
-import { Open5eMonsterListResponse } from './api-response-open5e';
+import { Open5eMonsterListResponse, Open5eMonsterResponse } from './api-response-open5e';
 
 export class SubMenu
 {
@@ -21,6 +21,7 @@ export class SubMenu
 
         if (this.POPOVERSUBMENUID == undefined) return;
         this.ShowSearchMenu(false);
+        this.ShowImportJSONMenu(false);
         this.ShowSubMenu(true);
 
         OBR.onReady(async () =>
@@ -188,6 +189,7 @@ export class SubMenu
             this.AppendUnitSaveButton();
             this.AppendAddActionButtons();
             this.AppendImportUnitButton();
+            this.AppendJSONButton();
         });
     }
 
@@ -210,7 +212,6 @@ export class SubMenu
         goBackButton.title = "Go back to Unit Information"
         goBackButton.onclick = function async() 
         {
-            console.log("Clicked Return");
             self.ShowSearchMenu(false);
             self.ShowSubMenu(true);
         }
@@ -226,7 +227,6 @@ export class SubMenu
         searchValueButton.title = "Type a value to filter monsters by"
         searchValueButton.onclick = function async() 
         {
-            console.log("Clicked FINDUNIT!");
         }
 
         //Create Search Confirm Button
@@ -238,7 +238,6 @@ export class SubMenu
         searchConfirmButton.title = "Click to send Search"
         searchConfirmButton.onclick = function async() 
         {
-            console.log(`Clicked CALLING API FOR! ${searchValueButton.value}`);
             fetch(`${self.open5eApiString}${searchValueButton.value}`)
                 .then(function (response)
                 {
@@ -262,10 +261,11 @@ export class SubMenu
                     });
                     list.innerHTML = monsterInformationHtml;
                     const btns = document.querySelectorAll('.monsterImportButtonConfirm');
-                    btns.forEach(btn => {
+                    btns.forEach(btn =>
+                    {
 
-                        btn.addEventListener('click', (e:Event) => self.ImportNewMonsterInfo((e.currentTarget as Element).id));
-                        });
+                        btn.addEventListener('click', (e: Event) => self.ImportNewMonsterInfo((e.currentTarget as Element).id));
+                    });
                 });
         }
 
@@ -273,7 +273,7 @@ export class SubMenu
         searchBarContainer?.append(searchValueButton);
         searchBarContainer?.append(searchConfirmButton);
 
-        function TruncateName(name: string):string
+        function TruncateName(name: string): string
         {
             if (name.length > 20)
             {
@@ -283,13 +283,150 @@ export class SubMenu
         }
     }
 
+    public async renderCustomImportForm(document: Document): Promise<void>
+    {
+        var self = this;
+        document.querySelector<HTMLDivElement>('#importjsonmenu')!.innerHTML = `
+            <h2>Import Custom JSON</h2>
+            <div id="importDataContainer"></div>
+            <div class="hr"></div>
+            <div class = "red" id="exampleLine>Example Input</div>
+            <div id="instructionsContainer"></div>
+            <h3>Format</h3>
+            ${this.exampleInterfaceString()}
+            <div class="hr"></div>
+            <h3>Sub Types</h3>
+            ${this.exampleTypesString()}
+            <footer><span class="returnFloatLeft" id="importReturnContainer"></span><span class="returnFloatRight" id="importFooterButtonContainer"></span></footer>
+           `;
+
+        const importDataContainer = document.getElementById("importDataContainer");
+        const importReturnContainer = document.getElementById("importReturnContainer");
+        const importBarContainer = document.getElementById("importFooterButtonContainer");
+
+        //Create Return Button
+        const goBackButton = document.createElement('input');
+        goBackButton.type = "image";
+        goBackButton.id = "returnButton";
+        goBackButton.className = "Icon";
+        goBackButton.title = "Go back to Unit Information"
+        goBackButton.onclick = function async() 
+        {
+            self.ShowImportJSONMenu(false);
+            self.ShowSubMenu(true);
+        }
+        goBackButton.src = "/return.svg";
+        goBackButton.height = 20;
+        goBackButton.width = 20;
+
+        //Create import Input Button
+        const importValueButton = document.createElement('textarea');
+        importValueButton.id = "customJsonValueBox";
+        importValueButton.className = "";
+        importValueButton.title = "Type custom monster information here"
+
+        //Create import Confirm Button
+        const importConfirmButton = document.createElement('input');
+        importConfirmButton.type = "button";
+        importConfirmButton.id = "importConfirm";
+        importConfirmButton.value = "Confirm Import";
+        importConfirmButton.className = "";
+        importConfirmButton.title = "Click to import custom data"
+        importConfirmButton.onclick = function async() 
+        {
+            console.log(`I'm importing this; ${importValueButton.value}`);
+            const customData = importValueButton.value;
+
+            let importUnit = new UnitInfo();
+            try 
+            {
+                let jsonData: Open5eMonsterResponse = JSON.parse(customData);
+                importUnit.ImportOpen5eResponse(jsonData);
+    
+                subMenu.freshImport = true;
+    
+                subMenu.currentUnit = importUnit;
+                subMenu.renderUnitInfo(document);
+                
+            } 
+            catch (error) 
+            {
+                alert(`The import failed - ${error}`);
+            }
+        }
+
+        importReturnContainer?.append(goBackButton);
+        importDataContainer?.append(importValueButton);
+        importBarContainer?.append(importConfirmButton);
+    }
+
+    private exampleInterfaceString(): string
+    {
+        let exampleInterface = `{</br>
+            name: string;</br>
+            size: string;</br>
+            type: string;</br>
+            alignment: string;</br>
+            armor_class: number;</br>
+            hit_points: number;</br>
+            speed: Speed;</br>
+            strength: number;</br>
+            dexterity: number;</br>
+            constitution: number;</br>
+            intelligence: number;</br>
+            wisdom: number;</br>
+            charisma: number;</br>
+            strength_save: number;</br>
+            dexterity_save: number;</br>
+            constitution_save: number;</br>
+            intelligence_save: number;</br>
+            wisdom_save: number;</br>
+            charisma_save?: number;</br>
+            perception: number;</br>
+            damage_vulnerabilities: string;</br>
+            damage_resistances: string;</br>
+            damage_immunities: string;</br>
+            condition_immunities: string;</br>
+            senses: string;</br>
+            languages: string;</br>
+            challenge_rating: string;</br>
+            actions: ActionsEntity[];</br>
+            reactions: ActionsEntity[];</br>
+            legendary_actions: ActionsEntity[];</br>
+            special_abilities: ActionsEntity[];</br>
+          }`;
+
+        return exampleInterface;
+    }
+
+    private exampleTypesString(): string
+    {
+        const exampleType = `
+        <b>Speed</b></br>
+        {</br>
+          swim: number;</br>
+          burrow: number;</br>
+          walk: number;</br>
+          fly: number;</br>
+          climb: number;</br>
+        }</br>
+      
+        <b>ActionsEntity</b> </br>
+        {</br>
+          name?: string;</br>
+          desc?: string;</br>
+        }</br>
+        `;
+
+        return exampleType;
+    }
     private AppendImportUnitButton(): void
     {
         var self = this;
-        //Get Reset Container
+
+        //Get footer Container
         const footerContainer = document.getElementById("footerButtonContainer");
 
-        //Create Turn Buttons
         const gotoSearchButton = document.createElement('input');
         gotoSearchButton.type = "button";
         gotoSearchButton.id = "gotoMonsterSearchButton";
@@ -298,13 +435,35 @@ export class SubMenu
         gotoSearchButton.title = "Search Monster Data from Free Open5e"
         gotoSearchButton.onclick = function async() 
         {
-            console.log("Clicked SEARCH!");
             self.ShowSubMenu(false);
             self.ShowSearchMenu(true);
             self.renderSearchForm(document);
         }
 
         footerContainer?.appendChild(gotoSearchButton);
+    }
+
+    private AppendJSONButton(): void
+    {
+        var self = this;
+
+        //Get footer Container
+        const footerContainer = document.getElementById("footerButtonContainer");
+
+        const gotoImportJSONButton = document.createElement('input');
+        gotoImportJSONButton.type = "button";
+        gotoImportJSONButton.id = "gotoImportMonsterButton";
+        gotoImportJSONButton.value = "Import Custom JSON"
+        gotoImportJSONButton.className = "";
+        gotoImportJSONButton.title = "Import Custom Monster JSON Data"
+        gotoImportJSONButton.onclick = function async() 
+        {
+            self.ShowSubMenu(false);
+            self.ShowImportJSONMenu(true);
+            self.renderCustomImportForm(document);
+        }
+
+        footerContainer?.appendChild(gotoImportJSONButton);
     }
 
     private AppendUnitSaveButton(): void
@@ -319,7 +478,6 @@ export class SubMenu
         saveButton.id = "saveButton";
         saveButton.onclick = function async() 
         {
-            console.log("Clicked Save Unit");
             OBR.onReady(async () =>
             {
                 //Validate form inputs
@@ -359,13 +517,12 @@ export class SubMenu
         addAttackButton.title = "Add new Attack"
         addAttackButton.onclick = function async() 
         {
-            console.log("Clicked Add");
 
             //Add a blank action
             const attackCollection = <HTMLElement>document.getElementById("formAttackCollection");
             const baseAttackHtml = `<div id="formAttackContainer" class="attack"><span id="formAttackName" class="attackname" contentEditable="true">Act-Name.</span>.
                 <span id="formAttackDesc" class="description" contentEditable="true">Act-Desc</span></div>`;
-            attackCollection.insertAdjacentHTML('beforeend', baseAttackHtml);                    
+            attackCollection.insertAdjacentHTML('beforeend', baseAttackHtml);
         }
         addAttackButton.src = "/add.svg";
         addAttackButton.height = 20;
@@ -384,7 +541,6 @@ export class SubMenu
         addAbilityButton.title = "Add new Ability";
         addAbilityButton.onclick = function async() 
         {
-            console.log("Clicked Add");
 
             //Add a blank ability
             const abilityCollection = <HTMLElement>document.getElementById("formAbilityCollection");
@@ -408,6 +564,12 @@ export class SubMenu
     private ShowSearchMenu(show: boolean): void
     {
         const page = document.querySelector<HTMLDivElement>('#searchmenu')!;
+        page.hidden = !show;
+    }
+
+    private ShowImportJSONMenu(show: boolean): void
+    {
+        const page = document.querySelector<HTMLDivElement>('#importjsonmenu')!;
         page.hidden = !show;
     }
 
