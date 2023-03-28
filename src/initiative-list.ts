@@ -1,6 +1,7 @@
-import OBR from "@owlbear-rodeo/sdk";
+import OBR, { buildShape } from "@owlbear-rodeo/sdk";
 import { Constants } from "./constants";
 import UnitInfo from './unit-info';
+import Tracker from './turn-tracker-item';
 
 export class InitiativeList
 {
@@ -14,7 +15,7 @@ export class InitiativeList
         <table id="initiative-list">
         <thead>
             <tr>
-            <th style="width: 8%"><img class="Icon" title="Initiative" src="/speed.svg"></th>
+            <th style="width: 8%"><img class="Icon" title="Initiative" src="/queue.svg"></th>
             <th style="width: 50%">Name</th>
             <th style="width: 24%"><img class="Icon" title="Hit Points" src="/heart.svg"></th>
             <th style="width: 8%"><img class="Icon" title="Armor Class" src="/shield.svg"></th>
@@ -32,7 +33,7 @@ export class InitiativeList
     /**Refresh the initiative list after updates */
     public setupInitiativeList(element: HTMLTableElement): void
     {
-        const renderList = (items: any) =>
+        const renderList = async (items: any) =>
         {
             // Get the name and initiative of any item with
             // our initiative metadata
@@ -42,6 +43,7 @@ export class InitiativeList
                 const metadata = item.metadata[`${Constants.EXTENSIONID}/metadata`];
                 const initiative = item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`];
                 const currenthp = item.metadata[`${Constants.EXTENSIONID}/metadata_currenthp`];
+                const trackItem = item.metadata[`${Constants.EXTENSIONID}/metadata_tracker`];
 
                 if (metadata?.unitInfo)
                 {
@@ -55,8 +57,15 @@ export class InitiativeList
                         id: item.id,
                     });
                 }
+
+                if (trackItem?.trackerItem)
+                {
+                    this.turnCounter = trackItem.trackerItem.turn!;
+                    this.roundCounter = trackItem.trackerItem.round!;
+                }
             }
-            // Sort so the highest initiative value is on topd
+
+            // Sort so the highest initiative value is on top
             const sortedItems = initiativeItems.sort(
                 (a, b) => b.initiative - a.initiative
             );
@@ -108,7 +117,7 @@ export class InitiativeList
                 triangleImg.width = 20;
 
                 initCell.appendChild(initiativeInput);
-                
+
                 nameCell.appendChild(document.createTextNode(initiativeItem.unitinfo.unitName));
                 hpCell.appendChild(heartInputMin);
                 hpCell.appendChild(document.createTextNode(` / `));
@@ -116,22 +125,7 @@ export class InitiativeList
                 acCell.appendChild(document.createTextNode(initiativeItem.unitinfo.armorClass.toString()));
                 optionCell.appendChild(triangleImg);
 
-                if (initiativeItem.currenthp < (initiativeItem.unitinfo.maxHP / 3))
-                {
-                    //red
-
-                }
-                else if (initiativeItem.currenthp < (initiativeItem.unitinfo.maxHP / 1.5))
-                {
-                    //yellow
-                }
-                else
-                {
-                    //white
-                }
-
-
-                 this.ShowTurnSelection();
+                this.ShowTurnSelection();
             }
         };
 
@@ -139,18 +133,19 @@ export class InitiativeList
         this.AppendResetButton();
 
         OBR.scene.items.onChange(renderList);
+        // Save to force the onChange so the initial load will render the list.
+        this.Save();
 
         //Calls the submenu
         function openMini(uid: string)
         {
-            globalThis.POPOVERSUBMENUID = uid;
-
             OBR.popover.open({
                 id: Constants.EXTENSIONSUBMENUID,
-                url: "/submenu/subindex.html",
+                url: `/submenu/subindex.html?unitid=${uid}`,
                 height: 700,
                 width: 325,
-                anchorElementId: uid,
+                anchorPosition: { left: 625, top: 15 },
+                anchorReference: "POSITION"
             });
         }
     }
@@ -167,8 +162,6 @@ export class InitiativeList
 
             const totalRows = table.rows.length - 1;
             const currentTurn = (this.turnCounter % totalRows) + 1;
-            console.log(`Turn counter is ${this.turnCounter}`);
-            console.log(`Current Turn is ${currentTurn}`);
             table.rows[currentTurn].className = "turnOutline";
 
             this.roundCounter = Math.floor(this.turnCounter / totalRows) + 1;
@@ -192,10 +185,14 @@ export class InitiativeList
         previousButton.title = "Previous Turn"
         previousButton.onclick = function async() 
         {
-            console.log("Clicked PREVIOUS!");
-            self.turnCounter--;
-            if (self.turnCounter < 0) self.turnCounter = 0;
-            self.ShowTurnSelection();
+            const table = <HTMLTableElement>document.getElementById("initiative-list");
+            if (table.rows?.length > 1)
+            {
+                self.turnCounter--;
+                if (self.turnCounter < 0) self.turnCounter = 0;
+                self.ShowTurnSelection();
+                self.Save();
+            }
         }
 
         const nextButton = document.createElement('input');
@@ -206,9 +203,13 @@ export class InitiativeList
         nextButton.title = "Next Turn"
         nextButton.onclick = function async() 
         {
-            console.log("Clicked NEXT!");
-            self.turnCounter++;
-            self.ShowTurnSelection();
+            const table = <HTMLTableElement>document.getElementById("initiative-list");
+            if (table.rows?.length > 1)
+            {
+                self.turnCounter++;
+                self.ShowTurnSelection();
+                self.Save();
+            }
         }
 
         turnContainer?.appendChild(previousButton);
@@ -217,6 +218,8 @@ export class InitiativeList
 
     private AppendResetButton(): void
     {
+        var self = this;
+
         //Get Reset Container
         const resetContainer = document.getElementById("resetContainer");
 
@@ -228,16 +231,23 @@ export class InitiativeList
         restButton.title = "Clear all Data"
         restButton.onclick = function async() 
         {
-            console.log("Clicked Reset!");
+
+            self.turnCounter = 0;
+            self.roundCounter = 1;
+            const counterHtml = document.getElementById("roundCount")!;
+            counterHtml.innerText = `Round: ${self.roundCounter}`;
+
             OBR.onReady(async () =>
             {
-                OBR.scene.items.updateItems((item) => item.metadata[`${Constants.EXTENSIONID}/metadata`] != undefined, (items) =>
+                await OBR.scene.items.updateItems((item) => item.metadata[`${Constants.EXTENSIONID}/metadata`] != undefined
+                || item.metadata[`${Constants.EXTENSIONID}/metadata_tracker`] != undefined, (items) =>
                 {
                     for (let item of items)
                     {
                         delete item.metadata[`${Constants.EXTENSIONID}/metadata`];
                         delete item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`];
                         delete item.metadata[`${Constants.EXTENSIONID}/metadata_currenthp`];
+                        delete item.metadata[`${Constants.EXTENSIONID}/metadata_tracker`];
                     }
                 });
             });
@@ -247,6 +257,7 @@ export class InitiativeList
 
     private AppendSaveOrderButton(): void
     {
+        var self = this;
         //Get Button Container
         const buttonContainer = document.getElementById("saveButtonContainer");
 
@@ -257,35 +268,7 @@ export class InitiativeList
         saveButton.id = "saveButton";
         saveButton.onclick = function async() 
         {
-            console.log("Clicked SaveOrder");
-
-            OBR.onReady(async () =>
-            {
-                const unitsInOrder = document.querySelectorAll(".InitiativeInput");
-                unitsInOrder.forEach(async (unit) =>
-                {
-                    const unitInput = unit as HTMLInputElement;
-                    const unitId = unitInput.id;
-                    const initiative = unitInput.value;
-
-                    const hpElement = document.querySelector(`#cHP${unitId}`) as HTMLInputElement;
-                    const currenthp = hpElement.value ? hpElement.value : null;
-
-                    if (!unitId || !initiative) return;
-
-                    await OBR.scene.items.updateItems(
-                        (item) => item.id === unitId,
-                        (items) =>
-                        {
-                            for (let item of items)
-                            {
-                                item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`] = { initiative };
-                                item.metadata[`${Constants.EXTENSIONID}/metadata_currenthp`] = { currenthp };
-                            }
-                        }
-                    );
-                });
-            });
+            self.Save();
         }
         saveButton.src = "/save.svg";
         saveButton.title = "Save Changes";
@@ -293,5 +276,63 @@ export class InitiativeList
         saveButton.width = 20;
 
         buttonContainer?.appendChild(saveButton);
+    }
+
+    private async Save(): Promise<void>
+    {
+        OBR.onReady(async () =>
+        {
+            let trackerItem: Tracker = { turn: this.turnCounter, round: this.roundCounter };
+            let trackerFound = false;
+
+            const unitsInOrder = document.querySelectorAll(".InitiativeInput");
+            unitsInOrder.forEach(async (unit) =>
+            {
+                const unitInput = unit as HTMLInputElement;
+                const unitId = unitInput.id;
+                const initiative = unitInput.value;
+
+                const hpElement = document.querySelector(`#cHP${unitId}`) as HTMLInputElement;
+                const currenthp = hpElement.value ? hpElement.value : null;
+
+                if (!unitId || !initiative) return;
+
+                await OBR.scene.items.updateItems(
+                    (item) => item.id === unitId,
+                    (items) =>
+                    {
+                        for (let item of items)
+                        {
+                            item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`] = { initiative };
+                            item.metadata[`${Constants.EXTENSIONID}/metadata_currenthp`] = { currenthp };
+                        }
+                    }
+                );
+            });
+
+            await OBR.scene.items.updateItems(
+                (item) => item.id === Constants.TURNTRACKER,
+                (items) =>
+                {
+                    for (let item of items)
+                    {
+                        item.metadata[`${Constants.EXTENSIONID}/metadata_tracker`] = { trackerItem };
+                        trackerFound = true;
+                    }
+                }
+            );
+
+            if (!trackerFound)
+            {
+                const turntracker = buildShape().width(1).height(1).shapeType("CIRCLE").build();
+                turntracker.id = Constants.TURNTRACKER;
+                turntracker.visible = false;
+                turntracker.locked = true;
+                turntracker.metadata[`${Constants.EXTENSIONID}/metadata_tracker`] = { trackerItem };
+
+                OBR.scene.items.addItems([turntracker]);
+            }
+
+        });
     }
 }

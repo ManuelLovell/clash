@@ -9,12 +9,17 @@ export class SubMenu
     currentUnit: UnitInfo = new UnitInfo();
     freshImport: boolean = false;
     open5eApiString: string = "https://api.open5e.com/monsters/?format=json&search=";
+    POPOVERSUBMENUID: string = "";
 
     public async renderUnitInfo(document: Document): Promise<void>
     {
 
         // If there's no ID, just give up.
-        if (Constants.POPOVERSUBMENUID == undefined) return;
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        this.POPOVERSUBMENUID = urlParams.get('unitid')!;
+
+        if (this.POPOVERSUBMENUID == undefined) return;
         this.ShowSearchMenu(false);
         this.ShowSubMenu(true);
 
@@ -22,7 +27,7 @@ export class SubMenu
         {
             if (!this.freshImport)
             {
-                const items = await OBR.scene.items.getItems([Constants.POPOVERSUBMENUID]);
+                const items = await OBR.scene.items.getItems([this.POPOVERSUBMENUID]);
                 const metadata = items[0].metadata[`${Constants.EXTENSIONID}/metadata`] as Metadata;
                 this.currentUnit = metadata.unitInfo as UnitInfo;
             }
@@ -88,7 +93,7 @@ export class SubMenu
                 for (let action of this.currentUnit.specialAbilities)
                 {
                     unitAbilitiesHtml += `<div id="formAbilityContainer" class="Ability">`;
-                    unitAbilitiesHtml += `<span id="formAbilityName" class="abilityname" contentEditable="true">${action.name}</span>  `;
+                    unitAbilitiesHtml += `<span id="formAbilityName" class="abilityname" contentEditable="true">${action.name}</span>.  `;
                     unitAbilitiesHtml += `<span id="formAbilityDesc" class="description" contentEditable="true">${action.desc}</span>`;
                     unitAbilitiesHtml += `</div>`;
                 }
@@ -102,7 +107,7 @@ export class SubMenu
                 for (let action of this.currentUnit.standardActions)
                 {
                     unitActionsHtml += `<div id="formAttackContainer" class="attack">`;
-                    unitActionsHtml += `<span id="formAttackName" class="attackname" contentEditable="true">${action.name}</span>  `;
+                    unitActionsHtml += `<span id="formAttackName" class="attackname" contentEditable="true">${action.name}</span>.  `;
                     unitActionsHtml += `<span id="formAttackDesc" class="description" contentEditable="true">${action.desc}</span>`;
                     if (action.attack_bonus)
                     {
@@ -125,7 +130,7 @@ export class SubMenu
                 for (let action of this.currentUnit.reactions)
                 {
                     unitReactionsHtml += `<div id="formReactionContainer" class="Reaction">`;
-                    unitReactionsHtml += `<span id="formReactionName" class="reactionname">${action.name}</span>  `;
+                    unitReactionsHtml += `<span id="formReactionName" class="reactionname">${action.name}</span>.  `;
                     unitReactionsHtml += `<span id="formReactionDesc" class="description">${action.desc}</span>`;
                     unitReactionsHtml += `</div>`;
                 }
@@ -140,7 +145,7 @@ export class SubMenu
                 for (let action of this.currentUnit.legendaryActions)
                 {
                     unitLegendaryHtml += `<div id="formLegendaryContainer" class="Legendary">`;
-                    unitLegendaryHtml += `<span id="formLegendaryName" class="legendaryname">${action.name}</span>  `;
+                    unitLegendaryHtml += `<span id="formLegendaryName" class="legendaryname">${action.name}</span>.  `;
                     unitLegendaryHtml += `<span id="formLegendaryDesc" class="description">${action.desc}</span>`;
                     unitLegendaryHtml += `</div>`;
                 }
@@ -304,6 +309,7 @@ export class SubMenu
 
     private AppendUnitSaveButton(): void
     {
+        var self = this;
         //Get Button Container
         const buttonContainer = document.getElementById("buttonContainer");
 
@@ -322,7 +328,7 @@ export class SubMenu
 
                 //Save new unit information to OBR
                 await OBR.scene.items.updateItems(
-                    (item) => item.id === Constants.POPOVERSUBMENUID,
+                    (item) => item.id === self.POPOVERSUBMENUID,
                     (items) =>
                     {
                         for (let item of items)
@@ -357,7 +363,7 @@ export class SubMenu
 
             //Add a blank action
             const attackCollection = <HTMLElement>document.getElementById("formAttackCollection");
-            const baseAttackHtml = `<div id="formAttackContainer" class="attack"><span id="formAttackName" class="attackname" contentEditable="true">Act-Name.</span>
+            const baseAttackHtml = `<div id="formAttackContainer" class="attack"><span id="formAttackName" class="attackname" contentEditable="true">Act-Name.</span>.
                 <span id="formAttackDesc" class="description" contentEditable="true">Act-Desc</span></div>`;
             attackCollection.insertAdjacentHTML('beforeend', baseAttackHtml);                    
         }
@@ -382,7 +388,7 @@ export class SubMenu
 
             //Add a blank ability
             const abilityCollection = <HTMLElement>document.getElementById("formAbilityCollection");
-            const baseabilityHtml = `<div id="formAbilityContainer" class="ability"><span id="formAbilityName" class="abilityname" contentEditable="true">Act-Name.</span>
+            const baseabilityHtml = `<div id="formAbilityContainer" class="ability"><span id="formAbilityName" class="abilityname" contentEditable="true">Act-Name.</span>.
                 <span id="formAbilityDesc" class="description" contentEditable="true">Act-Desc</span></div>`;
             abilityCollection.insertAdjacentHTML('beforeend', baseabilityHtml);
         }
