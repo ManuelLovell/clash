@@ -1,4 +1,4 @@
-import OBR, { buildShape } from "@owlbear-rodeo/sdk";
+import OBR from "@owlbear-rodeo/sdk";
 import { Constants } from "./constants";
 import UnitInfo from './unit-info';
 import Tracker from './turn-tracker-item';
