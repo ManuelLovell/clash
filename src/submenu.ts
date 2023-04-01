@@ -3,6 +3,7 @@ import '/src/css/mini-style.css'
 import OBR, { Metadata } from '@owlbear-rodeo/sdk';
 import UnitInfo from './unit-info';
 import { Open5eMonsterListResponse, Open5eMonsterResponse } from './interfaces/api-response-open5e';
+import { DiceRoller } from './dice-roller';
 
 export class SubMenu
 {
@@ -13,7 +14,6 @@ export class SubMenu
 
     public async renderUnitInfo(document: Document): Promise<void>
     {
-
         // If there's no ID, just give up.
         const queryString = window.location.search;
         const urlParams = new URLSearchParams(queryString);
@@ -23,7 +23,6 @@ export class SubMenu
         this.ShowSearchMenu(false);
         this.ShowImportJSONMenu(false);
         this.ShowSubMenu(true);
-
         OBR.onReady(async () =>
         {
             if (!this.freshImport)
@@ -109,16 +108,7 @@ export class SubMenu
                 {
                     unitActionsHtml += `<div id="formAttackContainer" class="attack">`;
                     unitActionsHtml += `<span id="formAttackName" class="attackname" contentEditable="true">${action.name}</span>.  `;
-                    unitActionsHtml += `<span id="formAttackDesc" class="description" contentEditable="true">${action.desc}</span>`;
-                    if (action.attack_bonus)
-                    {
-                        unitActionsHtml += `DOATHING${action.attack_bonus}`;
-                    }
-                    if (action.damage_dice)
-                    {
-                        unitActionsHtml += `DOATHING${action.damage_dice}`;
-                    }
-                    unitActionsHtml += `</div>`;
+                    unitActionsHtml += `<span id="formAttackDesc" class="description" contentEditable="true">${this.SetClassOnRollable(action.desc!)}</span>`;
                 }
             }
             unitActionsHtml += "</div>";
@@ -153,6 +143,19 @@ export class SubMenu
                 unitLegendaryHtml += "</div>";
             }
 
+            //Spells Actions
+            let unitSpellsHtml = `<div id="formSpellCollection">`;
+            if (this.currentUnit.spellActions && this.currentUnit.spellActions?.length > 0)
+            {
+                for (let action of this.currentUnit.spellActions)
+                {
+                    unitSpellsHtml += `<div id="formSpellContainer" class="attack">`;
+                    unitSpellsHtml += `<span id="formSpellName" class="attackname" contentEditable="true">${action.name}</span>.  `;
+                    unitSpellsHtml += `<span id="formSpellDesc" class="description" contentEditable="true">${this.SetClassOnRollable(action.desc!)}</span>`;
+                }
+            }
+            unitSpellsHtml += "</div>";
+
             //Set to page
             document.querySelector<HTMLDivElement>('#submenu')!.innerHTML = `
             <div class="headline"><span id="formUnitName" class="name" contentEditable="true">${this.currentUnit.unitName}</span><span id="buttonContainer" class="floatright"></span></div>
@@ -181,6 +184,9 @@ export class SubMenu
             ${unitActionsHtml}
             ${unitReactionsHtml}
             ${unitLegendaryHtml}
+            <div class="actions red">Spell List<span id="addSpellButtonContainer" class="floatright"></span></div>
+            <div class="hr"></div>
+            ${unitSpellsHtml}
             </div>
             <footer id="footerButtonContainer">
             </footer>
@@ -190,6 +196,22 @@ export class SubMenu
             this.AppendAddActionButtons();
             this.AppendImportUnitButton();
             this.AppendJSONButton();
+
+            const rollables = document.querySelectorAll('.clickableRoller');
+            rollables.forEach(roller =>
+            {
+                roller.addEventListener('click', async (e: Event) =>
+                {
+                    if (e && e.currentTarget)
+                    {
+                        e.preventDefault();
+                        const value = e.currentTarget as Element;
+                        value.parentElement?.blur();
+                        return await OBR.notification.show(`Rolled ${value.textContent} for ... ${DiceRoller.RollString(value.textContent!)}!`);
+                    }
+                    return null;
+                });
+            });
         });
     }
 
@@ -225,9 +247,6 @@ export class SubMenu
         searchValueButton.id = "searchValue";
         searchValueButton.className = "";
         searchValueButton.title = "Type a value to filter monsters by"
-        searchValueButton.onclick = function async() 
-        {
-        }
 
         //Create Search Confirm Button
         const searchConfirmButton = document.createElement('input');
@@ -244,27 +263,35 @@ export class SubMenu
                     return response.json();
                 }).then(function (data: Open5eMonsterListResponse)
                 {
-                    console.log(data);
                     const list = document.querySelector<HTMLDivElement>('#monsterList')!;
                     list.innerHTML = "";
                     let monsterInformationHtml = "";
-                    data.results.forEach((monster) =>
-                    {
-                        const importThis = document.createElement('input');
-                        importThis.type = "button";
-                        importThis.id = `${monster.slug}`;
-                        importThis.className = "monsterImportButtonConfirm"
-                        importThis.value = "Import";
-                        importThis.title = `Import ${monster.name} onto this Unit`;
 
-                        monsterInformationHtml += `<li><div class="monsterNameList">${TruncateName(monster.name)}</div><div class="monsterImportButtonContainer">${importThis.outerHTML}</div></li>`;
-                    });
-                    list.innerHTML = monsterInformationHtml;
-                    const btns = document.querySelectorAll('.monsterImportButtonConfirm');
-                    btns.forEach(btn =>
+                    if (data.count == 0)
                     {
-                        btn.addEventListener('click', (e: Event) => self.ImportNewMonsterInfo((e.currentTarget as Element).id));
-                    });
+                        list.innerHTML = "<div class='Nothing'>No results found.</div>";
+                    }
+                    else
+                    {
+                        data.results.forEach((monster) =>
+                        {
+                            const importThis = document.createElement('input');
+                            importThis.type = "button";
+                            importThis.id = `${monster.slug}`;
+                            importThis.className = "monsterImportButtonConfirm"
+                            importThis.value = "Import";
+                            importThis.title = `Import ${monster.name} onto this Unit`;
+
+                            monsterInformationHtml += `<li><div class="monsterNameList">${TruncateName(monster.name)}</div><div class="monsterImportButtonContainer">${importThis.outerHTML}</div></li>`;
+                        });
+                        list.innerHTML = monsterInformationHtml;
+                        const btns = document.querySelectorAll('.monsterImportButtonConfirm');
+                        btns.forEach(btn =>
+                        {
+                            btn.addEventListener('click', (e: Event) => self.ImportNewMonsterInfo((e.currentTarget as Element).id));
+                        });
+                    }
+
                 });
         }
 
@@ -341,13 +368,13 @@ export class SubMenu
             {
                 let jsonData: Open5eMonsterResponse = JSON.parse(customData);
                 importUnit.ImportOpen5eResponse(jsonData);
-    
+
                 subMenu.freshImport = true;
-    
+
                 subMenu.currentUnit = importUnit;
                 subMenu.renderUnitInfo(document);
-                
-            } 
+
+            }
             catch (error) 
             {
                 alert(`The import failed - ${error}`);
@@ -361,8 +388,7 @@ export class SubMenu
 
     private exampleInterfaceString(): string
     {
-        let exampleInterface = `{</br>
-            name: string;</br>
+        let exampleInterface = `{   name: string;</br>
             size: string;</br>
             type: string;</br>
             alignment: string;</br>
@@ -392,8 +418,7 @@ export class SubMenu
             actions: ActionsEntity[];</br>
             reactions: ActionsEntity[];</br>
             legendary_actions: ActionsEntity[];</br>
-            special_abilities: ActionsEntity[];</br>
-          }`;
+            special_abilities: ActionsEntity[];</br>    }`;
 
         return exampleInterface;
     }
@@ -402,19 +427,15 @@ export class SubMenu
     {
         const exampleType = `
         <b>Speed</b></br>
-        {</br>
-          swim: number;</br>
+        {   swim: number;</br>
           burrow: number;</br>
           walk: number;</br>
           fly: number;</br>
-          climb: number;</br>
-        }</br>
+          climb: number;</br>   }</br>
       
         <b>ActionsEntity</b> </br>
-        {</br>
-          name?: string;</br>
-          desc?: string;</br>
-        }</br>
+        {   name?: string;</br>
+          desc?: string;</br>   }</br>
         `;
 
         return exampleType;
@@ -517,11 +538,10 @@ export class SubMenu
         addAttackButton.title = "Add new Attack"
         addAttackButton.onclick = function async() 
         {
-
             //Add a blank action
             const attackCollection = <HTMLElement>document.getElementById("formAttackCollection");
-            const baseAttackHtml = `<div id="formAttackContainer" class="attack"><span id="formAttackName" class="attackname" contentEditable="true">Act-Name.</span>.
-                <span id="formAttackDesc" class="description" contentEditable="true">Act-Desc</span></div>`;
+            const baseAttackHtml = `<div id="formAttackContainer" class="attack"><span id="formAttackName" class="attackname" contentEditable="true">Atk-Name.</span>.
+                <span id="formAttackDesc" class="description" contentEditable="true">Atk-Desc</span></div>`;
             attackCollection.insertAdjacentHTML('beforeend', baseAttackHtml);
         }
         addAttackButton.src = "/add.svg";
@@ -532,7 +552,7 @@ export class SubMenu
 
 
         //Get Button Container
-        const buttonContainer = document.getElementById("addAbilityButtonContainer");
+        const abilityButtonContainer = document.getElementById("addAbilityButtonContainer");
 
         //Create Add Ability Button
         const addAbilityButton = document.createElement('input');
@@ -552,7 +572,30 @@ export class SubMenu
         addAbilityButton.height = 20;
         addAbilityButton.width = 20;
 
-        buttonContainer?.appendChild(addAbilityButton);
+        abilityButtonContainer?.appendChild(addAbilityButton);
+
+
+        //Get Button Container
+        const spellButtonContainer = document.getElementById("addSpellButtonContainer");
+
+        //Create Add SPELL Button
+        const addSpellButton = document.createElement('input');
+        addSpellButton.type = "image";
+        addSpellButton.id = "addButton";
+        addSpellButton.title = "Add new Spell";
+        addSpellButton.onclick = function async() 
+        {
+            //Add a blank SPELL
+            const abilityCollection = <HTMLElement>document.getElementById("formSpellCollection");
+            const baseabilityHtml = `<div id="formSpellContainer" class="spell"><span id="formSpellName" class="spellname" contentEditable="true">Spell-Name.</span>.
+                <span id="formSpellDesc" class="description" contentEditable="true">Spell-Desc</span></div>`;
+            abilityCollection.insertAdjacentHTML('beforeend', baseabilityHtml);
+        }
+        addSpellButton.src = "/add.svg";
+        addSpellButton.height = 20;
+        addSpellButton.width = 20;
+
+        spellButtonContainer?.appendChild(addSpellButton);
     }
 
     private ShowSubMenu(show: boolean): void
@@ -578,21 +621,22 @@ export class SubMenu
         fetch(`https://api.open5e.com/monsters/${slug}/?format=json`)
             .then(function (response)
             {
-                // The response is a Response instance.
-                // You parse the data into a useable format using `.json()`
+                //Parse the data into a usable state
                 return response.json();
-            }).then(function (data)
+            }).then(async function (data)
             {
-                // `data` is the parsed version of the JSON returned from the above endpoint.
-                console.log(data);  // { "userId": 1, "id": 1, "title": "...", "body": "..." }
-
                 let importUnit = new UnitInfo();
-                importUnit.ImportOpen5eResponse(data);
+                await importUnit.ImportOpen5eResponse(data);
                 subMenu.freshImport = true;
 
                 subMenu.currentUnit = importUnit;
                 subMenu.renderUnitInfo(document);
             });
+    }
+
+    private SetClassOnRollable(desc: string): string
+    {
+        return desc.replaceAll(Constants.PARENTHESESMATCH, "<span class='clickableRoller' contenteditable='false'>($1)</span>");
     }
 }
 

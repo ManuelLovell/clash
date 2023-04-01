@@ -1,4 +1,4 @@
-import { ActionsEntity, Open5eMonsterResponse } from './interfaces/api-response-open5e';
+import { ActionsEntity, Open5eMonsterResponse, Open5eSpellResponse } from './interfaces/api-response-open5e';
 
 export default class UnitInfo
 {
@@ -39,6 +39,7 @@ export default class UnitInfo
     standardActions?: ActionsEntity[];
     legendaryActions?: ActionsEntity[];
     specialAbilities?: ActionsEntity[];
+    spellActions?: ActionsEntity[];
     reactions?: ActionsEntity[];
 
     spellList?: string[];
@@ -87,6 +88,7 @@ export default class UnitInfo
         this.experiencePoints = 0;
         this.standardActions = [];
         this.specialAbilities = [];
+        this.spellList = [];
     }
 
     public ImportCustomFormInputs(document: Document): void
@@ -204,7 +206,7 @@ export default class UnitInfo
     }
 
     /**Take Open5e Response and overwrite unit values */
-    public ImportOpen5eResponse(response: Open5eMonsterResponse): void
+    public async ImportOpen5eResponse(response: Open5eMonsterResponse): Promise<void>
     {
         this.unitName = response.name;
         this.maxHP = response.hit_points;
@@ -246,6 +248,10 @@ export default class UnitInfo
         this.reactions = response.reactions;
 
         this.spellList = response.spell_list;
+        if (this.spellList != undefined && this.spellList?.length > 0)
+        {
+            this.spellActions = await this.ConvertSpellListtoSpellAction(this.spellList);
+        }
         this.senses = response.senses;
         //skills = SkillSetObject;
         this.languages = response.languages;
@@ -256,5 +262,24 @@ export default class UnitInfo
         this.speedBurrow = response.speed?.burrow;
         this.speedSwim = response.speed?.swim;
         this.CheckDefaults();
+    }
+
+    private async ConvertSpellListtoSpellAction(spellList: string[]): Promise<ActionsEntity[]>
+    {
+        const spellActions: ActionsEntity[] = [];
+        for (var i = 0, spell; spell = spellList[i]; i++) 
+        {
+            console.log(spell);
+            await fetch(spell)
+            .then(function (response)
+            {
+                return response.json();
+            }).then(function (data: Open5eSpellResponse)
+            {
+                let importedSpell: ActionsEntity = { name: data.name, desc: data.desc };
+                spellActions.push(importedSpell);
+            });
+        }
+        return spellActions;
     }
 }

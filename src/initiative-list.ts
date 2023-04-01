@@ -69,6 +69,7 @@ export class InitiativeList
             const metadata = item.metadata[`${Constants.EXTENSIONID}/metadata`] as any;
             const initiative = item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`] as any;
             const currenthp = item.metadata[`${Constants.EXTENSIONID}/metadata_currenthp`] as any;
+            const ismonster = item.metadata[`${Constants.EXTENSIONID}/metadata_ismonster`] as any;
             const unitPosition = item.position;
 
             if (metadata?.unitInfo)
@@ -81,6 +82,8 @@ export class InitiativeList
                 units.push({
                     initiative: initiative.initiative,
                     unitinfo: unit,
+                    ismonster: ismonster?.isMonster,
+                    visible: unitImage.visible,
                     currenthp: cHP,
                     position: unitPosition,
                     id: item.id,
@@ -127,6 +130,7 @@ export class InitiativeList
             let optionCell = row.insertCell(5);
 
             row.setAttribute("unit-id", unitItems.id);
+            row.setAttribute("unit-visible", unitItems.visible ? "true" : "false");
             row.setAttribute("unit-xpos", unitItems.position.x.toString());
             row.setAttribute("unit-ypos", unitItems.position.y.toString());
             row.setAttribute("unit-dpi", unitItems.dpi.toString());
@@ -138,6 +142,7 @@ export class InitiativeList
             const initiativeInput = document.createElement('input');
             initiativeInput.className = "InitiativeInput";
             initiativeInput.inputMode = "numeric";
+            initiativeInput.setAttribute("unit-dexbonus", Math.floor( (unitItems.unitinfo.dexScore! - 10) / 2 ).toString());
             initiativeInput.value = unitItems.initiative;
             initiativeInput.id = `iI${unitItems.id}`;
             initiativeInput.size = 2;
@@ -151,7 +156,8 @@ export class InitiativeList
             rollerButton.id = `rB${unitItems.id}`;
             rollerButton.onclick = async function () 
             {
-                initiativeInput.value = Math.floor(Math.random() * (20 - 1) + 1).toString();
+                const dexBonus = parseFloat(initiativeInput.getAttribute("unit-dexbonus")!);
+                initiativeInput.value = (dexBonus + Math.floor(Math.random() * (20 - 1) + 1)).toString();
             }
             rollerButton.src = "/dice.svg";
             rollerButton.height = 20;
@@ -159,9 +165,10 @@ export class InitiativeList
 
             const nameToggle = document.createElement('input');
             nameToggle.type = "button";
-            nameToggle.value = unitItems.unitinfo.unitName;
+            nameToggle.value = unitItems.ismonster === "true" ? `ʳ ${unitItems.unitinfo.unitName} ʴ` : unitItems.unitinfo.unitName;
             nameToggle.title = "Change between Player and Monster groups";
             nameToggle.id = `nT${unitItems.id}`;
+            nameToggle.className = unitItems.ismonster === "true" ? "isMonster" : "";
             nameToggle.onclick = async function () 
             {
                 if (nameToggle.className == "isMonster")
@@ -177,9 +184,6 @@ export class InitiativeList
                     nameToggle.className = "isMonster";
                 }
             }
-            rollerButton.src = "/dice.svg";
-            rollerButton.height = 20;
-            rollerButton.width = 20;
 
             const heartInputMin = document.createElement('input');
             heartInputMin.className = "HealthInput";
@@ -196,7 +200,7 @@ export class InitiativeList
             triangleImg.onclick = async function (e) 
             {
                 const currentTarget = e.currentTarget as HTMLInputElement;
-                await self.OpenSubMenu(currentTarget.id);
+                await self.OpenSubMenu(currentTarget.id.substring(2));
             }
             triangleImg.src = "/triangle.svg";
             triangleImg.height = 20;
@@ -348,37 +352,40 @@ export class InitiativeList
         restButton.title = "Clear all Data"
         restButton.onclick = async function () 
         {
-            self.turnCounter = 1;
-            self.roundCounter = 1;
-            const counterHtml = document.getElementById("roundCount")!;
-            counterHtml.innerText = `Round: ${self.roundCounter}`;
-
-            await OBR.scene.items.deleteItems([Constants.LABEL]);
-
-            await OBR.scene.items.updateItems((item) => item.metadata[`${Constants.EXTENSIONID}/metadata`] != undefined
-                || item.id === Constants.TURNTRACKER
-                || item.id === Constants.LABEL, (items) =>
+            if (confirm("Are you sure you want to clear all data?"))
             {
-                for (let item of items)
+                self.turnCounter = 1;
+                self.roundCounter = 1;
+                const counterHtml = document.getElementById("roundCount")!;
+                counterHtml.innerText = `Round: ${self.roundCounter}`;
+
+                await OBR.scene.items.deleteItems([Constants.LABEL]);
+
+                await OBR.scene.items.updateItems((item) => item.metadata[`${Constants.EXTENSIONID}/metadata`] != undefined
+                    || item.id === Constants.TURNTRACKER
+                    || item.id === Constants.LABEL, (items) =>
                 {
-                    if (item.id == Constants.TURNTRACKER)
+                    for (let item of items)
                     {
-                        // Reset tracker to initial values
-                        let trackerItem: Tracker = { turn: 1, round: 1 };
-                        item.metadata[`${Constants.EXTENSIONID}/metadata_trackeritem`] = { trackerItem };
+                        if (item.id == Constants.TURNTRACKER)
+                        {
+                            // Reset tracker to initial values
+                            let trackerItem: Tracker = { turn: 1, round: 1 };
+                            item.metadata[`${Constants.EXTENSIONID}/metadata_trackeritem`] = { trackerItem };
+                        }
+                        //else if (item.id == Constants.LABEL)
+                        //{
+                        // }
+                        else
+                        {
+                            // Remove unit data from tokens
+                            delete item.metadata[`${Constants.EXTENSIONID}/metadata`];
+                            delete item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`];
+                            delete item.metadata[`${Constants.EXTENSIONID}/metadata_currenthp`];
+                        }
                     }
-                    //else if (item.id == Constants.LABEL)
-                    //{
-                    // }
-                    else
-                    {
-                        // Remove unit data from tokens
-                        delete item.metadata[`${Constants.EXTENSIONID}/metadata`];
-                        delete item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`];
-                        delete item.metadata[`${Constants.EXTENSIONID}/metadata_currenthp`];
-                    }
-                }
-            });
+                });
+            }
         }
         resetContainer.appendChild(restButton);
     }
@@ -427,9 +434,10 @@ export class InitiativeList
             {
                 const unitNameInput = unit as HTMLInputElement;
                 const unitId = unitNameInput.id.substring(2);
-    
+
                 const initElement = document.querySelector(`#iI${unitId}`) as HTMLInputElement;
-                initElement.value = Math.floor(Math.random() * (20 - 1) + 1).toString();
+                const dexBonus = parseFloat(initElement.getAttribute("unit-dexbonus")!);
+                initElement.value = (dexBonus + Math.floor(Math.random() * (20 - 1) + 1)).toString();
             });
         }
         rollerButton.src = "/dice.svg";
@@ -453,6 +461,9 @@ export class InitiativeList
             const hpElement = document.querySelector(`#cHP${unitId}`) as HTMLInputElement;
             const currenthp = hpElement.value ? hpElement.value : null;
 
+            const nameElement = document.querySelector(`#nT${unitId}`) as HTMLInputElement;
+            const isMonster = (nameElement.className == "isMonster") ? "true" : "false";
+
             if (!unitId || !initiative) return;
 
             await OBR.scene.items.updateItems(
@@ -463,6 +474,7 @@ export class InitiativeList
                     {
                         item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`] = { initiative };
                         item.metadata[`${Constants.EXTENSIONID}/metadata_currenthp`] = { currenthp };
+                        item.metadata[`${Constants.EXTENSIONID}/metadata_ismonster`] = { isMonster };
                     }
                 }
 

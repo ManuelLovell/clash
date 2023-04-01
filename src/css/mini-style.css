@@ -5,7 +5,6 @@
 
     color-scheme: dark;
     color: rgba(255, 255, 255, 0.87);
-    background-color: #242424;
 
     font-synthesis: none;
     text-rendering: optimizeLegibility;
@@ -86,7 +85,16 @@ footer {
 .HealthInput {
     width: 30px;
 }
-
+.clickableRoller{
+    display: inline-block;
+    cursor: pointer;
+    background-color: darkred;
+    border-radius:5px;
+    border-color:#f9f9f9;
+    border-style: solid;
+    border-width: 1px;
+    padding-bottom: 2px;
+}
 .Icon {
     vertical-align: text-bottom;
     height: 20px;
@@ -173,11 +181,11 @@ td {
     height: 2px;
 }
 
-.attack,.ability {
+.attack,.ability,.spell {
     margin: 5px 0px;
 }
 
-.attackname {
+.attackname,.spellname,.abilityname {
     font-weight: bold;
     font-style: italic;
 }
@@ -186,7 +194,6 @@ td {
 @media (prefers-color-scheme: dark) {
     :root {
         color: rgba(255, 255, 255, 0.87);
-        background-color: #242424;
     }
 
     a:hover {

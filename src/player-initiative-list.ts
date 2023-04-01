@@ -63,6 +63,7 @@ export class PlayerList
                 units.push({
                     initiative: initiative.initiative,
                     unitinfo: unit,
+                    visible: unitImage.visible,
                     currenthp: cHP,
                     position: unitPosition,
                     id: item.id,
@@ -106,6 +107,7 @@ export class PlayerList
             let nameCell = row.insertCell(1);
 
             row.setAttribute("unit-id", unitItems.id);
+            row.setAttribute("unit-visible", unitItems.visible ? "true" : "false");
             row.setAttribute("unit-xpos", unitItems.position.x.toString());
             row.setAttribute("unit-ypos", unitItems.position.y.toString());
             row.setAttribute("unit-dpi", unitItems.dpi.toString());
@@ -168,8 +170,11 @@ export class PlayerList
 
                 let ctu: CurrentTurnUnit = LabelLogic.GetCTUFromRow(currentTurnRow);
 
-                //Move the view
-                await ViewportFunctions.CenterViewportOnImage(ctu);
+                if (ctu.visible === "true")
+                {
+                    //Move the view
+                    await ViewportFunctions.CenterViewportOnImage(ctu);
+                }
             }
         }
     }

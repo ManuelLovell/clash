@@ -1,4 +1,4 @@
-import OBR, { Item, buildLabel } from "@owlbear-rodeo/sdk";
+import OBR, { Item, Label, buildLabel } from "@owlbear-rodeo/sdk";
 import { Constants } from "./constants";
 import { CurrentTurnUnit } from "./interfaces/current-turn-unit";
 
@@ -27,11 +27,13 @@ export class LabelLogic
                     if (row.className == "turnOutline")
                     {
                         console.log("Updating label");
-                        const xpos = parseFloat(row.getAttribute("unit-xpos")!);
-                        const ypos = parseFloat(row.getAttribute("unit-ypos")!);
-                        label.position = { x: xpos, y: ypos + 50 };
-                        label.visible = true;
-                        label.attachedTo = row.getAttribute("unit-id")!;
+                        const ctu: CurrentTurnUnit = LabelLogic.GetCTUFromRow(row)
+
+                        label.position = { x: ctu.xpos, y: ctu.ypos + 50 };
+                        label.visible = ctu.visible === "true" ? true : false;
+                        label.text.plainText = label.visible ? "« Go! »" : "« Go! »\r\n(Hidden)";
+                        label.attachedTo = ctu.id;
+                        label.locked = true;
                         foundRow = true;
                     }
                 }
@@ -47,7 +49,7 @@ export class LabelLogic
         {
             await OBR.scene.items.updateItems(
                 (item: Item) => item.id == Constants.LABEL,
-                (items) =>
+                (items: Label[]) =>
                 {
                     for (let label of items)
                     {
@@ -59,11 +61,13 @@ export class LabelLogic
                                 if (row.className == "turnOutline")
                                 {
                                     console.log("Updating label");
-                                    const xpos = parseFloat(row.getAttribute("unit-xpos")!);
-                                    const ypos = parseFloat(row.getAttribute("unit-ypos")!);
-                                    label.position = { x: xpos, y: ypos + 50 };
-                                    label.visible = true;
-                                    label.attachedTo = row.getAttribute("unit-id")!;
+                                    const ctu: CurrentTurnUnit = LabelLogic.GetCTUFromRow(row)
+
+                                    label.position = { x: ctu.xpos, y: ctu.ypos + 50 };
+                                    label.visible = ctu.visible === "true" ? true : false;
+                                    label.text.plainText = label.visible ? "« Go! »" : "« Go! »\r\n(Hidden)";
+                                    label.attachedTo = ctu.id;
+                                    label.locked = true;
                                     foundRow = true;
                                 }
                             }
@@ -83,6 +87,7 @@ export class LabelLogic
     {
         let ctu: CurrentTurnUnit = {
             id: currentTurnRow.getAttribute("unit-id")!,
+            visible: currentTurnRow.getAttribute("unit-visible")!,
             xpos: parseFloat(currentTurnRow.getAttribute("unit-xpos")!),
             ypos: parseFloat(currentTurnRow.getAttribute("unit-ypos")!),
             dpi: parseFloat(currentTurnRow.getAttribute("unit-dpi")!),
