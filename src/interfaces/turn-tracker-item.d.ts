@@ -1,4 +1,4 @@
-export default class Tracker
+export interface Tracker
 {
     turn?: number;
     round?: number;

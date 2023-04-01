@@ -1,4 +1,4 @@
-import { ActionsEntity, Open5eMonsterResponse } from './api-response-open5e';
+import { ActionsEntity, Open5eMonsterResponse } from './interfaces/api-response-open5e';
 
 export default class UnitInfo
 {

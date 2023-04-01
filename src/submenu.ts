@@ -1,8 +1,8 @@
 import { Constants } from './constants';
-import './mini-style.css'
+import '/src/css/mini-style.css'
 import OBR, { Metadata } from '@owlbear-rodeo/sdk';
 import UnitInfo from './unit-info';
-import { Open5eMonsterListResponse, Open5eMonsterResponse } from './api-response-open5e';
+import { Open5eMonsterListResponse, Open5eMonsterResponse } from './interfaces/api-response-open5e';
 
 export class SubMenu
 {
@@ -263,7 +263,6 @@ export class SubMenu
                     const btns = document.querySelectorAll('.monsterImportButtonConfirm');
                     btns.forEach(btn =>
                     {
-
                         btn.addEventListener('click', (e: Event) => self.ImportNewMonsterInfo((e.currentTarget as Element).id));
                     });
                 });
@@ -491,6 +490,7 @@ export class SubMenu
                     {
                         for (let item of items)
                         {
+                            item.name = unitInfo.unitName;
                             item.metadata[`${Constants.EXTENSIONID}/metadata`] = { unitInfo };
                         }
                     }
