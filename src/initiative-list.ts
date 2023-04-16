@@ -1,10 +1,12 @@
-import OBR, { Item, Image, buildShape } from "@owlbear-rodeo/sdk";
+import OBR, { Metadata } from "@owlbear-rodeo/sdk";
 import { Constants } from "./constants";
-import UnitInfo from './unit-info';
 import { ViewportFunctions } from './viewport';
-import { Tracker } from "./interfaces/turn-tracker-item";
-import { CurrentTurnUnit } from './interfaces/current-turn-unit';
+import { Tracker, UnitTrack } from './interfaces/turn-tracker-item';
+import { ICurrentTurnUnit } from './interfaces/current-turn-unit';
 import { LabelLogic } from "./label-logic";
+import { db } from './local-database';
+import { IUnitInfo } from "./interfaces/unit-info";
+import { liveQuery } from "dexie";
 
 export class InitiativeList
 {
@@ -12,6 +14,8 @@ export class InitiativeList
     roundCounter: number = 1;
     // Counter per turn
     turnCounter: number = 1;
+    // Active Units
+    activeUnits: IUnitInfo[] = [];
 
     /**Render the main initiatve form from the GM perspective */
     public async Render(document: Document): Promise<void>
@@ -31,7 +35,8 @@ export class InitiativeList
         </thead>
         <tbody id="unit-list"></tbody>
         </table>
-        <div id="roundCounter" class="bottom"><span id="turnContainer"></span><span id="roundCount" class="centerish">Round: ${this.roundCounter}</span><span id="resetContainer" class="floatright"></span></div>
+        <div id="roundCounter" class="bottom"><span id="prevContainer"></span><span id="roundCount" class="centerish">Round: ${this.roundCounter}</span><span id="nextContainer" class="floatright"></span></div>
+        <div id="bombContainer" class="bombBottom"><span id="resetContainer" class=""></span></div>
         `;
 
         // Append basic form buttons
@@ -40,77 +45,42 @@ export class InitiativeList
         this.AppendResetButton();
         this.AppendRollerButton();
 
-        // Bind List to callback function
-        OBR.scene.items.onChange(async (items: Item[]) =>
+        // Initialize base turn order if none exists
+        const trackerExists = await db.Tracker.get(Constants.TURNTRACKER);
+        if (trackerExists)
         {
-            const filteredItems = items.filter((item) => item.metadata[`${Constants.EXTENSIONID}/metadata`] != undefined
-                || item.id === Constants.TURNTRACKER)
+            this.turnCounter = trackerExists.currentTurn;
+            this.roundCounter = trackerExists.currentRound;
+        }
+        else
+        {
+            await db.Tracker.add({id: Constants.TURNTRACKER, currentRound: 1, currentTurn: 1});
+        }
 
-            // Only refresh for things using Clash
-            await this.RefreshList(filteredItems);
-        });
+        // The purpose of these is to catch the Add/Remove from Owlbear-ContextMenu without OBRs listener
+        let updateDb = liveQuery(() => db.ActiveEncounter.toArray());
+        updateDb.subscribe(() => this.RefreshList(), error => console.error('Clash!SubscriptionError: '+error));
 
-        // Save to force the onChange so the initial load will render the list.
-        await this.Save();
+        this.RefreshList();
     }
 
-    public async RefreshList(items: Item[]): Promise<void>
+    public async RefreshList(): Promise<void>
     {
         // Reference to initiative list
         const tableElement = <HTMLTableElement>document.querySelector("#unit-list")!;
+
         // Reference to InitiativeList class
         const self = this;
+        
+        // Get all units from activeencounter
+        const tableUnits = await db.ActiveEncounter.toCollection();
+        
         // Unit list
-        const units = [];
-
-        for (const item of items)
-        {
-            // Sort through units and push information to the list
-            const metadata = item.metadata[`${Constants.EXTENSIONID}/metadata`] as any;
-            const initiative = item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`] as any;
-            const currenthp = item.metadata[`${Constants.EXTENSIONID}/metadata_currenthp`] as any;
-            const ismonster = item.metadata[`${Constants.EXTENSIONID}/metadata_ismonster`] as any;
-            const unitPosition = item.position;
-
-            if (metadata?.unitInfo)
-            {
-                const unit: UnitInfo = metadata.unitInfo;
-                const unitImage = item as Image;
-                const cHP = currenthp ? currenthp.currenthp : unit.maxHP;
-
-                // This is a mess Im sorry me.
-                units.push({
-                    initiative: initiative.initiative,
-                    unitinfo: unit,
-                    ismonster: ismonster?.isMonster,
-                    visible: unitImage.visible,
-                    currenthp: cHP,
-                    position: unitPosition,
-                    id: item.id,
-                    dpi: unitImage.grid.dpi,
-                    width: unitImage.image.width,
-                    height: unitImage.image.height,
-                    offsetx: unitImage.grid.offset.x,
-                    offsety: unitImage.grid.offset.y
-                });
-            }
-
-            // Get the turntracker and update the turn/rounds
-            if (item.id == Constants.TURNTRACKER)
-            {
-                const trackContainer = item.metadata[`${Constants.EXTENSIONID}/metadata_trackeritem`] as any;
-                const trackerItem: Tracker = trackContainer?.trackerItem;
-                if (trackerItem)
-                {
-                    this.turnCounter = trackerItem.turn!;
-                    this.roundCounter = trackerItem.round!;
-                }
-            }
-        }
+        this.activeUnits = (await tableUnits.toArray()).filter(x => x.isActive == 1);
 
         // Sort so the highest initiative value is on top
-        const sortedUnits = units.sort(
-            (a, b) => b.initiative - a.initiative
+        const sortedUnits = this.activeUnits.sort(
+            (a, b) => b.initiative - a.initiative || a.unitName.localeCompare(b.unitName)!
         );
 
         //Clear the table
@@ -119,7 +89,7 @@ export class InitiativeList
             tableElement.deleteRow(0);
         }
         //Rebuild the table in order
-        for (const unitItems of sortedUnits)
+        for (const unit of sortedUnits)
         {
             let row = tableElement.insertRow(-1);
             let initCell = row.insertCell(0);
@@ -129,22 +99,14 @@ export class InitiativeList
             let acCell = row.insertCell(4);
             let optionCell = row.insertCell(5);
 
-            row.setAttribute("unit-id", unitItems.id);
-            row.setAttribute("unit-visible", unitItems.visible ? "true" : "false");
-            row.setAttribute("unit-xpos", unitItems.position.x.toString());
-            row.setAttribute("unit-ypos", unitItems.position.y.toString());
-            row.setAttribute("unit-dpi", unitItems.dpi.toString());
-            row.setAttribute("unit-width", unitItems.width.toString());
-            row.setAttribute("unit-height", unitItems.height.toString());
-            row.setAttribute("unit-offsetx", unitItems.offsetx.toString());
-            row.setAttribute("unit-offsety", unitItems.offsety.toString());
+            row.setAttribute("unit-id", unit.id!);
 
             const initiativeInput = document.createElement('input');
             initiativeInput.className = "InitiativeInput";
             initiativeInput.inputMode = "numeric";
-            initiativeInput.setAttribute("unit-dexbonus", Math.floor( (unitItems.unitinfo.dexScore! - 10) / 2 ).toString());
-            initiativeInput.value = unitItems.initiative;
-            initiativeInput.id = `iI${unitItems.id}`;
+            initiativeInput.setAttribute("unit-dexbonus", Math.floor( (unit.dexScore! - 10) / 2 ).toString());
+            initiativeInput.value = unit.initiative!.toString();
+            initiativeInput.id = `iI${unit.id}`;
             initiativeInput.size = 2;
             initiativeInput.min = "0";
             initiativeInput.max = "99";
@@ -153,7 +115,8 @@ export class InitiativeList
             const rollerButton = document.createElement('input');
             rollerButton.type = "image";
             rollerButton.title = "Roll this Unit's Iniative";
-            rollerButton.id = `rB${unitItems.id}`;
+            rollerButton.id = `rB${unit.id}`;
+            rollerButton.className = "clickable";
             rollerButton.onclick = async function () 
             {
                 const dexBonus = parseFloat(initiativeInput.getAttribute("unit-dexbonus")!);
@@ -165,22 +128,22 @@ export class InitiativeList
 
             const nameToggle = document.createElement('input');
             nameToggle.type = "button";
-            nameToggle.value = unitItems.ismonster === "true" ? `ʳ ${unitItems.unitinfo.unitName} ʴ` : unitItems.unitinfo.unitName;
+            nameToggle.value = unit.isMonster ? `ʳ ${unit.unitName} ʴ` : unit.unitName;
             nameToggle.title = "Change between Player and Monster groups";
-            nameToggle.id = `nT${unitItems.id}`;
-            nameToggle.className = unitItems.ismonster === "true" ? "isMonster" : "";
+            nameToggle.id = `nT${unit.id}`;
+            nameToggle.className = unit.isMonster ? "isMonster" : "";
             nameToggle.onclick = async function () 
             {
                 if (nameToggle.className == "isMonster")
                 {
                     console.log("Swapped to PLAYER");
-                    nameToggle.value = unitItems.unitinfo.unitName;
+                    nameToggle.value = unit.unitName;
                     nameToggle.className = "";
                 }
                 else
                 {
                     console.log("Swapped to MONSTER");
-                    nameToggle.value = `ʳ ${unitItems.unitinfo.unitName} ʴ`;
+                    nameToggle.value = `ʳ ${unit.unitName} ʴ`;
                     nameToggle.className = "isMonster";
                 }
             }
@@ -188,15 +151,32 @@ export class InitiativeList
             const heartInputMin = document.createElement('input');
             heartInputMin.className = "HealthInput";
             heartInputMin.inputMode = "numeric";
-            heartInputMin.id = `cHP${unitItems.id}`;
-            heartInputMin.value = unitItems.currenthp;
+            heartInputMin.id = `cHP${unit.id}`;
+            heartInputMin.value = unit.currentHP!.toString();
             heartInputMin.size = 4;
             heartInputMin.maxLength = 4;
+
+            const heartInputMax = document.createElement('input');
+            heartInputMax.className = "HealthInput";
+            heartInputMax.inputMode = "numeric";
+            heartInputMax.id = `mHP${unit.id}`;
+            heartInputMax.value = unit.maxHP!.toString();
+            heartInputMax.size = 4;
+            heartInputMax.maxLength = 4;
+
+            const armorInput = document.createElement('input');
+            armorInput.className = "ArmorInput";
+            armorInput.inputMode = "numeric";
+            armorInput.id = `aC${unit.id}`;
+            armorInput.value = unit.armorClass!.toString();
+            armorInput.size = 2;
+            armorInput.maxLength = 2;
 
             const triangleImg = document.createElement('input');
             triangleImg.type = "image";
             triangleImg.title = "View/Edit this Unit's Stats";
-            triangleImg.id = `tB${unitItems.id}`;
+            triangleImg.id = `tB${unit.id}`;
+            triangleImg.className = "clickable";
             triangleImg.onclick = async function (e) 
             {
                 const currentTarget = e.currentTarget as HTMLInputElement;
@@ -211,13 +191,12 @@ export class InitiativeList
 
             nameCell.appendChild(nameToggle);
             hpCell.appendChild(heartInputMin);
-            hpCell.appendChild(document.createTextNode(` / `));
-            hpCell.appendChild(document.createTextNode(unitItems.unitinfo.maxHP.toString()));
-            acCell.appendChild(document.createTextNode(unitItems.unitinfo.armorClass.toString()));
+            hpCell.appendChild(document.createTextNode(`/`));
+            hpCell.appendChild(heartInputMax);
+            acCell.appendChild(armorInput);
             optionCell.appendChild(triangleImg);
         }
 
-        console.log("Show turn selection");
         await this.ShowTurnSelection();
     }
 
@@ -247,9 +226,6 @@ export class InitiativeList
             if (this.turnCounter >= table.rows.length)
             {
                 this.turnCounter = table.rows.length - 1;
-
-                // This should update for player sides, also
-                await this.SaveTracker();
             }
 
             if (table.rows[this.turnCounter])
@@ -259,11 +235,6 @@ export class InitiativeList
 
                 const counterHtml = document.getElementById("roundCount")!;
                 counterHtml.innerText = `Round: ${this.roundCounter}`;
-
-                let ctu: CurrentTurnUnit = LabelLogic.GetCTUFromRow(currentTurnRow);
-
-                //Move the view
-                await ViewportFunctions.CenterViewportOnImage(ctu);
             }
         }
     }
@@ -273,14 +244,15 @@ export class InitiativeList
     {
         var self = this;
         //Get Turn Button Container
-        const turnContainer = document.getElementById("turnContainer");
+        const prevContainer = document.getElementById("prevContainer");
+        const nextContainer = document.getElementById("nextContainer");
 
         //Create Turn Buttons
         const previousButton = document.createElement('input');
         previousButton.type = "button";
         previousButton.id = "previousButton";
         previousButton.value = "Previous"
-        previousButton.className = "turnColor chalkBorder";
+        previousButton.className = "turnColor chalkBorder turnIndicator";
         previousButton.title = "Previous Turn"
         previousButton.onclick = async function () 
         {
@@ -301,6 +273,7 @@ export class InitiativeList
                         }
                     }
                 }
+                await self.FocusOnCurrentTurnUnit(table);
                 await self.Save();
             }
         }
@@ -308,8 +281,8 @@ export class InitiativeList
         const nextButton = document.createElement('input');
         nextButton.type = "button";
         nextButton.id = "nextButton";
-        nextButton.value = "Next"
-        nextButton.className = "turnColor chalkBorder";
+        nextButton.value = "Next";
+        nextButton.className = "turnColor chalkBorder turnIndicator";
         nextButton.title = "Next Turn"
         nextButton.onclick = async function () 
         {
@@ -328,12 +301,13 @@ export class InitiativeList
                         }
                     }
                 }
+                await self.FocusOnCurrentTurnUnit(table);
                 await self.Save();
             }
         }
 
-        turnContainer?.appendChild(previousButton);
-        turnContainer?.appendChild(nextButton);
+        prevContainer?.appendChild(previousButton);
+        nextContainer?.appendChild(nextButton);
     }
 
     /**Add Clear Data Button */
@@ -344,50 +318,74 @@ export class InitiativeList
         //Get Reset Container
         const resetContainer = document.getElementById("resetContainer")!;
 
-        //Create Reset Button
-        const restButton = document.createElement('input');
-        restButton.type = "button";
-        restButton.id = "resetButton";
-        restButton.value = "Clear Data"
-        restButton.title = "Clear all Data"
-        restButton.onclick = async function () 
+        //Create Soft Reset Button
+        const clearButton = document.createElement('input');
+        clearButton.type = "button";
+        clearButton.id = "clearButton";
+        clearButton.value = "CLEAR LIST"
+        clearButton.title = "Clear List"
+        clearButton.className = "tinyType";
+        clearButton.onclick = async function () 
         {
-            if (confirm("Are you sure you want to clear all data?"))
+            if (confirm("Clear the Initiative List (This will leave unit info)?"))
             {
                 self.turnCounter = 1;
                 self.roundCounter = 1;
                 const counterHtml = document.getElementById("roundCount")!;
                 counterHtml.innerText = `Round: ${self.roundCounter}`;
 
+                await db.Tracker.clear();
+                await db.Tracker.add({id: Constants.TURNTRACKER, currentRound: 1, currentTurn: 1});
+                await db.ActiveEncounter.where("isActive").equals(1).modify({ isActive: 0 });
+
                 await OBR.scene.items.deleteItems([Constants.LABEL]);
 
-                await OBR.scene.items.updateItems((item) => item.metadata[`${Constants.EXTENSIONID}/metadata`] != undefined
-                    || item.id === Constants.TURNTRACKER
+                await OBR.scene.items.updateItems((item) => item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`] != undefined
                     || item.id === Constants.LABEL, (items) =>
                 {
                     for (let item of items)
                     {
-                        if (item.id == Constants.TURNTRACKER)
-                        {
-                            // Reset tracker to initial values
-                            let trackerItem: Tracker = { turn: 1, round: 1 };
-                            item.metadata[`${Constants.EXTENSIONID}/metadata_trackeritem`] = { trackerItem };
-                        }
-                        //else if (item.id == Constants.LABEL)
-                        //{
-                        // }
-                        else
-                        {
-                            // Remove unit data from tokens
-                            delete item.metadata[`${Constants.EXTENSIONID}/metadata`];
-                            delete item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`];
-                            delete item.metadata[`${Constants.EXTENSIONID}/metadata_currenthp`];
-                        }
+                        delete item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`];
                     }
                 });
             }
         }
-        resetContainer.appendChild(restButton);
+        resetContainer.appendChild(clearButton);
+
+        //Create Reset ALL Button
+        const resetButton = document.createElement('input');
+        resetButton.type = "button";
+        resetButton.id = "resetButton";
+        resetButton.value = "DELETE DATA"
+        resetButton.title = "Clear all Clash! Data"
+        resetButton.className = "tinyType";
+        resetButton.onclick = async function () 
+        {
+            if (confirm("Clear ALL saved Clash info? (This will wipe saved unit info)"))
+            {
+                self.turnCounter = 1;
+                self.roundCounter = 1;
+                const counterHtml = document.getElementById("roundCount")!;
+                counterHtml.innerText = `Round: ${self.roundCounter}`;
+
+                await db.ActiveEncounter.clear();
+                await db.Tracker.clear();
+
+                await db.Tracker.add({id: Constants.TURNTRACKER, currentRound: 1, currentTurn: 1});
+
+                await OBR.scene.items.deleteItems([Constants.LABEL]);
+
+                await OBR.scene.items.updateItems((item) => item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`] != undefined
+                    || item.id === Constants.LABEL, (items) =>
+                {
+                    for (let item of items)
+                    {
+                        delete item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`];
+                    }
+                });
+            }
+        }
+        resetContainer.appendChild(resetButton);
     }
 
     /** Add Save Button */
@@ -400,7 +398,7 @@ export class InitiativeList
         //Create Save Button
         const saveButton = document.createElement('input');
         saveButton.type = "image";
-        saveButton.className = "Icon";
+        saveButton.className = "Icon clickable";
         saveButton.id = "saveButton";
         saveButton.onclick = async function () 
         {
@@ -423,8 +421,9 @@ export class InitiativeList
         //Create RollAll Button
         const rollerButton = document.createElement('input');
         rollerButton.type = "image";
-        rollerButton.className = "Icon RollerButton";
+        rollerButton.className = "Icon RollerButton clickable";
         rollerButton.id = "rollAllButton";
+    
         rollerButton.onclick = async function () 
         {
             OBR.notification.show("Rolled Initiative for all Monsters.");
@@ -459,57 +458,66 @@ export class InitiativeList
             const initiative = unitInput.value;
 
             const hpElement = document.querySelector(`#cHP${unitId}`) as HTMLInputElement;
-            const currenthp = hpElement.value ? hpElement.value : null;
+            const currentHp = hpElement.value ? hpElement.value : "0";
+            
+            const mhpElement = document.querySelector(`#mHP${unitId}`) as HTMLInputElement;
+            const maxHp = mhpElement.value ? mhpElement.value : "1";
+            
+            const acElement = document.querySelector(`#aC${unitId}`) as HTMLInputElement;
+            const armorClass = acElement.value ? acElement.value : "10";
 
             const nameElement = document.querySelector(`#nT${unitId}`) as HTMLInputElement;
-            const isMonster = (nameElement.className == "isMonster") ? "true" : "false";
+            const isMonster = (nameElement.className == "isMonster");
 
             if (!unitId || !initiative) return;
 
-            await OBR.scene.items.updateItems(
-                (item) => item.id === unitId,
-                (items) =>
-                {
-                    for (let item of items)
-                    {
-                        item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`] = { initiative };
-                        item.metadata[`${Constants.EXTENSIONID}/metadata_currenthp`] = { currenthp };
-                        item.metadata[`${Constants.EXTENSIONID}/metadata_ismonster`] = { isMonster };
-                    }
-                }
-
-            );
+            let updateMe = this.activeUnits?.find(x => x.id == unitId);
+            if (updateMe)
+            {
+                await db.ActiveEncounter.update(
+                    updateMe.id,
+                    {initiative:parseFloat(initiative),
+                    currentHP:parseFloat(currentHp),
+                    maxHP:parseFloat(maxHp),
+                    armorClass:parseFloat(armorClass),
+                    isMonster: isMonster});
+            }
         });
-        await this.SaveTracker();
+        await db.Tracker.update(Constants.TURNTRACKER, { id: Constants.TURNTRACKER, currentTurn: this.turnCounter, currentRound: this.roundCounter });
+        await this.RefreshList();
+        await this.UpdateTrackerForPlayers();
     }
 
-    /** Save the turntracker information to an Item */
-    private async SaveTracker(): Promise<void>
+    private async UpdateTrackerForPlayers()
     {
-        let trackerItem: Tracker = { turn: this.turnCounter, round: this.roundCounter };
-        const saveItemExists = await OBR.scene.items.getItems([Constants.TURNTRACKER]);
-
-        if (saveItemExists.length == 0) // There is no current save tracker item, Create one
+        let trackedUnits: UnitTrack[] = [];
+        for (const unit of this.activeUnits)
         {
-            const saveItem = buildShape().width(1).height(1).shapeType("CIRCLE").id(Constants.TURNTRACKER).visible(false).locked(true).build();
-            saveItem.metadata[`${Constants.EXTENSIONID}/metadata_trackeritem`] = { trackerItem };
-            saveItem.type = "SHAPE";
-            await OBR.scene.items.addItems([saveItem]);
-        }
-        else
-        {
-            //Update the tracker item since it exists
-            await OBR.scene.items.updateItems(
-                (item) => item.id === Constants.TURNTRACKER,
-                (items) =>
+            trackedUnits.push(
                 {
-                    for (let item of items)
-                    {
-                        item.metadata[`${Constants.EXTENSIONID}/metadata_trackeritem`] = { trackerItem };
-                    }
+                    id: unit.id,
+                    name: unit.unitName,
+                    initiative: unit.initiative,
+                    cHp: unit.currentHP,
+                    mHp: unit.maxHP
                 }
             );
         }
-        await LabelLogic.UpdateLabel();
+
+        let Tracker: Tracker = { turn: this.turnCounter, round: this.roundCounter, units: trackedUnits };
+
+        let trackerMeta: Metadata = {};
+        trackerMeta[`${Constants.EXTENSIONID}/metadata_trackeritem`] = { Tracker };
+        await OBR.scene.setMetadata(trackerMeta);
+    }
+
+    private async FocusOnCurrentTurnUnit(table: HTMLTableElement): Promise<void>
+    {
+        const currentTurnRow = table.rows[this.turnCounter];
+        const ctu: ICurrentTurnUnit = await LabelLogic.GetCTUFromRow(currentTurnRow);
+
+        //Move the view
+        await ViewportFunctions.CenterViewportOnImage(ctu);
+        await LabelLogic.UpdateLabel(ctu);
     }
 }

@@ -1,11 +1,11 @@
-import OBR, { Item, Label, buildLabel } from "@owlbear-rodeo/sdk";
+import OBR, { Item, Image, Label, buildLabel } from "@owlbear-rodeo/sdk";
 import { Constants } from "./constants";
-import { CurrentTurnUnit } from "./interfaces/current-turn-unit";
+import { ICurrentTurnUnit } from "./interfaces/current-turn-unit";
 
 export class LabelLogic
 {
     /**Creates/Updates the Label that says GO on the current turn unit; Utilizes OBR.ADDITEMS or OBR.UPDATEITEMS */
-    static async UpdateLabel(): Promise<void>
+    static async UpdateLabel(ctu: ICurrentTurnUnit): Promise<void>
     {
         const labelItemExists = await OBR.scene.items.getItems([Constants.LABEL]);
 
@@ -27,10 +27,9 @@ export class LabelLogic
                     if (row.className == "turnOutline")
                     {
                         console.log("Updating label");
-                        const ctu: CurrentTurnUnit = LabelLogic.GetCTUFromRow(row)
 
                         label.position = { x: ctu.xpos, y: ctu.ypos + 50 };
-                        label.visible = ctu.visible === "true" ? true : false;
+                        label.visible = ctu.visible ? true : false;
                         label.text.plainText = label.visible ? "« Go! »" : "« Go! »\r\n(Hidden)";
                         label.attachedTo = ctu.id;
                         label.locked = true;
@@ -61,10 +60,9 @@ export class LabelLogic
                                 if (row.className == "turnOutline")
                                 {
                                     console.log("Updating label");
-                                    const ctu: CurrentTurnUnit = LabelLogic.GetCTUFromRow(row)
 
                                     label.position = { x: ctu.xpos, y: ctu.ypos + 50 };
-                                    label.visible = ctu.visible === "true" ? true : false;
+                                    label.visible = ctu.visible ? true : false;
                                     label.text.plainText = label.visible ? "« Go! »" : "« Go! »\r\n(Hidden)";
                                     label.attachedTo = ctu.id;
                                     label.locked = true;
@@ -83,20 +81,37 @@ export class LabelLogic
     }
 
     /** Retrieve the CurrentTurnUnit from a Row, which holds its unit information between get calls */
-    static GetCTUFromRow(currentTurnRow: HTMLTableRowElement): CurrentTurnUnit
+    static async GetCTUFromRow(currentTurnRow: HTMLTableRowElement): Promise<ICurrentTurnUnit>
     {
-        let ctu: CurrentTurnUnit = {
-            id: currentTurnRow.getAttribute("unit-id")!,
-            visible: currentTurnRow.getAttribute("unit-visible")!,
-            xpos: parseFloat(currentTurnRow.getAttribute("unit-xpos")!),
-            ypos: parseFloat(currentTurnRow.getAttribute("unit-ypos")!),
-            dpi: parseFloat(currentTurnRow.getAttribute("unit-dpi")!),
-            width: parseFloat(currentTurnRow.getAttribute("unit-width")!),
-            height: parseFloat(currentTurnRow.getAttribute("unit-height")!),
-            offsetx: parseFloat(currentTurnRow.getAttribute("unit-offsetx")!),
-            offsety: parseFloat(currentTurnRow.getAttribute("unit-offsety")!)
+        let ctu: ICurrentTurnUnit = {
+            id: "",
+            visible: false,
+            xpos: 0,
+            ypos: 0,
+            dpi: 0,
+            width: 0,
+            height: 0,
+            offsetx: 0,
+            offsety: 0
         };
+        const id = currentTurnRow.getAttribute("unit-id")!
+        const items = await OBR.scene.items.getItems([id]);
 
+        for (let item of items)
+        {
+            const image = item as Image;
+            ctu = {
+                id: image.id!,
+                visible: image.visible,
+                xpos: image.position.x,
+                ypos: image.position.y,
+                dpi: image.grid.dpi,
+                width: image.image.width,
+                height: image.image.height,
+                offsetx: image.grid.offset.x,
+                offsety: image.grid.offset.y
+            };
+        }
         return ctu;
     }
 }

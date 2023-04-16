@@ -1,7 +1,7 @@
-export interface CurrentTurnUnit
+export interface ICurrentTurnUnit
 {
     id: string;
-    visible: string;
+    visible: boolean;
     xpos: number;
     ypos: number;
     dpi: number;

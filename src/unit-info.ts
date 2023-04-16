@@ -1,61 +1,75 @@
 import { ActionsEntity, Open5eMonsterResponse, Open5eSpellResponse } from './interfaces/api-response-open5e';
+import { IUnitInfo } from './interfaces/unit-info';
+import { db } from './local-database';
 
-export default class UnitInfo
+export default class UnitInfo implements IUnitInfo
 {
+    id: string;
+    tokenId?: string;
+    initiative: number;
+    currentHP: number;
+    isMonster?: number;
+    isActive?: number;
+
     unitName: string;
     maxHP: number;
     armorClass: number;
 
-    unitType?: string;
-    unitSize?: string;
+    unitType: string;
+    unitSize: string;
 
-    strScore?: number;
-    strSave?: number;
+    strScore: number;
+    strSave: number;
 
-    dexScore?: number;
-    dexSave?: number;
+    dexScore: number;
+    dexSave: number;
 
-    conScore?: number;
-    conSave?: number;
+    conScore: number;
+    conSave: number;
 
-    intScore?: number;
-    intSave?: number;
+    intScore: number;
+    intSave: number;
 
-    wisScore?: number;
-    wisSave?: number;
+    wisScore: number;
+    wisSave: number;
 
-    chaScore?: number;
-    chaSave?: number;
+    chaScore: number;
+    chaSave: number;
 
-    damageVulnerabilities?: string;
-    damageImmunities?: string;
-    damageResistances?: string;
-    conditionImmunities?: string;
+    damageVulnerabilities: string;
+    damageImmunities: string;
+    damageResistances: string;
+    conditionImmunities: string;
 
-    challengeRating?: string;
-    experiencePoints?: number;
-    alignment?: string;
+    challengeRating: string;
+    experiencePoints: number;
+    alignment: string;
 
-    standardActions?: ActionsEntity[];
+    standardActions: ActionsEntity[];
     legendaryActions?: ActionsEntity[];
     specialAbilities?: ActionsEntity[];
     spellActions?: ActionsEntity[];
     reactions?: ActionsEntity[];
 
     spellList?: string[];
-    senses?: string;
+    senses: string;
     //skills?: SkillSetObject;
-    languages?: string;
+    languages: string;
 
-    speedWalk?: number;
-    speedFly?: number;
-    speedClimb?: number;
-    speedBurrow?: number;
-    speedSwim?: number;
+    speedWalk: number;
+    speedFly: number;
+    speedClimb: number;
+    speedBurrow: number;
+    speedSwim: number;
 
-    constructor(name?: string)
+    constructor(tokenId: string, name?: string)
     {
+        this.id = tokenId!;
+        this.tokenId = tokenId;
+        this.isActive = 0;
         this.unitName = name ??= "Default";
+        this.initiative = 1;
+        this.currentHP = 4;
         this.maxHP = 4;
         this.armorClass = 10;
         this.speedWalk = 30;
@@ -281,5 +295,15 @@ export default class UnitInfo
             });
         }
         return spellActions;
+    }
+    
+    public async SaveToDB(): Promise<string>
+    {
+        return await db.ActiveEncounter.add(this);
+    }
+
+    public async SaveToCreatureStorage(): Promise<string>
+    {
+        return await db.Creatures.add(this);
     }
 }

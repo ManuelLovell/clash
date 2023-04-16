@@ -1,5 +1,5 @@
 import OBR from "@owlbear-rodeo/sdk";
-import { CurrentTurnUnit } from "./interfaces/current-turn-unit";
+import { ICurrentTurnUnit } from "./interfaces/current-turn-unit";
 
 export class ViewportFunctions
 {
@@ -7,7 +7,7 @@ export class ViewportFunctions
      * Center the current OBR viewport on an image
      * @param {import("@owlbear-rodeo/sdk").Image} item - The image item
      */
-    static async CenterViewportOnImage(ctu: CurrentTurnUnit)
+    static async CenterViewportOnImage(ctu: ICurrentTurnUnit)
     {
         const dpi = await OBR.scene.grid.getDpi();
         const scale = await OBR.viewport.getScale();
@@ -45,7 +45,7 @@ export class ViewportFunctions
      * @param {number} dpi - The base DPI of the scene
      * @returns {import("@owlbear-rodeo/sdk").Vector2}
      */
-    static async GetImageCenter(ctu: CurrentTurnUnit, dpi: number)
+    static async GetImageCenter(ctu: ICurrentTurnUnit, dpi: number)
     {
         const dpiScale = dpi / ctu.dpi;
         const width = ctu.width * dpiScale;
@@ -57,6 +57,4 @@ export class ViewportFunctions
             y: ctu.ypos - offsetY + height / 2,
         };
     }
-
-    
 }

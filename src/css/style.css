@@ -73,14 +73,38 @@ body {
     border-color: #ffffff;
     border-radius: 5px;
 }
+.clickable:active{
+    filter: invert(52%) sepia(81%) saturate(5333%) hue-rotate(331deg) brightness(90%) contrast(88%);
+    transform: scale(1.5);
+}
+.turnIndicator
+{
+    width: 100px;
+}
+.tinyType
+{
+    background-color: #242424;
+    font-size: 10px;
+    margin-right: 15px;
+}
 .bottom {
     position: absolute;
     bottom: 0;
     width: 100%;
-    height: 2.5rem;  
+    height: 3.0rem;  
+}
+.bombBottom {
+    text-align: center;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 1.5rem;
 }
 .HealthInput {
     width: 30px;
+}
+.ArmorInput{
+    width: 20px;
 }
 
 .InitiativeInput {

@@ -1,9 +1,8 @@
-import OBR, { Image, Item } from "@owlbear-rodeo/sdk";
+import OBR, { Metadata } from "@owlbear-rodeo/sdk";
 import { Constants } from "./constants";
-import UnitInfo from "./unit-info";
 import { ViewportFunctions } from "./viewport";
 import { Tracker } from "./interfaces/turn-tracker-item";
-import { CurrentTurnUnit } from "./interfaces/current-turn-unit";
+import { ICurrentTurnUnit } from "./interfaces/current-turn-unit";
 import { LabelLogic } from "./label-logic";
 
 export class PlayerList
@@ -27,73 +26,26 @@ export class PlayerList
             <div id="roundCounter" class="bottom"><span id="turnContainer"></span><span id="roundCount" class="centerish">Round: ${this.roundCounter}</span><span id="resetContainer" class="floatright"></span></div>
             `;
 
-        // Bind List to callback function
-        OBR.scene.items.onChange(async (items: Item[]) =>
-        {
-            const filteredItems = items.filter((item) => item.metadata[`${Constants.EXTENSIONID}/metadata`] != undefined
-                || item.id === Constants.TURNTRACKER)
-
-            // Only refresh for things using Clash
-            await this.RefreshList(filteredItems);
-        });
+        OBR.scene.onMetadataChange((metadata) => this.RefreshList(metadata));
     }
 
     /**Refresh the initiative list after updates */
-    public async RefreshList(items: Item[]): Promise<void>
+    public async RefreshList(metadata: Metadata): Promise<void>
     {
+        const meta = metadata[`${Constants.EXTENSIONID}/metadata_trackeritem`] as any;
+        const trackerData = meta.Tracker as Tracker;
+
+        if (!trackerData || !trackerData.units) return;
         // Reference to initiative list
         const tableElement = <HTMLTableElement>document.querySelector("#unit-list")!;
-        // Unit list
-        const units = [];
-
-        for (const item of items)
-        {
-            const metadata = item.metadata[`${Constants.EXTENSIONID}/metadata`] as any;
-            const initiative = item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`] as any;
-            const currenthp = item.metadata[`${Constants.EXTENSIONID}/metadata_currenthp`] as any;
-            const unitPosition = item.position;
-
-            if (metadata?.unitInfo)
-            {
-                const unit: UnitInfo = metadata.unitInfo;
-                const unitImage = item as Image;
-                const cHP = currenthp ? currenthp.currenthp : unit.maxHP;
-
-                // This is a mess Im sorry me.
-                units.push({
-                    initiative: initiative.initiative,
-                    unitinfo: unit,
-                    visible: unitImage.visible,
-                    currenthp: cHP,
-                    position: unitPosition,
-                    id: item.id,
-                    dpi: unitImage.grid.dpi,
-                    width: unitImage.image.width,
-                    height: unitImage.image.height,
-                    offsetx: unitImage.grid.offset.x,
-                    offsety: unitImage.grid.offset.y
-                });
-            }
-
-            // Get the turntracker and update the turn/rounds
-            if (item.id == Constants.TURNTRACKER)
-            {
-                const trackContainer = item.metadata[`${Constants.EXTENSIONID}/metadata_trackeritem`] as any;
-                const trackerItem: Tracker = trackContainer?.trackerItem;
-                if (trackerItem)
-                {
-                    this.turnCounter = trackerItem.turn!;
-                    this.roundCounter = trackerItem.round!;
-                }
-            }
-        }
-
 
         // Sort so the highest initiative value is on top
-        const sortedUnits = units.sort(
-            (a, b) => b.initiative - a.initiative
+        const sortedUnits = trackerData.units.sort(
+            (a, b) => b.initiative - a.initiative || a.name.localeCompare(b.name)!
         );
 
+        this.roundCounter = trackerData.round;
+        this.turnCounter = trackerData.turn;
         //Clear the table
         while (tableElement.rows.length > 0)
         {
@@ -107,28 +59,20 @@ export class PlayerList
             let nameCell = row.insertCell(1);
 
             row.setAttribute("unit-id", unitItems.id);
-            row.setAttribute("unit-visible", unitItems.visible ? "true" : "false");
-            row.setAttribute("unit-xpos", unitItems.position.x.toString());
-            row.setAttribute("unit-ypos", unitItems.position.y.toString());
-            row.setAttribute("unit-dpi", unitItems.dpi.toString());
-            row.setAttribute("unit-width", unitItems.width.toString());
-            row.setAttribute("unit-height", unitItems.height.toString());
-            row.setAttribute("unit-offsetx", unitItems.offsetx.toString());
-            row.setAttribute("unit-offsety", unitItems.offsety.toString());
 
             const heartInputMin = document.createElement('input');
             heartInputMin.className = "HealthInput";
             heartInputMin.inputMode = "numeric";
             heartInputMin.id = "cHP" + unitItems.id;
-            heartInputMin.value = unitItems.currenthp;
+            heartInputMin.value = unitItems.cHp.toString();
             heartInputMin.size = 4;
             heartInputMin.maxLength = 4;
 
-            if (unitItems.currenthp <= unitItems.unitinfo.maxHP / 4)
+            if (unitItems.cHp <= unitItems.mHp / 4)
             {
                 nameCell.className = "unitHarmed";
             }
-            else if (unitItems.currenthp <= unitItems.unitinfo.maxHP / 2)
+            else if (unitItems.cHp <= unitItems.mHp / 2)
             {
                 nameCell.className = "unitHurt";
             }
@@ -137,8 +81,8 @@ export class PlayerList
                 nameCell.className = "unitHappy";
             }
 
-            initCell.appendChild(document.createTextNode(unitItems.initiative));
-            nameCell.appendChild(document.createTextNode(unitItems.unitinfo.unitName));
+            initCell.appendChild(document.createTextNode(unitItems.initiative.toString()));
+            nameCell.appendChild(document.createTextNode(unitItems.name));
         }
         console.log("Show turn selection");
         await this.ShowTurnSelection();
@@ -168,9 +112,9 @@ export class PlayerList
                 const counterHtml = document.getElementById("roundCount")!;
                 counterHtml.innerText = `Round: ${this.roundCounter}`;
 
-                let ctu: CurrentTurnUnit = LabelLogic.GetCTUFromRow(currentTurnRow);
+                let ctu: ICurrentTurnUnit = await LabelLogic.GetCTUFromRow(currentTurnRow);
 
-                if (ctu.visible === "true")
+                if (ctu.visible)
                 {
                     //Move the view
                     await ViewportFunctions.CenterViewportOnImage(ctu);

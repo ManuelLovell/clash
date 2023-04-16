@@ -28,8 +28,8 @@ export interface Open5eMonsterResponse {
     dexterity_save: number;
     constitution_save: number;
     intelligence_save: number;
-    wisdom_save?: number;
-    charisma_save?: number;
+    wisdom_save: number;
+    charisma_save: number;
     perception: number;
     skills: Skills;
     damage_vulnerabilities: string;

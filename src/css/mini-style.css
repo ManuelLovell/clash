@@ -116,6 +116,11 @@ footer {
     padding: .5rem;
 }
 
+.clickable:active{
+    filter: invert(52%) sepia(81%) saturate(5333%) hue-rotate(331deg) brightness(90%) contrast(88%);
+    transform: scale(1.5);
+}
+
 
 .gradient {
     background: linear-gradient(10deg, #A73335, rgba(255, 255, 255, 0));

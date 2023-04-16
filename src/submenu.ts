@@ -1,13 +1,14 @@
 import { Constants } from './constants';
-import '/src/css/mini-style.css'
-import OBR, { Metadata } from '@owlbear-rodeo/sdk';
+import OBR from '@owlbear-rodeo/sdk';
 import UnitInfo from './unit-info';
-import { Open5eMonsterListResponse, Open5eMonsterResponse } from './interfaces/api-response-open5e';
+import { Open5eMonsterListResponse } from './interfaces/api-response-open5e';
 import { DiceRoller } from './dice-roller';
+import { db } from './local-database';
+import '/src/css/mini-style.css'
 
 export class SubMenu
 {
-    currentUnit: UnitInfo = new UnitInfo();
+    currentUnit: any;
     freshImport: boolean = false;
     open5eApiString: string = "https://api.open5e.com/monsters/?format=json&search=";
     POPOVERSUBMENUID: string = "";
@@ -20,6 +21,7 @@ export class SubMenu
         this.POPOVERSUBMENUID = urlParams.get('unitid')!;
 
         if (this.POPOVERSUBMENUID == undefined) return;
+   
         this.ShowSearchMenu(false);
         this.ShowImportJSONMenu(false);
         this.ShowSubMenu(true);
@@ -27,9 +29,12 @@ export class SubMenu
         {
             if (!this.freshImport)
             {
-                const items = await OBR.scene.items.getItems([this.POPOVERSUBMENUID]);
-                const metadata = items[0].metadata[`${Constants.EXTENSIONID}/metadata`] as Metadata;
-                this.currentUnit = metadata.unitInfo as UnitInfo;
+                this.currentUnit = await db.ActiveEncounter.get(this.POPOVERSUBMENUID);
+                if (this.currentUnit == undefined)
+                {
+                    console.log("Found no UnitInformation for " + this.POPOVERSUBMENUID);
+                    return;
+                }
             }
             this.freshImport = false;
 
@@ -109,6 +114,7 @@ export class SubMenu
                     unitActionsHtml += `<div id="formAttackContainer" class="attack">`;
                     unitActionsHtml += `<span id="formAttackName" class="attackname" contentEditable="true">${action.name}</span>.  `;
                     unitActionsHtml += `<span id="formAttackDesc" class="description" contentEditable="true">${this.SetClassOnRollable(action.desc!)}</span>`;
+                    unitActionsHtml += `</div>`;
                 }
             }
             unitActionsHtml += "</div>";
@@ -152,6 +158,7 @@ export class SubMenu
                     unitSpellsHtml += `<div id="formSpellContainer" class="attack">`;
                     unitSpellsHtml += `<span id="formSpellName" class="attackname" contentEditable="true">${action.name}</span>.  `;
                     unitSpellsHtml += `<span id="formSpellDesc" class="description" contentEditable="true">${this.SetClassOnRollable(action.desc!)}</span>`;
+                    unitSpellsHtml += `</div>`;
                 }
             }
             unitSpellsHtml += "</div>";
@@ -192,6 +199,7 @@ export class SubMenu
             </footer>
            `;
 
+            this.AppendUnitExportButton();
             this.AppendUnitSaveButton();
             this.AppendAddActionButtons();
             this.AppendImportUnitButton();
@@ -215,7 +223,7 @@ export class SubMenu
         });
     }
 
-    public async renderSearchForm(document: Document): Promise<void>
+    private async renderSearchForm(document: Document): Promise<void>
     {
         var self = this;
         document.querySelector<HTMLDivElement>('#searchmenu')!.innerHTML = `
@@ -309,7 +317,7 @@ export class SubMenu
         }
     }
 
-    public async renderCustomImportForm(document: Document): Promise<void>
+    private async renderCustomImportForm(document: Document): Promise<void>
     {
         var self = this;
         document.querySelector<HTMLDivElement>('#importjsonmenu')!.innerHTML = `
@@ -318,7 +326,7 @@ export class SubMenu
             <div class="hr"></div>
             <div class = "red" id="exampleLine>Example Input</div>
             <div id="instructionsContainer"></div>
-            <h3>Format</h3>
+            <h3>Formatting Help</h3>
             ${this.exampleInterfaceString()}
             <div class="hr"></div>
             <h3>Sub Types</h3>
@@ -360,18 +368,17 @@ export class SubMenu
         importConfirmButton.title = "Click to import custom data"
         importConfirmButton.onclick = function async() 
         {
-            console.log(`I'm importing this; ${importValueButton.value}`);
             const customData = importValueButton.value;
 
-            let importUnit = new UnitInfo();
             try 
             {
-                let jsonData: Open5eMonsterResponse = JSON.parse(customData);
-                importUnit.ImportOpen5eResponse(jsonData);
+                let clashData: UnitInfo = JSON.parse(customData);
+                clashData.id = subMenu.POPOVERSUBMENUID;
+                clashData.tokenId = subMenu.POPOVERSUBMENUID;
 
                 subMenu.freshImport = true;
 
-                subMenu.currentUnit = importUnit;
+                subMenu.currentUnit = clashData;
                 subMenu.renderUnitInfo(document);
 
             }
@@ -388,51 +395,70 @@ export class SubMenu
 
     private exampleInterfaceString(): string
     {
-        let exampleInterface = `{   name: string;</br>
-            size: string;</br>
-            type: string;</br>
-            alignment: string;</br>
-            armor_class: number;</br>
-            hit_points: number;</br>
-            speed: Speed;</br>
-            strength: number;</br>
-            dexterity: number;</br>
-            constitution: number;</br>
-            intelligence: number;</br>
-            wisdom: number;</br>
-            charisma: number;</br>
-            strength_save: number;</br>
-            dexterity_save: number;</br>
-            constitution_save: number;</br>
-            intelligence_save: number;</br>
-            wisdom_save: number;</br>
-            charisma_save?: number;</br>
-            perception: number;</br>
-            damage_vulnerabilities: string;</br>
-            damage_resistances: string;</br>
-            damage_immunities: string;</br>
-            condition_immunities: string;</br>
-            senses: string;</br>
-            languages: string;</br>
-            challenge_rating: string;</br>
-            actions: ActionsEntity[];</br>
-            reactions: ActionsEntity[];</br>
-            legendary_actions: ActionsEntity[];</br>
-            special_abilities: ActionsEntity[];</br>    }`;
+        let exampleInterface = `Below are the type definitions for importing.</br>
+        If you need an easier example, click Export on an existing Unit and change the values.</br>
+        When adding clickable dice rolls, the format is '(#d#+#)' ex; (2d6+2)</br>
+        If it's detected in an Action description, it should create a roller button.</br></br>
+        <b>CustomEntity</b> </br>
+        {</br>
+            unitName: string;</br> 
+            initiative: number;</br> 
+            currentHP: number;</br> 
+            maxHP: number;</br> 
+            armorClass: number;</br> 
+        
+            unitType: string;</br> 
+            unitSize: string;</br> 
+        
+            strScore: number;</br> 
+            strSave: number;</br> 
+        
+            dexScore: number;</br> 
+            dexSave: number;</br> 
+        
+            conScore: number;</br> 
+            conSave: number;</br> 
+        
+            intScore: number;</br> 
+            intSave: number;</br> 
+        
+            wisScore: number;</br> 
+            wisSave: number;</br> 
+        
+            chaScore: number;</br> 
+            chaSave: number;</br> 
+        
+            damageVulnerabilities: string;</br> 
+            damageImmunities: string;</br> 
+            damageResistances: string;</br> 
+            conditionImmunities: string;</br> 
+        
+            challengeRating: string;</br> 
+            experiencePoints: number;</br> 
+            alignment: string;</br> 
+        
+            standardActions: ActionsEntity[];</br> 
+            legendaryActions?: ActionsEntity[];</br> 
+            specialAbilities?: ActionsEntity[];</br> 
+            spellActions?: ActionsEntity[];</br> 
+            reactions?: ActionsEntity[];</br> 
+        
+            senses: string;</br> 
+            languages: string;</br> 
+        
+            speedWalk: number;</br> 
+            speedFly: number;</br> 
+            speedClimb: number;</br> 
+            speedBurrow: number;</br> 
+            speedSwim: number;</br> 
+        }`;
 
         return exampleInterface;
     }
 
     private exampleTypesString(): string
     {
-        const exampleType = `
-        <b>Speed</b></br>
-        {   swim: number;</br>
-          burrow: number;</br>
-          walk: number;</br>
-          fly: number;</br>
-          climb: number;</br>   }</br>
-      
+        const exampleType = `      
         <b>ActionsEntity</b> </br>
         {   name?: string;</br>
           desc?: string;</br>   }</br>
@@ -453,7 +479,7 @@ export class SubMenu
         gotoSearchButton.value = "Search Monster Data"
         gotoSearchButton.className = "";
         gotoSearchButton.title = "Search Monster Data from Free Open5e"
-        gotoSearchButton.onclick = function async() 
+        gotoSearchButton.onclick = async function() 
         {
             self.ShowSubMenu(false);
             self.ShowSearchMenu(true);
@@ -476,7 +502,7 @@ export class SubMenu
         gotoImportJSONButton.value = "Import Custom JSON"
         gotoImportJSONButton.className = "";
         gotoImportJSONButton.title = "Import Custom Monster JSON Data"
-        gotoImportJSONButton.onclick = function async() 
+        gotoImportJSONButton.onclick = async function() 
         {
             self.ShowSubMenu(false);
             self.ShowImportJSONMenu(true);
@@ -496,27 +522,16 @@ export class SubMenu
         const saveButton = document.createElement('input');
         saveButton.type = "image";
         saveButton.id = "saveButton";
-        saveButton.onclick = function async() 
+        saveButton.className = "clickable";
+        saveButton.onclick = async function () 
         {
-            OBR.onReady(async () =>
-            {
-                //Validate form inputs
-                let unitInfo = new UnitInfo();
-                unitInfo.ImportCustomFormInputs(document);
+            //Validate form inputs
+            let unitInfo = new UnitInfo(self.POPOVERSUBMENUID);
+            unitInfo.ImportCustomFormInputs(document);
+            unitInfo.isActive = self.currentUnit.isActive;
 
-                //Save new unit information to OBR
-                await OBR.scene.items.updateItems(
-                    (item) => item.id === self.POPOVERSUBMENUID,
-                    (items) =>
-                    {
-                        for (let item of items)
-                        {
-                            item.name = unitInfo.unitName;
-                            item.metadata[`${Constants.EXTENSIONID}/metadata`] = { unitInfo };
-                        }
-                    }
-                );
-            });
+            //Save to DB
+            await db.ActiveEncounter.put(unitInfo, self.POPOVERSUBMENUID);
         }
         saveButton.src = "/save.svg";
         saveButton.title = "Save Changes";
@@ -524,6 +539,36 @@ export class SubMenu
         saveButton.width = 20;
 
         buttonContainer?.appendChild(saveButton);
+    }
+
+    private AppendUnitExportButton(): void
+    {
+        var self = this;
+        //Get Button Container
+        const buttonContainer = document.getElementById("buttonContainer");
+
+        //Create Export Button
+        const exportButton = document.createElement('input');
+        exportButton.type = "image";
+        exportButton.id = "exportButton";
+        exportButton.className = "clickable";
+        exportButton.onclick = async function() 
+        {
+            //Validate form inputs
+            let unitInfo = new UnitInfo(self.POPOVERSUBMENUID);
+            unitInfo.ImportCustomFormInputs(document);
+            unitInfo.id = "";
+            unitInfo.tokenId = "";
+
+            await navigator.clipboard.writeText(JSON.stringify(unitInfo));
+            window.alert("JSON Copied to clipboard.");
+        }
+        exportButton.src = "/export.svg";
+        exportButton.title = "Export to JSON";
+        exportButton.height = 20;
+        exportButton.width = 20;
+
+        buttonContainer?.appendChild(exportButton);
     }
 
     private AppendAddActionButtons(): void
@@ -536,7 +581,8 @@ export class SubMenu
         addAttackButton.type = "image";
         addAttackButton.id = "addButton";
         addAttackButton.title = "Add new Attack"
-        addAttackButton.onclick = function async() 
+        addAttackButton.className = "clickable";
+        addAttackButton.onclick = async function() 
         {
             //Add a blank action
             const attackCollection = <HTMLElement>document.getElementById("formAttackCollection");
@@ -558,8 +604,9 @@ export class SubMenu
         const addAbilityButton = document.createElement('input');
         addAbilityButton.type = "image";
         addAbilityButton.id = "addButton";
+        addAbilityButton.className = "clickable";
         addAbilityButton.title = "Add new Ability";
-        addAbilityButton.onclick = function async() 
+        addAbilityButton.onclick = async function() 
         {
 
             //Add a blank ability
@@ -583,7 +630,8 @@ export class SubMenu
         addSpellButton.type = "image";
         addSpellButton.id = "addButton";
         addSpellButton.title = "Add new Spell";
-        addSpellButton.onclick = function async() 
+        addSpellButton.className = "clickable";
+        addSpellButton.onclick = async function() 
         {
             //Add a blank SPELL
             const abilityCollection = <HTMLElement>document.getElementById("formSpellCollection");
@@ -616,7 +664,7 @@ export class SubMenu
         page.hidden = !show;
     }
 
-    public ImportNewMonsterInfo(slug: string): void
+    private ImportNewMonsterInfo(slug: string): void
     {
         fetch(`https://api.open5e.com/monsters/${slug}/?format=json`)
             .then(function (response)
@@ -625,8 +673,9 @@ export class SubMenu
                 return response.json();
             }).then(async function (data)
             {
-                let importUnit = new UnitInfo();
+                let importUnit = new UnitInfo(subMenu.POPOVERSUBMENUID);
                 await importUnit.ImportOpen5eResponse(data);
+                importUnit.isActive = subMenu.currentUnit.isActive;
                 subMenu.freshImport = true;
 
                 subMenu.currentUnit = importUnit;
