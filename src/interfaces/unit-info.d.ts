@@ -59,4 +59,6 @@ export interface IUnitInfo
     speedClimb: number;
     speedBurrow: number;
     speedSwim: number;
+
+    dataSlug: string;
 }

@@ -2,6 +2,8 @@ import OBR from "@owlbear-rodeo/sdk";
 import { Constants } from "./constants";
 import { InitiativeList } from "./initiative-list";
 import { db } from "./local-database";
+import UnitInfo from "./unit-info";
+import * as Utilities from './utilities';
 
 export class SettingsData implements ISettingsData
 {
@@ -28,7 +30,16 @@ export async function RenderSettings(document: Document, list: InitiativeList): 
     document.querySelector<HTMLDivElement>('#clash-main-body-settings')!.innerHTML = `
         <div id="settingsContainer">
         <h1>Settings</h1>
+        <div><span id="exportAllContainer"></span>Export Collection Data </div>
+        </br>
+        <div><span id="importSubmitContainer"></span>Import Collection Data </div>
+        <div><span id="importAllContainer"></span></div>
+        <i><small>This will overwrite keys with the same Name/Author</small></i>
+        </br>
+        </br>
         <div><span id="clearAllContainer"></span>Clear All Data </div>
+        <i><small>This will delete the database.</small></i>
+        </br>
         </br>
         <div>${CreateSlider("hideHp")}</span>&emsp;Hide HP Indication from Players </div>
         </br>
@@ -48,6 +59,73 @@ export async function RenderSettings(document: Document, list: InitiativeList): 
 
     const settingsReturnContainer = document.getElementById("settingsReturnContainer");
 
+    //Create Import ALL Button
+    const importAllContainer = document.getElementById("importAllContainer");
+    const importButton = document.createElement('input');
+    importButton.type = "file";
+    importButton.id = "importButton";
+    importButton.title = "Choose a file to import"
+    importButton.className = "tinyType";
+    importButton.onclick = async function () 
+    {
+        console.log("test")
+        //await UploadCollection();
+    }
+
+    const importSubmitContainer = document.getElementById("importSubmitContainer");
+    const importSubmitButton = document.createElement('input');
+    importSubmitButton.type = "button";
+    importSubmitButton.id = "importSubmitButton";
+    importSubmitButton.value = "IMPORT DATA"
+    importSubmitButton.title = "Import Clash Collection Data"
+    importSubmitButton.className = "tinyType";
+    importSubmitButton.onclick = async function () 
+    {
+        if (importButton.files && importButton.files.length > 0)
+        {
+            let file = importButton.files[0];
+            let reader = new FileReader();
+
+            reader.readAsText(file);
+
+            reader.onload = function ()
+            {
+                console.log(reader.result);
+                try
+                {
+                    const units:UnitInfo[] = JSON.parse(reader.result as string);
+                    UploadCollection(units);
+                }
+                catch (error) 
+                {
+                    alert(`The import failed - ${error}`);
+                }
+            };
+
+            reader.onerror = function ()
+            {
+                console.log(reader.error);
+            };
+        }
+    }
+
+    importAllContainer?.appendChild(importButton);
+    importSubmitContainer?.appendChild(importSubmitButton);
+
+    //Create Export ALL Button
+    const exportAllContainer = document.getElementById("exportAllContainer");
+    const exportButton = document.createElement('input');
+    exportButton.type = "button";
+    exportButton.id = "exportButton";
+    exportButton.value = "EXPORT DATA"
+    exportButton.title = "Export Clash Collection Data"
+    exportButton.className = "tinyType";
+    exportButton.onclick = async function () 
+    {
+        await DownloadCollection();
+    }
+    exportAllContainer?.appendChild(exportButton);
+
     //Create Reset ALL Button
     const clearAllContainer = document.getElementById("clearAllContainer");
     const resetButton = document.createElement('input');
@@ -58,19 +136,12 @@ export async function RenderSettings(document: Document, list: InitiativeList): 
     resetButton.className = "tinyType";
     resetButton.onclick = async function () 
     {
-        if (confirm("Clear ALL saved Clash info? (This will wipe saved unit info)"))
+        if (confirm("Delete EVERYTHING? (Deletes Database and Refreshes Window)"))
         {
             self.turnCounter = 1;
             self.roundCounter = 1;
             const counterHtml = document.getElementById("roundCount")!;
             counterHtml.innerText = `Round: ${self.roundCounter}`;
-
-            await db.ActiveEncounter.clear();
-            await db.Tracker.clear();
-            await db.Settings.clear();
-
-            await db.Tracker.add({ id: Constants.TURNTRACKER, currentRound: 1, currentTurn: 1 });
-            await db.Settings.add({ id: Constants.SETTINGSID, gmHideHp: false, gmHideAll: false, gmDisableLabel: false, disableFocus: false });
 
             await OBR.scene.items.deleteItems([Constants.LABEL]);
 
@@ -82,6 +153,9 @@ export async function RenderSettings(document: Document, list: InitiativeList): 
                     delete item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`];
                 }
             });
+
+            await db.delete();
+            window.location.reload();
         }
     }
     clearAllContainer?.appendChild(resetButton);
@@ -149,5 +223,47 @@ export async function RenderSettings(document: Document, list: InitiativeList): 
             }
         };
         container?.insertBefore(slider, container.firstChild);
+    }
+
+    async function DownloadCollection()
+    {
+        const content = await db.Creatures.toArray();
+
+        var a = document.createElement("a");
+        var file = new Blob([JSON.stringify(content)], { type: "text/plain" });
+        a.href = URL.createObjectURL(file);
+        a.download = `ClashCollectionExport-${Date.now()}`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+
+    async function UploadCollection(uploadedItem: UnitInfo[])
+    {
+        const database = await db.Creatures.toArray();
+        let verifiedItems: UnitInfo[] = [];
+        //Check DB for dupes to update and sign over Ids
+        uploadedItem.forEach(unit =>
+        {
+            let defaultItem = new UnitInfo("", "Default");
+            defaultItem.SetToModel(unit);
+            defaultItem.tokenId = "";
+
+            const foundMatch = database.find(data => data.unitName == unit.unitName && data.dataSlug == unit.dataSlug);
+            if (foundMatch)
+            {
+                //If we have it, update it
+                defaultItem.id = foundMatch.id;
+            }
+            else
+            {
+                //If we don't, new ID
+                defaultItem.id = Utilities.GetGUID();
+            }
+            verifiedItems.push(defaultItem);
+        });
+
+        await db.Creatures.bulkPut(verifiedItems);
+        console.log("Import complete.");
     }
 }

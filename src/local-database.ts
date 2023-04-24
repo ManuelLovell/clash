@@ -120,6 +120,7 @@ async function getDatabase(): Promise<DexieDatabase>
         return database;
     }
 }
+
 async function createDatabase(): Promise<DexieDatabase>
 {
     return new Promise((resolve) =>
@@ -138,7 +139,6 @@ async function createDatabase(): Promise<DexieDatabase>
         testDBRequest.onerror = async function ()
         {
             console.warn("IndexDB is disabled, no state will be saved");
-            //const FakeDB = await import("fake-indexeddb");
             window.indexedDB.deleteDatabase("__test");
             resolve(new DexieDatabase(true, { indexedDB: FakeDB.indexedDB, IDBKeyRange: FakeDB.IDBKeyRange }));
         };

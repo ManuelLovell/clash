@@ -78,7 +78,8 @@ footer {
     border-radius: 16px;
     background-color: #242424;
 }
-.monsterNameList {
+#formMaxHP{
+    white-space: pre-wrap;
 }
 ul {
     margin-right: 0;

@@ -4,6 +4,7 @@ import UnitInfo from './unit-info';
 import { IOpen5eMonsterListResponse } from './interfaces/api-response-open5e';
 import { DiceRoller } from './dice-roller';
 import { db } from './local-database';
+import * as Utilities from './utilities';
 import '/src/css/mini-style.css'
 import { IUnitInfo } from './interfaces/unit-info';
 
@@ -203,7 +204,22 @@ export class SubMenu
             <footer id="footerButtonContainer">
             </footer>
            `;
+           
+           // Stop linebreaks in contenteditables
+           const editables = document.querySelectorAll('[contenteditable=true]');
+           editables.forEach(edits =>
+            {
+                edits.addEventListener('keypress', function (event): void
+                {
+                    let kbEvent = event as KeyboardEvent;
+                    if (kbEvent.key === 'Enter')
+                    {
+                        event.preventDefault();
+                    }
+                });
+            });
 
+            this.AppendCollectionSaveButton();
             this.AppendUnitExportButton();
             this.AppendUnitSaveButton();
             this.AppendAddActionButtons();
@@ -246,7 +262,7 @@ export class SubMenu
         goBackButton.style.marginRight = "4px";
         goBackButton.title = "Go back to Unit Information";
         goBackButton.value = "Return";
-        goBackButton.onclick = function async() 
+        goBackButton.onclick = async function () 
         {
             self.ShowSearchMenu(false);
             self.ShowSubMenu(true);
@@ -267,23 +283,19 @@ export class SubMenu
         searchConfirmButton.className = "chalkBorder";
         searchConfirmButton.style.marginLeft = "4px";
         searchConfirmButton.title = "Click to send Search"
-        searchConfirmButton.onclick = function async() 
+        searchConfirmButton.onclick = async function () 
         {
-            fetch(`${self.open5eApiString}${searchValueButton.value}`)
+            const list = document.querySelector<HTMLDivElement>('#monsterList')!;
+            list.innerHTML = "Searching...";
+            let monsterInformationHtml = "";
+
+            await fetch(`${self.open5eApiString}${searchValueButton.value}`)
                 .then(function (response)
                 {
                     return response.json();
                 }).then(function (data: IOpen5eMonsterListResponse)
                 {
-                    const list = document.querySelector<HTMLDivElement>('#monsterList')!;
-                    list.innerHTML = "";
-                    let monsterInformationHtml = "";
-
-                    if (data.count == 0)
-                    {
-                        list.innerHTML = "<div class='Nothing'>No results found.</div>";
-                    }
-                    else
+                    if (data.count > 0)
                     {
                         data.results.forEach((monster) =>
                         {
@@ -296,15 +308,49 @@ export class SubMenu
 
                             monsterInformationHtml += `<li style="--tooltip-color:${ColorName(monster.document__slug)}" data-tag="🡆 from ${monster.document__slug}"><div class="monsterNameList">${TruncateName(monster.name)}</div><div class="monsterImportButtonContainer">${importThis.outerHTML}</div></li>`;
                         });
-                        list.innerHTML = monsterInformationHtml;
-                        const btns = document.querySelectorAll('.monsterImportButtonConfirm');
-                        btns.forEach(btn =>
-                        {
-                            btn.addEventListener('click', (e: Event) => self.ImportNewMonsterInfo((e.currentTarget as Element).id));
-                        });
                     }
-
                 });
+
+            const dexieSearch = await db.Creatures.filter(unit => unit.unitName.toLowerCase().includes(searchValueButton.value.toLocaleLowerCase())).toArray();
+            if (dexieSearch.length > 0)
+            {
+                dexieSearch.forEach((monster) =>
+                {
+                    const importCollection = document.createElement('input');
+                    importCollection.type = "button";
+                    importCollection.id = `${monster.id}`;
+                    importCollection.className = "collectionImportButtonConfirm"
+                    importCollection.value = "Import";
+                    importCollection.title = `Import ${monster.unitName} onto this Unit`;
+
+                    monsterInformationHtml += `<li style="--tooltip-color:${ColorName(monster.dataSlug)}" data-tag="🡆 from [Collection] User:${monster.dataSlug}"><div class="monsterNameList">${TruncateName(monster.unitName)}</div><div class="monsterImportButtonContainer">${importCollection.outerHTML}</div></li>`;
+                });
+            }
+
+            //If we have HTML, set up the buttons
+            if (monsterInformationHtml != "Searching...")
+            {
+                list.innerHTML = monsterInformationHtml;
+                // Add open 5e buttons
+                const btns = document.querySelectorAll('.monsterImportButtonConfirm');
+                btns.forEach(btn =>
+                {
+                    btn.addEventListener('click', async (e: Event) => await self.ImportNewMonsterInfo((e.currentTarget as Element).id));
+                });
+
+                // Add collection buttons
+                const collbBttns = document.querySelectorAll('.collectionImportButtonConfirm');
+                collbBttns.forEach(btn =>
+                {
+                    console.log(btn.id);
+                    btn.addEventListener('click', async (e: Event) => await self.ImportCollectionMonsterInfo((e.currentTarget as Element).id));
+                });
+            }
+            else
+            {
+                // Otherwise no results found
+                list.innerHTML = "<div class='Nothing'>No results found.</div>";
+            }
         }
 
         searchBarContainer?.append(goBackButton);
@@ -322,6 +368,11 @@ export class SubMenu
 
         function ColorName(name: string): string
         {
+            if (!name || name === "")
+            {
+                return "white";
+            }
+
             const letter = name.substring(0, 1).toLowerCase();
             switch (letter)
             {
@@ -338,7 +389,7 @@ export class SubMenu
                 case "f":
                 case "g":
                 case "h":
-                    return "blue";
+                    return "cyan";
                 case "j":
                 case "k":
                 case "l":
@@ -393,7 +444,7 @@ export class SubMenu
         goBackButton.style.marginRight = "4px";
         goBackButton.title = "Go back to Unit Information";
         goBackButton.value = "Return";
-        goBackButton.onclick = function async() 
+        goBackButton.onclick = async function () 
         {
             self.ShowImportJSONMenu(false);
             self.ShowSubMenu(true);
@@ -413,7 +464,7 @@ export class SubMenu
         importConfirmButton.className = "chalkBorder";
         importConfirmButton.style.marginLeft = "4px";
         importConfirmButton.title = "Click to import custom data"
-        importConfirmButton.onclick = function async() 
+        importConfirmButton.onclick = async function () 
         {
             const customData = importValueButton.value;
 
@@ -583,6 +634,57 @@ export class SubMenu
         buttonContainer?.appendChild(saveButton);
     }
 
+    private AppendCollectionSaveButton(): void
+    {
+        var self = this;
+        //Get Button Container
+        const buttonContainer = document.getElementById("buttonContainer");
+
+        //Create Collect Button
+        const saveButton = document.createElement('input');
+        saveButton.type = "image";
+        saveButton.id = "collectionButton";
+        saveButton.className = "clickable";
+        saveButton.onclick = async function () 
+        {
+            //Validate form inputs
+            self.currentUnit.ImportCustomFormInputs(document);
+            const authorName = await OBR.player.getName();
+
+            //Clean Unit and remove Ids
+            let cleanCopy: UnitInfo = JSON.parse(JSON.stringify(self.currentUnit));
+            cleanCopy.id = "";
+            cleanCopy.tokenId = "";
+            cleanCopy.dataSlug = authorName;
+            //cleanCopy.dataSlug = myname;
+
+            //Check DB for Creature by same name
+            const dupe = await db.Creatures.get({ unitName: self.currentUnit.unitName, dataSlug: authorName });
+            if (dupe)
+            {
+                if (confirm(`Unit named '${self.currentUnit.unitName}' already found in Collection. Overwrite?`))
+                {
+                    // Has permission to save
+                    cleanCopy.id = dupe.id;
+                    await db.Creatures.put(cleanCopy, dupe.id);
+                }
+            }
+            else
+            {
+                // Doesn't need permission
+                const freshGuid = Utilities.GetGUID();
+                cleanCopy.id = freshGuid;
+                await db.Creatures.put(cleanCopy, freshGuid);
+            }
+        }
+        saveButton.src = "/collection.svg";
+        saveButton.title = "Save to Collection";
+        saveButton.height = 20;
+        saveButton.width = 20;
+
+        buttonContainer?.appendChild(saveButton);
+    }
+
     private AppendUnitExportButton(): void
     {
         var self = this;
@@ -711,9 +813,9 @@ export class SubMenu
         page.hidden = !show;
     }
 
-    private ImportNewMonsterInfo(slug: string): void
+    private async ImportNewMonsterInfo(slug: string): Promise<void>
     {
-        fetch(`https://api.open5e.com/monsters/${slug}/?format=json`)
+        await fetch(`https://api.open5e.com/monsters/${slug}/?format=json`)
             .then(function (response)
             {
                 //Parse the data into a usable state
@@ -729,6 +831,17 @@ export class SubMenu
                 subMenu.currentUnit = importUnit;
                 subMenu.renderUnitInfo(document);
             });
+    }
+
+    private async ImportCollectionMonsterInfo(id: string): Promise<void>
+    {
+        const unit = await db.Creatures.get(id);
+        if (unit)
+        {
+            subMenu.freshImport = true;
+            subMenu.currentUnit.SetToModel(unit);
+            subMenu.renderUnitInfo(document);
+        }
     }
 
     private SetClassOnRollable(desc: string): string

@@ -62,6 +62,8 @@ export default class UnitInfo implements IUnitInfo
     speedBurrow: number;
     speedSwim: number;
 
+    dataSlug: string;
+
     // Set the base values that the form needs to not error out and display correctly.
     constructor(tokenId: string, name?: string)
     {
@@ -104,6 +106,7 @@ export default class UnitInfo implements IUnitInfo
         this.standardActions = [];
         this.specialAbilities = [];
         this.spellList = [];
+        this.dataSlug = "";
     }
 
     /** Import Custom JSON data to a UnitInfo model */
@@ -128,7 +131,7 @@ export default class UnitInfo implements IUnitInfo
         this.isActive = dbUnit.isActive;
     }
 
-    private SetToModel(unit: IUnitInfo): void
+    public SetToModel(unit: IUnitInfo): void
     {
         this.initiative = unit.initiative;
         this.currentHP = unit.maxHP
@@ -183,6 +186,8 @@ export default class UnitInfo implements IUnitInfo
         this.speedClimb = unit.speedClimb;
         this.speedBurrow = unit.speedBurrow;
         this.speedSwim = unit.speedSwim;
+        this.dataSlug = unit.dataSlug;
+        this.CheckDefaults();
     }
 
     // Import the values directly from the Document, go to default if anything is erroneous
@@ -190,6 +195,7 @@ export default class UnitInfo implements IUnitInfo
     {
         this.unitName = this.GetContent(document, "formUnitName");
         this.maxHP = parseFloat(this.GetContent(document, "formMaxHP")) || 4;
+        this.currentHP = this.maxHP;
         this.armorClass = parseFloat(this.GetContent(document, "formArmorClass")) || 10;
 
         this.unitType = this.GetContent(document, "formUnitType");
@@ -299,7 +305,9 @@ export default class UnitInfo implements IUnitInfo
     {
         this.unitName ??= "Nameless";
         this.maxHP ??= 4;
+        this.currentHP ??= this.maxHP;
         this.armorClass ??= 10;
+        this.dataSlug ??= "Unknown";
 
         this.unitType ??= "Humanoid";
         this.unitSize ??= "Medium";
