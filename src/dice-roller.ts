@@ -35,9 +35,9 @@ export class DiceRoller
         };
     }
 
-    static RollMe(a: number, b: number, rnd: Function): RollResult
+    static RollMe(a: number, b: number, rnd: Function): IRollResult
     {
-        var msg = 'Invalid dice values.', toRoll: RollResult = {};
+        var msg = 'Invalid dice values.', toRoll: IRollResult = {};
         if (typeof a === 'string')
         {
             toRoll = this.Parse(a);
@@ -64,7 +64,7 @@ export class DiceRoller
         return toRoll;
     }
 
-    static DetailedRoll(a: number, b: number, rnd: Function): RollResult
+    static DetailedRoll(a: number, b: number, rnd: Function): IRollResult
     {
         return this.RollMe(a, b, rnd);
     }
@@ -83,7 +83,7 @@ export class DiceRoller
         return num;
     }
 
-    static Parse(notation: string): RollResult
+    static Parse(notation: string): IRollResult
     {
         var roll = this.CompressNotation(notation).match(Constants.DICENOTATION)!, mod = 0;
         var msg = 'Invalid notation: ' + notation + '';
@@ -111,12 +111,4 @@ export class DiceRoller
             modifier: mod
         };
     }
-}
-
-interface RollResult
-{
-    number?: number,
-    type?: number,
-    modifier?: number,
-    result?: number
 }

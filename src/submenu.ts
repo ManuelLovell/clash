@@ -1,27 +1,37 @@
 import { Constants } from './constants';
 import OBR from '@owlbear-rodeo/sdk';
 import UnitInfo from './unit-info';
-import { Open5eMonsterListResponse } from './interfaces/api-response-open5e';
+import { IOpen5eMonsterListResponse } from './interfaces/api-response-open5e';
 import { DiceRoller } from './dice-roller';
 import { db } from './local-database';
 import '/src/css/mini-style.css'
+import { IUnitInfo } from './interfaces/unit-info';
 
 export class SubMenu
 {
-    currentUnit: any;
-    freshImport: boolean = false;
+    dbImport: IUnitInfo | undefined;
+    currentUnit: UnitInfo;
+    freshImport: boolean;
+
     open5eApiString: string = "https://api.open5e.com/monsters/?format=json&search=";
     POPOVERSUBMENUID: string = "";
 
-    public async renderUnitInfo(document: Document): Promise<void>
+    constructor()
     {
-        // If there's no ID, just give up.
+        this.freshImport = false;
+
         const queryString = window.location.search;
         const urlParams = new URLSearchParams(queryString);
         this.POPOVERSUBMENUID = urlParams.get('unitid')!;
 
+        this.currentUnit = new UnitInfo(this.POPOVERSUBMENUID, "Default");
+    }
+
+    public async renderUnitInfo(document: Document): Promise<void>
+    {
+        // If there's no ID, just give up.
         if (this.POPOVERSUBMENUID == undefined) return;
-   
+
         this.ShowSearchMenu(false);
         this.ShowImportJSONMenu(false);
         this.ShowSubMenu(true);
@@ -29,12 +39,7 @@ export class SubMenu
         {
             if (!this.freshImport)
             {
-                this.currentUnit = await db.ActiveEncounter.get(this.POPOVERSUBMENUID);
-                if (this.currentUnit == undefined)
-                {
-                    console.log("Found no UnitInformation for " + this.POPOVERSUBMENUID);
-                    return;
-                }
+                await this.currentUnit.ImportFromDatabase(this.POPOVERSUBMENUID);
             }
             this.freshImport = false;
 
@@ -58,7 +63,7 @@ export class SubMenu
 
             //Unit Attribute Scores
             let unitScoresHtml = '<table>';
-            unitScoresHtml += '<tr><th>STR    </th><th>DEX   </th><th>CON    </th><th>INT   </th><th>WIS   </th><th>CHA   </th></tr>';
+            unitScoresHtml += '<tr class="red"><th>STR    </th><th>DEX   </th><th>CON    </th><th>INT   </th><th>WIS   </th><th>CHA   </th></tr>';
             unitScoresHtml += `<tr><td><span id="formStrScore" contentEditable="true">${this.currentUnit.strScore}</span></td>
                             <td><span id="formDexScore" contentEditable="true">${this.currentUnit.dexScore}</span></td>
                             <td><span id="formConScore" contentEditable="true">${this.currentUnit.conScore}</span></td>
@@ -227,27 +232,25 @@ export class SubMenu
     {
         var self = this;
         document.querySelector<HTMLDivElement>('#searchmenu')!.innerHTML = `
-            <div id="searchResultsContainer"><ol id="monsterList"></ol></div>
-            <footer><span class="returnFloatLeft" id="searchReturnContainer"></span><span class="returnFloatRight" id="searchFooterButtonContainer"></span></footer>
+            <div id="searchResultsContainer"><ul id="monsterList"></ul></div>
+            <footer></span><span class="returnFloatRight" id="searchFooterButtonContainer"></span></footer>
            `;
 
-        const searchReturnContainer = document.getElementById("searchReturnContainer");
         const searchBarContainer = document.getElementById("searchFooterButtonContainer");
 
         //Create Return Button
         const goBackButton = document.createElement('input');
-        goBackButton.type = "image";
+        goBackButton.type = "button";
         goBackButton.id = "returnButton";
-        goBackButton.className = "Icon";
-        goBackButton.title = "Go back to Unit Information"
+        goBackButton.className = "chalkBorder";
+        goBackButton.style.marginRight = "4px";
+        goBackButton.title = "Go back to Unit Information";
+        goBackButton.value = "Return";
         goBackButton.onclick = function async() 
         {
             self.ShowSearchMenu(false);
             self.ShowSubMenu(true);
         }
-        goBackButton.src = "/return.svg";
-        goBackButton.height = 20;
-        goBackButton.width = 20;
 
         //Create Search Input Button
         const searchValueButton = document.createElement('input');
@@ -261,7 +264,8 @@ export class SubMenu
         searchConfirmButton.type = "button";
         searchConfirmButton.id = "searchConfirm";
         searchConfirmButton.value = "Search";
-        searchConfirmButton.className = "";
+        searchConfirmButton.className = "chalkBorder";
+        searchConfirmButton.style.marginLeft = "4px";
         searchConfirmButton.title = "Click to send Search"
         searchConfirmButton.onclick = function async() 
         {
@@ -269,7 +273,7 @@ export class SubMenu
                 .then(function (response)
                 {
                     return response.json();
-                }).then(function (data: Open5eMonsterListResponse)
+                }).then(function (data: IOpen5eMonsterListResponse)
                 {
                     const list = document.querySelector<HTMLDivElement>('#monsterList')!;
                     list.innerHTML = "";
@@ -290,7 +294,7 @@ export class SubMenu
                             importThis.value = "Import";
                             importThis.title = `Import ${monster.name} onto this Unit`;
 
-                            monsterInformationHtml += `<li><div class="monsterNameList">${TruncateName(monster.name)}</div><div class="monsterImportButtonContainer">${importThis.outerHTML}</div></li>`;
+                            monsterInformationHtml += `<li style="--tooltip-color:${ColorName(monster.document__slug)}" data-tag="🡆 from ${monster.document__slug}"><div class="monsterNameList">${TruncateName(monster.name)}</div><div class="monsterImportButtonContainer">${importThis.outerHTML}</div></li>`;
                         });
                         list.innerHTML = monsterInformationHtml;
                         const btns = document.querySelectorAll('.monsterImportButtonConfirm');
@@ -303,17 +307,60 @@ export class SubMenu
                 });
         }
 
-        searchReturnContainer?.append(goBackButton);
+        searchBarContainer?.append(goBackButton);
         searchBarContainer?.append(searchValueButton);
         searchBarContainer?.append(searchConfirmButton);
 
         function TruncateName(name: string): string
         {
-            if (name.length > 20)
+            if (name.length > 30)
             {
-                return name.substring(0, 20) + "...";
+                return name.substring(0, 30) + "...";
             }
             return name;
+        }
+
+        function ColorName(name: string): string
+        {
+            const letter = name.substring(0, 1).toLowerCase();
+            switch (letter)
+            {
+                case "a":
+                case "e":
+                case "i":
+                case "o":
+                case "u":
+                    return "red";
+                case "b":
+                case "c":
+                case "d":
+                    return "pink";
+                case "f":
+                case "g":
+                case "h":
+                    return "blue";
+                case "j":
+                case "k":
+                case "l":
+                case "m":
+                    return "#747bff"; //purple
+                case "n":
+                case "p":
+                case "q":
+                    return "green";
+                case "r":
+                case "s":
+                case "t":
+                case "v":
+                    return "orange";
+                case "w":
+                case "x":
+                case "y":
+                case "z":
+                    return "yellow";
+                default:
+                    return "white";
+            }
         }
     }
 
@@ -331,27 +378,26 @@ export class SubMenu
             <div class="hr"></div>
             <h3>Sub Types</h3>
             ${this.exampleTypesString()}
-            <footer><span class="returnFloatLeft" id="importReturnContainer"></span><span class="returnFloatRight" id="importFooterButtonContainer"></span></footer>
+            <footer><span id="importReturnContainer"></span><span id="importFooterButtonContainer"></span></footer>
            `;
 
         const importDataContainer = document.getElementById("importDataContainer");
         const importReturnContainer = document.getElementById("importReturnContainer");
         const importBarContainer = document.getElementById("importFooterButtonContainer");
 
-        //Create Return Button
+        //Create JSON Return Button
         const goBackButton = document.createElement('input');
-        goBackButton.type = "image";
+        goBackButton.type = "button";
         goBackButton.id = "returnButton";
-        goBackButton.className = "Icon";
-        goBackButton.title = "Go back to Unit Information"
+        goBackButton.className = "chalkBorder";
+        goBackButton.style.marginRight = "4px";
+        goBackButton.title = "Go back to Unit Information";
+        goBackButton.value = "Return";
         goBackButton.onclick = function async() 
         {
             self.ShowImportJSONMenu(false);
             self.ShowSubMenu(true);
         }
-        goBackButton.src = "/return.svg";
-        goBackButton.height = 20;
-        goBackButton.width = 20;
 
         //Create import Input Button
         const importValueButton = document.createElement('textarea');
@@ -364,7 +410,8 @@ export class SubMenu
         importConfirmButton.type = "button";
         importConfirmButton.id = "importConfirm";
         importConfirmButton.value = "Confirm Import";
-        importConfirmButton.className = "";
+        importConfirmButton.className = "chalkBorder";
+        importConfirmButton.style.marginLeft = "4px";
         importConfirmButton.title = "Click to import custom data"
         importConfirmButton.onclick = function async() 
         {
@@ -372,15 +419,10 @@ export class SubMenu
 
             try 
             {
-                let clashData: UnitInfo = JSON.parse(customData);
-                clashData.id = subMenu.POPOVERSUBMENUID;
-                clashData.tokenId = subMenu.POPOVERSUBMENUID;
-
                 subMenu.freshImport = true;
 
-                subMenu.currentUnit = clashData;
+                subMenu.currentUnit.ImportFromJSON(customData);
                 subMenu.renderUnitInfo(document);
-
             }
             catch (error) 
             {
@@ -477,9 +519,10 @@ export class SubMenu
         gotoSearchButton.type = "button";
         gotoSearchButton.id = "gotoMonsterSearchButton";
         gotoSearchButton.value = "Search Monster Data"
-        gotoSearchButton.className = "";
+        gotoSearchButton.className = "chalkBorder";
+        gotoSearchButton.style.marginRight = "4px";
         gotoSearchButton.title = "Search Monster Data from Free Open5e"
-        gotoSearchButton.onclick = async function() 
+        gotoSearchButton.onclick = async function () 
         {
             self.ShowSubMenu(false);
             self.ShowSearchMenu(true);
@@ -500,9 +543,10 @@ export class SubMenu
         gotoImportJSONButton.type = "button";
         gotoImportJSONButton.id = "gotoImportMonsterButton";
         gotoImportJSONButton.value = "Import Custom JSON"
-        gotoImportJSONButton.className = "";
+        gotoImportJSONButton.className = "chalkBorder";
+        gotoImportJSONButton.style.marginLeft = "4px";
         gotoImportJSONButton.title = "Import Custom Monster JSON Data"
-        gotoImportJSONButton.onclick = async function() 
+        gotoImportJSONButton.onclick = async function () 
         {
             self.ShowSubMenu(false);
             self.ShowImportJSONMenu(true);
@@ -526,12 +570,10 @@ export class SubMenu
         saveButton.onclick = async function () 
         {
             //Validate form inputs
-            let unitInfo = new UnitInfo(self.POPOVERSUBMENUID);
-            unitInfo.ImportCustomFormInputs(document);
-            unitInfo.isActive = self.currentUnit.isActive;
+            self.currentUnit.ImportCustomFormInputs(document);
 
             //Save to DB
-            await db.ActiveEncounter.put(unitInfo, self.POPOVERSUBMENUID);
+            await db.ActiveEncounter.put(self.currentUnit, self.POPOVERSUBMENUID);
         }
         saveButton.src = "/save.svg";
         saveButton.title = "Save Changes";
@@ -552,16 +594,21 @@ export class SubMenu
         exportButton.type = "image";
         exportButton.id = "exportButton";
         exportButton.className = "clickable";
-        exportButton.onclick = async function() 
+        exportButton.onclick = async function () 
         {
             //Validate form inputs
-            let unitInfo = new UnitInfo(self.POPOVERSUBMENUID);
-            unitInfo.ImportCustomFormInputs(document);
-            unitInfo.id = "";
-            unitInfo.tokenId = "";
-
-            await navigator.clipboard.writeText(JSON.stringify(unitInfo));
-            window.alert("JSON Copied to clipboard.");
+            self.currentUnit.ImportCustomFormInputs(document);
+            self.currentUnit.id = "";
+            self.currentUnit.tokenId = "";
+            try
+            {
+                await navigator.clipboard.writeText(JSON.stringify(self.currentUnit));
+                window.alert("JSON Copied to clipboard.");
+            }
+            catch
+            {
+                window.alert("Unable to copy; Please try again.");
+            }
         }
         exportButton.src = "/export.svg";
         exportButton.title = "Export to JSON";
@@ -582,7 +629,7 @@ export class SubMenu
         addAttackButton.id = "addButton";
         addAttackButton.title = "Add new Attack"
         addAttackButton.className = "clickable";
-        addAttackButton.onclick = async function() 
+        addAttackButton.onclick = async function () 
         {
             //Add a blank action
             const attackCollection = <HTMLElement>document.getElementById("formAttackCollection");
@@ -606,7 +653,7 @@ export class SubMenu
         addAbilityButton.id = "addButton";
         addAbilityButton.className = "clickable";
         addAbilityButton.title = "Add new Ability";
-        addAbilityButton.onclick = async function() 
+        addAbilityButton.onclick = async function () 
         {
 
             //Add a blank ability
@@ -631,7 +678,7 @@ export class SubMenu
         addSpellButton.id = "addButton";
         addSpellButton.title = "Add new Spell";
         addSpellButton.className = "clickable";
-        addSpellButton.onclick = async function() 
+        addSpellButton.onclick = async function () 
         {
             //Add a blank SPELL
             const abilityCollection = <HTMLElement>document.getElementById("formSpellCollection");
@@ -676,6 +723,7 @@ export class SubMenu
                 let importUnit = new UnitInfo(subMenu.POPOVERSUBMENUID);
                 await importUnit.ImportOpen5eResponse(data);
                 importUnit.isActive = subMenu.currentUnit.isActive;
+                importUnit.currentHP = importUnit.maxHP;
                 subMenu.freshImport = true;
 
                 subMenu.currentUnit = importUnit;

@@ -1,11 +1,11 @@
-export interface Open5eMonsterListResponse {
+export interface IOpen5eMonsterListResponse {
     count: number;
     next?: null;
     previous?: null;
     results: Open5eMonsterResponse[];
 }
 
-export interface Open5eMonsterResponse {
+export interface IOpen5eMonsterResponse {
     slug: string;
     name: string;
     size: string;
@@ -52,7 +52,7 @@ export interface Open5eMonsterResponse {
     document__license_url: string;
   }
 
-  export interface Speed
+  export interface ISpeed
   {
     swim: number;
     burrow: number;
@@ -61,14 +61,14 @@ export interface Open5eMonsterResponse {
     climb: number;
   }
 
-  export interface Skills 
+  export interface ISkills 
   {
     athletics: number;
     perception: number;
     stealth: number;
   }
 
-  export interface ActionsEntity 
+  export interface IActionsEntity 
   {
     name?: string;
     desc?: string;
@@ -76,7 +76,7 @@ export interface Open5eMonsterResponse {
     damage_dice?: string;
   }
 
-  export interface Open5eSpellResponse {
+  export interface IOpen5eSpellResponse {
     slug: string;
     name: string;
     desc: string;

@@ -1,11 +1,13 @@
-export interface Tracker
+export interface IOBRTracker
 {
     turn: number;
     round: number;
+    gmHideHp: boolean;
+    gmHideAll: boolean;
     units: UnitTrack[];
 }
 
-export interface UnitTrack
+export interface IUnitTrack
 {
     id: string;
     name: string;

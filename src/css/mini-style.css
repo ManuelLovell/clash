@@ -49,7 +49,10 @@ body::-webkit-scrollbar{
 #searchmenu::-webkit-scrollbar{
     display: none;
 }
-
+.chalkBorder {
+    border-color: #ffffff;
+    border-radius: 5px;
+}
 #importjsonmenu
 {
     height: 100%;
@@ -58,12 +61,10 @@ body::-webkit-scrollbar{
 #importjsonmenu::-webkit-scrollbar{
     display: none;
 }
-body::-webkit-scrollbar{
-    display: none;
-}
 
 footer {
     background: linear-gradient(180deg, #A73335, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0));
+    background-color: #242424;
     position: fixed;
     left: 0;
     bottom: 0;
@@ -73,11 +74,26 @@ footer {
 }
 .popColor
 {
-    background-color: rgb(34, 38, 57);
-    background-image: linear-gradient(rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.12));
+    border-style:solid;
+    border-radius: 16px;
+    background-color: #242424;
 }
 .monsterNameList {
-    float:left;
+}
+ul {
+    margin-right: 0;
+    padding-left: 0;
+    list-style: none;
+}
+ul li:after {
+    content: attr(data-tag);
+    width: 1em;
+    color: var(--tooltip-color);
+    height: 1em;
+    font-size: small;
+    padding: 0.25em;
+    line-height: 1.0;
+    margin-right: 0.5em;
 }
 .monsterImportButtonContainer {
     float:right;
@@ -88,12 +104,17 @@ footer {
 .clickableRoller{
     display: inline-block;
     cursor: pointer;
-    background-color: darkred;
-    border-radius:5px;
+    font-weight: bold;
+    font-style: normal;
+    color: #f9f9f9;
+    background-color: rgb(87, 11, 11);
+    border-radius:10px;
     border-color:#f9f9f9;
-    border-style: solid;
+    border-style: outset;
     border-width: 1px;
-    padding-bottom: 2px;
+    padding-bottom: 3px;
+    padding-left: 2px;
+    padding-right: 2px;
 }
 .Icon {
     vertical-align: text-bottom;
@@ -140,7 +161,7 @@ footer {
     font-family: Georgia, serif;
     font-variant: small-caps;
     font-weight: bold;
-    color: #A73335;
+    color: #f8f0f0;
 }
 
 .description {
@@ -156,17 +177,19 @@ footer {
 
 .bold {
     font-weight: bold;
+    color: #FF9294;
 }
-
+.white {
+    color: #E1D0D0;
+}
 .red {
-    color: #A73335;
+    color: #FF9294;
 }
 
 table {
     width: 100%;
     border: 0px;
     border-collapse: collapse;
-    color: #A73335;
 }
 
 th,

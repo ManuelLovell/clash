@@ -1,7 +1,7 @@
 import OBR, { Metadata } from "@owlbear-rodeo/sdk";
 import { Constants } from "./constants";
 import { ViewportFunctions } from "./viewport";
-import { Tracker } from "./interfaces/turn-tracker-item";
+import { IOBRTracker } from "./interfaces/turn-tracker-item";
 import { ICurrentTurnUnit } from "./interfaces/current-turn-unit";
 import { LabelLogic } from "./label-logic";
 
@@ -9,11 +9,12 @@ export class PlayerList
 {
     roundCounter: number = 1;
     turnCounter: number = 1;
+    disableFocus: boolean = false;
 
     /**Render the main initiatve list */
     public async Render(document: Document): Promise<void>
     {
-        document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
+        document.querySelector<HTMLDivElement>('#clash-main-body-app')!.innerHTML = `
             <table id="initiative-list">
             <thead>
                 <tr>
@@ -23,21 +24,52 @@ export class PlayerList
             </thead>
             <tbody id="unit-list"></tbody>
             </table>
-            <div id="roundCounter" class="bottom"><span id="turnContainer"></span><span id="roundCount" class="centerish">Round: ${this.roundCounter}</span><span id="resetContainer" class="floatright"></span></div>
+            <footer>
+            <div id="roundCounter" class="playerBottom">
+            <label class="switch" id="settingnoFocusContainer">
+            <span class="slider round"></span>
+            </label> No AutoFocus
+            <span id="roundCount" class="playerCenterish">Round: ${this.roundCounter}</span>
+            </div>
+            </footer>
             `;
 
+            var self = this;
+            const container = document.getElementById(`settingnoFocusContainer`);
+            const slider = document.createElement('input');
+            slider.type = "checkbox";
+            slider.value = String(this.disableFocus);
+            slider.checked = this.disableFocus;
+            slider.onclick = async function (element)
+            {
+                const target = element.target as HTMLInputElement;
+                slider.value = String(target.checked);
+                self.disableFocus = target.checked;
+            }
+            container?.insertBefore(slider, container.firstChild);
+            
         OBR.scene.onMetadataChange((metadata) => this.RefreshList(metadata));
+
+        const metadata = await OBR.scene.getMetadata();
+        await this.RefreshList(metadata);
     }
 
     /**Refresh the initiative list after updates */
     public async RefreshList(metadata: Metadata): Promise<void>
     {
         const meta = metadata[`${Constants.EXTENSIONID}/metadata_trackeritem`] as any;
-        const trackerData = meta.Tracker as Tracker;
+        const trackerData = meta.Tracker as IOBRTracker;
 
         if (!trackerData || !trackerData.units) return;
+        
         // Reference to initiative list
         const tableElement = <HTMLTableElement>document.querySelector("#unit-list")!;
+
+        if (trackerData.gmHideAll)
+        {
+            tableElement.innerHTML = "";
+            return;
+        }
 
         // Sort so the highest initiative value is on top
         const sortedUnits = trackerData.units.sort(
@@ -57,6 +89,9 @@ export class PlayerList
             let row = tableElement.insertRow(-1);
             let initCell = row.insertCell(0);
             let nameCell = row.insertCell(1);
+            nameCell.style.textOverflow = "ellipsis";
+            nameCell.style.overflow = "hidden";
+            nameCell.style.whiteSpace = "nowrap";
 
             row.setAttribute("unit-id", unitItems.id);
 
@@ -68,22 +103,30 @@ export class PlayerList
             heartInputMin.size = 4;
             heartInputMin.maxLength = 4;
 
-            if (unitItems.cHp <= unitItems.mHp / 4)
+            // If the GM has the HP indicator turned off
+            if (!trackerData.gmHideHp)
             {
-                nameCell.className = "unitHarmed";
-            }
-            else if (unitItems.cHp <= unitItems.mHp / 2)
-            {
-                nameCell.className = "unitHurt";
-            }
-            else
-            {
-                nameCell.className = "unitHappy";
+                if (unitItems.cHp <= unitItems.mHp / 4)
+                {
+                    nameCell.className = "unitHarmed";
+                }
+                else if (unitItems.cHp <= unitItems.mHp / 2)
+                {
+                    nameCell.className = "unitHurt";
+                }
+                else
+                {
+                    nameCell.className = "unitHappy";
+                }
             }
 
             initCell.appendChild(document.createTextNode(unitItems.initiative.toString()));
+            initCell.style.width = "20%";
             nameCell.appendChild(document.createTextNode(unitItems.name));
+            nameCell.style.width = "75%";
+
         }
+
         console.log("Show turn selection");
         await this.ShowTurnSelection();
     }
@@ -117,7 +160,10 @@ export class PlayerList
                 if (ctu.visible)
                 {
                     //Move the view
-                    await ViewportFunctions.CenterViewportOnImage(ctu);
+                    if (!this.disableFocus)
+                    {
+                        await ViewportFunctions.CenterViewportOnImage(ctu);
+                    }
                 }
             }
         }

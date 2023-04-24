@@ -1,98 +1,95 @@
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
 
-  color-scheme: dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+    color-scheme: dark;
+    color: rgba(255, 255, 255, 0.87);
+    background-color: #242424;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-text-size-adjust: 100%;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+}
+.unitHappy {
+    color: white;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
+.unitHurt {
+    color: yellow;
 }
-a:hover {
-  color: #535bf2;
+
+.unitHarmed {
+    color: red;
 }
-.boldMiddle
-{
-    font-weight: bold;
-    text-align: center;
-    margin: auto;
-    padding: 20px;
-}
-body {
-    position: relative;
-    min-height: 95vh;
-}
-.unitHappy{
-    color:white;
-}
-.unitHurt{
-    color:yellow;
-}
-.unitHarmed{
-    color:red;
-}
-.RollerButton
-{
+
+.RollerButton {
     background-color: darkred;
     border-width: 1px;
     border-style: ridge;
     border-radius: 5px;
 }
-#initiative-list{
-    font-size: 13px!important;
-    width: 100%;
-    display: table;
-    table-layout: fixed;
+a {
+    font-weight: 500;
+    color: #646cff;
+    text-decoration: inherit;
 }
-#initiative-list td {
-    overflow: hidden;
+
+a:hover {
+    color: #535bf2;
+}
+
+.boldMiddle {
+    font-weight: bold;
     text-align: center;
+    margin: auto;
+    padding: 20px;
 }
-.turnOutline {
-    outline: thin;
-    outline-style: solid;
+
+thead, tbody { display: block; }
+#unit-list::-webkit-scrollbar {
+    display:none;
 }
-.isMonster
-{
-    background-color: darkred;
-    border-width: 0px;
-    border-radius: 5px;
+table, thead, tbody, tr {
+    width: 100%;
 }
-.chalkBorder {
-    border-color: #ffffff;
-    border-radius: 5px;
+tr {
+    display: flex;
 }
-.clickable:active{
-    filter: invert(52%) sepia(81%) saturate(5333%) hue-rotate(331deg) brightness(90%) contrast(88%);
-    transform: scale(1.5);
+tbody {
+    height: 515px;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
-.turnIndicator
-{
-    width: 100px;
+body {
+    margin: 0;
+    min-width: 390px;
+    padding: 5px;
+    display: flex;
+    height: 95%;
+    flex-direction: column;
 }
-.tinyType
-{
-    background-color: #242424;
-    font-size: 10px;
-    margin-right: 15px;
+body::-webkit-scrollbar{
+    display: none;
 }
+footer {
+    background: linear-gradient(180deg, #A73335, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0));
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    height: 48px;
+    width: 100%;
+}
+
 .bottom {
     position: absolute;
     bottom: 0;
     width: 100%;
-    height: 3.0rem;  
+    height: 2.8rem;
 }
+
 .bombBottom {
     text-align: center;
     position: absolute;
@@ -100,17 +97,58 @@ body {
     width: 100%;
     height: 1.5rem;
 }
+#initiative-list td {
+    overflow: hidden;
+    text-align: center;
+}
+
+.turnOutline {
+    outline: thin;
+    outline-style: inset;
+    outline-offset: -1px;
+    background-color: rgb(87, 5, 5);
+}
+
+.isMonster {
+    background-color: darkred;
+    border-width: 0px;
+    border-radius: 5px;
+}
+
+.chalkBorder {
+    border-color: #ffffff;
+    border-radius: 5px;
+}
+
+.clickable:active {
+    filter: invert(52%) sepia(81%) saturate(5333%) hue-rotate(331deg) brightness(90%) contrast(88%);
+    transform: scale(1.5);
+}
+
+.turnIndicator {
+    width: 100px;
+}
+
+.tinyType {
+    background-color: #242424;
+    font-size: 10px;
+    margin-right: 15px;
+}
+
+
 .HealthInput {
     width: 30px;
 }
-.ArmorInput{
+
+.ArmorInput {
     width: 20px;
 }
 
 .InitiativeInput {
     width: 15px;
 }
-.Icon{  
+
+.Icon {
     vertical-align: text-bottom;
     height: 20px;
     width: 20px;
@@ -118,35 +156,123 @@ body {
 
 .centerish {
     position: fixed;
-    left: 45%;
+    left: 40%;
     font-weight: bold;
 }
-.floatright {
-    float:right;
-    padding-right: 15px;
-}
-#app {
-  max-width: 1280px;
-  height: 100%;
-  position:absolute;
-  margin: 0 auto;
-  padding: .5rem;
+.playerCenterish {
+    margin-left: 110px;
+    font-weight: bold;
+    font-size: larger;
 }
 
-#unitinfo{
+.playerBottom {
+    position: absolute;
+    bottom: 0;
+    padding-left: 20px;
+    width: 100%;
+    height: 2.4rem;
+}
+#returnButton {
+    position: fixed;
+    left: 35%;
+    margin-top: 10px;
+}
+#settingsContainer{
+    margin: 0;
+    padding: 5px;
+    display: block;
+    height: 500px;
+    padding-left: 10%;
+    overflow-y: hidden;
+}
+#prevContainer
+{
+    padding-left: 15px;;
+}
+.floatright, #nextContainer {
+    float: right;
+    padding-right: 15px;
+}
+
+#unitinfo {
     max-width: 400px;
     padding: .5rem;
 }
+/* The switch - the box around the slider */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+  }
+  
+  /* Hide default HTML checkbox */
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  /* The slider */
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+  }
+  
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+  }
+  
+  input:checked + .slider {
+    background-color: #2196F3;
+  }
+  
+  input:focus + .slider {
+    box-shadow: 0 0 1px #2196F3;
+  }
+  
+  input:checked + .slider:before {
+    -webkit-transform: translateX(26px);
+    -ms-transform: translateX(26px);
+    transform: translateX(26px);
+  }
+  
+  /* Rounded sliders */
+  .slider.round {
+    border-radius: 24px;
+  }
+  
+  .slider.round:before {
+    border-radius: 50%;
+  }
+  
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    color: rgba(255, 255, 255, 0.87);
-    background-color: #242424;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+    :root {
+        color: rgba(255, 255, 255, 0.87);
+        background-color: #242424;
+    }
+
+    a:hover {
+        color: #747bff;
+    }
+
+    button {
+        background-color: #f9f9f9;
+    }
 }
