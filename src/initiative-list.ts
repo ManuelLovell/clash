@@ -22,6 +22,8 @@ export class InitiativeList
     gmHideAll = false;
     gmDisableLabel = false;
     gmDisableFocus = false;
+    gmReverseList = false;
+    gmTurnText = "";
 
     /**Render the main initiatve form from the GM perspective */
     public async RenderInitiativeList(document: Document): Promise<void>
@@ -66,10 +68,12 @@ export class InitiativeList
             this.gmHideAll = settingData.gmHideAll;
             this.gmDisableLabel = settingData.gmDisableLabel;
             this.gmDisableFocus = settingData.disableFocus;
+            this.gmReverseList = settingData.gmReverseList;
+            this.gmTurnText = settingData.gmTurnText;
         }
         else
         {
-            await db.Settings.add({ id: Constants.SETTINGSID, gmHideHp: false, gmHideAll: false, gmDisableLabel: false, disableFocus: false });
+            await db.Settings.add({ id: Constants.SETTINGSID, gmHideHp: false, gmHideAll: false, gmDisableLabel: false, gmTurnText: "", gmReverseList: false, disableFocus: false });
         }
 
         // Initialize base turn order if none exists
@@ -105,10 +109,9 @@ export class InitiativeList
         // Unit list
         this.activeUnits = (await tableUnits.toArray()).filter(x => x.isActive == 1);
 
-        // Sort so the highest initiative value is on top
-        const sortedUnits = this.activeUnits.sort(
-            (a, b) => b.initiative - a.initiative || a.unitName.localeCompare(b.unitName)!
-        );
+        // Sort unts based on Reverse Setting or not
+        const sortedUnits = this.gmReverseList ? this.activeUnits.sort((a, b) => a.initiative - b.initiative || a.unitName.localeCompare(b.unitName)!)
+            : this.activeUnits.sort((a, b) => b.initiative - a.initiative || a.unitName.localeCompare(b.unitName)!);
 
         //Clear the table
         while (tableElement.rows.length > 0)
@@ -161,7 +164,7 @@ export class InitiativeList
             nameToggle.style.width = "140px";
             nameToggle.style.textOverflow = "ellipsis";
             nameToggle.style.overflow = "hidden";
-            
+
             nameToggle.className = unit.isMonster ? "isMonster" : "";
             nameToggle.onclick = async function () 
             {
@@ -191,14 +194,14 @@ export class InitiativeList
             {
                 const target = e.currentTarget as HTMLInputElement;
                 const value = target.value;
-                if (value.substring(0,1) == "+")
+                if (value.substring(0, 1) == "+")
                 {
                     const addThis = value.substring(value.indexOf('+') + 1);
                     heartInputMin.value = (+addThis + +heartInputMin.title).toString();
                     heartInputMin.title = heartInputMin.value;
                     e.preventDefault();
                 }
-                else if (value.substring(0,1) == "-")
+                else if (value.substring(0, 1) == "-")
                 {
                     const minusThis = value.substring(value.indexOf('-') + 1);
                     heartInputMin.value = (+heartInputMin.title - +minusThis).toString();
@@ -208,17 +211,17 @@ export class InitiativeList
             };
             heartInputMin.onkeydown = function (e)
             {
-                if(e.key !== "Enter") return;
+                if (e.key !== "Enter") return;
                 const target = e.currentTarget as HTMLInputElement;
                 const value = target.value;
-                if (value.substring(0,1) == "+")
+                if (value.substring(0, 1) == "+")
                 {
                     const addThis = value.substring(value.indexOf('+') + 1);
                     heartInputMin.value = (+addThis + +heartInputMin.title).toString();
                     heartInputMin.title = heartInputMin.value;
                     e.preventDefault();
                 }
-                else if (value.substring(0,1) == "-")
+                else if (value.substring(0, 1) == "-")
                 {
                     const minusThis = value.substring(value.indexOf('-') + 1);
                     heartInputMin.value = (+heartInputMin.title - +minusThis).toString();
@@ -366,7 +369,7 @@ export class InitiativeList
             );
         }
 
-        let Tracker: IOBRTracker = { turn: this.turnCounter, round: this.roundCounter, units: trackedUnits, gmHideHp: this.gmHideHp, gmHideAll: this.gmHideAll };
+        let Tracker: IOBRTracker = { turn: this.turnCounter, round: this.roundCounter, units: trackedUnits, gmHideHp: this.gmHideHp, gmHideAll: this.gmHideAll, gmReverseList: this.gmReverseList };
 
         let trackerMeta: Metadata = {};
         trackerMeta[`${Constants.EXTENSIONID}/metadata_trackeritem`] = { Tracker };
@@ -375,19 +378,19 @@ export class InitiativeList
 
     public async FocusOnCurrentTurnUnit(table: HTMLTableElement): Promise<void>
     {
-        if (this.gmDisableFocus)
-        {
-            return;
-        }
         const currentTurnRow = table.rows[this.turnCounter];
         const ctu: ICurrentTurnUnit = await LabelLogic.GetCTUFromRow(currentTurnRow);
 
-        //Move the view
-        await ViewportFunctions.CenterViewportOnImage(ctu);
-        // Do not update the label if disabled in settings
+        if (!this.gmDisableFocus)
+        {
+            //Update the view if the setting is allowed
+            await ViewportFunctions.CenterViewportOnImage(ctu);
+        }
+
         if (!this.gmDisableLabel)
         {
-            await LabelLogic.UpdateLabel(ctu);
+            //Update the label if the setting is allowed
+            await LabelLogic.UpdateLabel(ctu, this.gmTurnText);
         }
     }
 
@@ -410,9 +413,8 @@ export class InitiativeList
             url: `/submenu/subindex.html?unitid=${unitId}`,
             height: 700,
             width: 350,
-            anchorElementId: `tB${unitId}`
-            //anchorPosition: { left: 625, top: 15 },
-            //anchorReference: "POSITION"
+            //anchorElementId: `tB${unitId}`,
+            //anchorReference: "ELEMENT"
         });
     }
 }

@@ -71,10 +71,9 @@ export class PlayerList
             return;
         }
 
-        // Sort so the highest initiative value is on top
-        const sortedUnits = trackerData.units.sort(
-            (a, b) => b.initiative - a.initiative || a.name.localeCompare(b.name)!
-        );
+        // Sort unts based on Reverse Setting or not
+        const sortedUnits = trackerData.gmReverseList ? trackerData.units.sort((a, b) => a.initiative - b.initiative || a.name.localeCompare(b.name)!) 
+        : trackerData.units.sort((a, b) => b.initiative - a.initiative || a.name.localeCompare(b.name)!);
 
         this.roundCounter = trackerData.round;
         this.turnCounter = trackerData.turn;

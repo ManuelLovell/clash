@@ -7,5 +7,5 @@ export class Constants
     static LABEL = '56d6b2c4-cd17-11ed-afa1-0242ac120002';
     static DICENOTATION = /(\d+)[dD](\d+)(.*)$/i;
     static DICEMODIFIER = /([+-])(\d+)/;
-    static PARENTHESESMATCH = /\(([^)]+)\)/g;
+    static PARENTHESESMATCH = /\((\d[^)]*)\)/g;
 }

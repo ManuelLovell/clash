@@ -5,16 +5,17 @@ import { ICurrentTurnUnit } from "./interfaces/current-turn-unit";
 export class LabelLogic
 {
     /**Creates/Updates the Label that says GO on the current turn unit; Utilizes OBR.ADDITEMS or OBR.UPDATEITEMS */
-    static async UpdateLabel(ctu: ICurrentTurnUnit): Promise<void>
+    static async UpdateLabel(ctu: ICurrentTurnUnit, settingsText: string): Promise<void>
     {
         const labelItemExists = await OBR.scene.items.getItems([Constants.LABEL]);
-
+        
+        const labelText = settingsText ? settingsText : "« Go! »";
         let foundRow = false;
 
         // Keep calls separate to minimize the amount of calls - Only one ADD or one UPDATE.
         if (labelItemExists.length == 0 || labelItemExists[0].id != Constants.LABEL) // There is no current label item.
         {
-            const label = buildLabel().fillColor("#ffffff").plainText("« Go! »").build();
+            const label = buildLabel().fillColor("#ffffff").plainText(labelText).build();
             label.visible = false;
             label.type = "LABEL";
             label.id = Constants.LABEL;
@@ -26,11 +27,10 @@ export class LabelLogic
                 {
                     if (row.className == "turnOutline")
                     {
-                        console.log("Updating label");
 
                         label.position = { x: ctu.xpos, y: ctu.ypos + 50 };
                         label.visible = ctu.visible ? true : false;
-                        label.text.plainText = label.visible ? "« Go! »" : "« Go! »\r\n(Hidden)";
+                        label.text.plainText = label.visible ? labelText : labelText + "\r\n(Hidden)";
                         label.attachedTo = ctu.id;
                         label.locked = true;
                         foundRow = true;
@@ -42,7 +42,6 @@ export class LabelLogic
                 }
             }
             await OBR.scene.items.addItems([label]);
-            console.log("Created label");
         }
         else
         {
@@ -59,11 +58,10 @@ export class LabelLogic
                             {
                                 if (row.className == "turnOutline")
                                 {
-                                    console.log("Updating label");
 
                                     label.position = { x: ctu.xpos, y: ctu.ypos + 50 };
                                     label.visible = ctu.visible ? true : false;
-                                    label.text.plainText = label.visible ? "« Go! »" : "« Go! »\r\n(Hidden)";
+                                    label.text.plainText = label.visible ? labelText : labelText + "\r\n(Hidden)";
                                     label.attachedTo = ctu.id;
                                     label.locked = true;
                                     foundRow = true;

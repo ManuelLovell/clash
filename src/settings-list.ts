@@ -11,6 +11,8 @@ export class SettingsData implements ISettingsData
     gmHideHp: boolean;
     gmHideAll: boolean;
     gmDisableLabel: boolean;
+    gmReverseList: boolean;
+    gmTurnText: string;
     disableFocus: boolean;
 
     constructor()
@@ -19,45 +21,66 @@ export class SettingsData implements ISettingsData
         this.gmHideHp = false;
         this.gmHideAll = false;
         this.gmDisableLabel = false;
+        this.gmReverseList = false;
         this.disableFocus = false;
+        this.gmTurnText = "";
     }
 }
 
 export async function RenderSettings(document: Document, list: InitiativeList): Promise<void>
 {
     var self = list;
+    const smallBreak = '<hr style="height:10px; margin-top: 4px; margin-bottom: 4px; visibility:hidden;" />';
 
     document.querySelector<HTMLDivElement>('#clash-main-body-settings')!.innerHTML = `
         <div id="settingsContainer">
-        <h1>Settings</h1>
+        <h2 style="margin-top: 10px;">Settings</h2>
         <div><span id="exportAllContainer"></span>Export Collection Data </div>
+        <i><small>This will save Collection data to a Text/JSON file</small></i>
         </br>
+        ${smallBreak}
         <div><span id="importSubmitContainer"></span>Import Collection Data </div>
         <div><span id="importAllContainer"></span></div>
         <i><small>This will overwrite keys with the same Name/Author</small></i>
         </br>
-        </br>
+        ${smallBreak}
         <div><span id="clearAllContainer"></span>Clear All Data </div>
         <i><small>This will delete the database.</small></i>
         </br>
-        </br>
+        ${smallBreak}
         <div>${CreateSlider("hideHp")}</span>&emsp;Hide HP Indication from Players </div>
-        </br>
+        ${smallBreak}
         <div>${CreateSlider("hideAll")}</span>&emsp;Hide All from Players </div>
-        </br>
+        ${smallBreak}
+        <div>${CreateSlider("reverseList")}</span>&emsp;Reverse Initiative </div>
+        ${smallBreak}
         <div>${CreateSlider("noFocus")}</span>&emsp;Disable Camera Focus </div>
-        </br>
-        <div>${CreateSlider("noLabel")}</span>&emsp;Disable Go-Label </div>
+        ${smallBreak}
+        <div>${CreateSlider("noLabel")}</span>&emsp;Disable Turn Label </div>
+        <div id="turnLabelTextContainer">&emsp;&emsp;&emsp;&emsp;</div>
         <footer><span class="returnFloatLeft" id="settingsReturnContainer"></span></footer>
         </div>
        `;
 
     SetCheckbox(document, "hideHp", list.gmHideHp, list);
     SetCheckbox(document, "hideAll", list.gmHideAll, list);
+    SetCheckbox(document, "reverseList", list.gmReverseList, list);
     SetCheckbox(document, "noFocus", list.gmDisableFocus, list);
     SetCheckbox(document, "noLabel", list.gmDisableLabel, list);
 
-    const settingsReturnContainer = document.getElementById("settingsReturnContainer");
+
+    //Create TextLabel Input
+    const turnLabelTextContainer = document.getElementById("turnLabelTextContainer");
+    const textLabelButton = document.createElement('input');
+    textLabelButton.type = "text";
+    textLabelButton.id = "textLabelButton";
+    textLabelButton.title = "Change your Turn Label's text"
+    textLabelButton.placeholder = "« Go! »";
+    textLabelButton.maxLength = 40;
+    textLabelButton.value = list.gmTurnText ? list.gmTurnText : "";
+    textLabelButton.size = 30;
+    textLabelButton.className = "";
+    turnLabelTextContainer?.appendChild(textLabelButton);
 
     //Create Import ALL Button
     const importAllContainer = document.getElementById("importAllContainer");
@@ -66,11 +89,6 @@ export async function RenderSettings(document: Document, list: InitiativeList): 
     importButton.id = "importButton";
     importButton.title = "Choose a file to import"
     importButton.className = "tinyType";
-    importButton.onclick = async function () 
-    {
-        console.log("test")
-        //await UploadCollection();
-    }
 
     const importSubmitContainer = document.getElementById("importSubmitContainer");
     const importSubmitButton = document.createElement('input');
@@ -93,7 +111,7 @@ export async function RenderSettings(document: Document, list: InitiativeList): 
                 console.log(reader.result);
                 try
                 {
-                    const units:UnitInfo[] = JSON.parse(reader.result as string);
+                    const units: UnitInfo[] = JSON.parse(reader.result as string);
                     UploadCollection(units);
                 }
                 catch (error) 
@@ -160,21 +178,27 @@ export async function RenderSettings(document: Document, list: InitiativeList): 
     }
     clearAllContainer?.appendChild(resetButton);
 
+    const settingsReturnContainer = document.getElementById("settingsReturnContainer");
     //Create Return Button
     const goBackButton = document.createElement('input');
     goBackButton.type = "button";
     goBackButton.id = "returnButton";
     goBackButton.className = "turnColor chalkBorder turnIndicator";
-    goBackButton.title = "Go back to Initiative List"
+    goBackButton.title = "Save and return to Initiative List"
     goBackButton.value = "Return"
     goBackButton.onclick = async function () 
     {
+        //Update list text
+        list.gmTurnText = textLabelButton.value;
+
         await db.Settings.update(
             Constants.SETTINGSID,
             {
                 gmHideHp: list.gmHideHp,
                 gmHideAll: list.gmHideAll,
                 gmDisableLabel: list.gmDisableLabel,
+                gmReverseList: list.gmReverseList,
+                gmTurnText: list.gmTurnText,
                 disableFocus: list.gmDisableFocus,
             });
         if (list.gmDisableLabel)
@@ -217,6 +241,9 @@ export async function RenderSettings(document: Document, list: InitiativeList): 
                     break;
                 case "noLabel":
                     list.gmDisableLabel = target.checked;
+                    break;
+                case "reverseList":
+                    list.gmReverseList = target.checked;
                     break;
                 default:
                     break;

@@ -4,6 +4,7 @@ export interface IOBRTracker
     round: number;
     gmHideHp: boolean;
     gmHideAll: boolean;
+    gmReverseList: boolean;
     units: UnitTrack[];
 }
 

@@ -65,22 +65,22 @@ export class SubMenu
             //Unit Attribute Scores
             let unitScoresHtml = '<table>';
             unitScoresHtml += '<tr class="red"><th>STR    </th><th>DEX   </th><th>CON    </th><th>INT   </th><th>WIS   </th><th>CHA   </th></tr>';
-            unitScoresHtml += `<tr><td><span id="formStrScore" contentEditable="true">${this.currentUnit.strScore}</span></td>
-                            <td><span id="formDexScore" contentEditable="true">${this.currentUnit.dexScore}</span></td>
-                            <td><span id="formConScore" contentEditable="true">${this.currentUnit.conScore}</span></td>
-                            <td><span id="formIntScore" contentEditable="true">${this.currentUnit.intScore}</span></td>
-                            <td><span id="formWisScore" contentEditable="true">${this.currentUnit.wisScore}</span></td>
-                            <td><span id="formChaScore" contentEditable="true">${this.currentUnit.chaScore}</span></td></tr>`;
+            unitScoresHtml += `<tr><td><div class="rollableScore"><span id="formStrScore" contentEditable="true">${this.currentUnit.strScore}</span></div></td>
+                            <td><div class="rollableScore"><span id="formDexScore" contentEditable="true">${this.currentUnit.dexScore}</span></div></td>
+                            <td><div class="rollableScore"><span id="formConScore" contentEditable="true">${this.currentUnit.conScore}</span></div></td>
+                            <td><div class="rollableScore"><span id="formIntScore" contentEditable="true">${this.currentUnit.intScore}</span></div></td>
+                            <td><div class="rollableScore"><span id="formWisScore" contentEditable="true">${this.currentUnit.wisScore}</span></div></td>
+                            <td><div class="rollableScore"><span id="formChaScore" contentEditable="true">${this.currentUnit.chaScore}</span></div></td></tr>`;
             unitScoresHtml += '</table>';
 
             //Unit Save Scores
             let unitSavesHtml = '<div class="center red bold">Saving Throws</div><table>';
-            unitSavesHtml += `<tr><td><span id="formStrSave" contentEditable="true">${this.currentUnit.strSave}</span></td>
-                            <td><span id="formDexSave" contentEditable="true">${this.currentUnit.dexSave}</span></td>
-                            <td><span id="formConSave" contentEditable="true">${this.currentUnit.conSave}</span></td>
-                            <td><span id="formIntSave" contentEditable="true">${this.currentUnit.intSave}</span></td>
-                            <td><span id="formWisSave" contentEditable="true">${this.currentUnit.wisSave}</span></td>
-                            <td><span id="formChaSave" contentEditable="true">${this.currentUnit.chaSave}</span></td></tr>`;
+            unitSavesHtml += `<tr><td><div class="rollableSave"><span id="formStrSave" contentEditable="true">${this.currentUnit.strSave}</span></div></td>
+                            <td><div class="rollableSave"><span id="formDexSave" contentEditable="true">${this.currentUnit.dexSave}</span></div></td>
+                            <td><div class="rollableSave"><span id="formConSave" contentEditable="true">${this.currentUnit.conSave}</span></div></td>
+                            <td><div class="rollableSave"><span id="formIntSave" contentEditable="true">${this.currentUnit.intSave}</span></div></td>
+                            <td><div class="rollableSave"><span id="formWisSave" contentEditable="true">${this.currentUnit.wisSave}</span></div></td>
+                            <td><div class="rollableSave"><span id="formChaSave" contentEditable="true">${this.currentUnit.chaSave}</span></div></td></tr>`;
             unitSavesHtml += '</table>';
 
             //Unit Senses, Languages, ChallengeRating/XP
@@ -204,10 +204,10 @@ export class SubMenu
             <footer id="footerButtonContainer">
             </footer>
            `;
-           
-           // Stop linebreaks in contenteditables
-           const editables = document.querySelectorAll('[contenteditable=true]');
-           editables.forEach(edits =>
+
+            // Stop linebreaks in contenteditables
+            const editables = document.querySelectorAll('[contenteditable=true]');
+            editables.forEach(edits =>
             {
                 edits.addEventListener('keypress', function (event): void
                 {
@@ -237,6 +237,40 @@ export class SubMenu
                         const value = e.currentTarget as Element;
                         value.parentElement?.blur();
                         return await OBR.notification.show(`Rolled ${value.textContent} for ... ${DiceRoller.RollString(value.textContent!)}!`);
+                    }
+                    return null;
+                });
+            });
+
+            const clickablleScores = document.querySelectorAll('.rollableScore');
+            clickablleScores.forEach(score =>
+            {
+                score.addEventListener('click', async (e: Event) =>
+                {
+                    if (e && e.currentTarget && score.firstChild)
+                    {
+                        const number = Math.floor((Number(score.firstChild?.textContent) - 10) /2);
+                        let toRoll = number == 0 ? `(1d20)` : `(1d20 + ${number})`;
+
+                        e.preventDefault();
+                        return await OBR.notification.show(`Rolled ${toRoll} for ... ${DiceRoller.RollString(toRoll)}!`);
+                    }
+                    return null;
+                });
+            });
+
+            const clickableSaves = document.querySelectorAll('.rollableSave');
+            clickableSaves.forEach(save =>
+            {
+                save.addEventListener('click', async (e: Event) =>
+                {
+                    if (e && e.currentTarget && save.firstChild)
+                    {
+                        const number = Number(save.firstChild?.textContent);
+                        let toRoll = number == 0 ? `(1d20)` : `(1d20 + ${number})`;
+
+                        e.preventDefault();
+                        return await OBR.notification.show(`Rolled ${toRoll} for ... ${DiceRoller.RollString(toRoll)}!`);
                     }
                     return null;
                 });
@@ -544,6 +578,8 @@ export class SubMenu
             speedClimb: number;</br> 
             speedBurrow: number;</br> 
             speedSwim: number;</br> 
+
+            dataSlug: string;</br>
         }`;
 
         return exampleInterface;

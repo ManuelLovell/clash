@@ -1,4 +1,4 @@
-import OBR from "@owlbear-rodeo/sdk";
+import OBR, { Image } from "@owlbear-rodeo/sdk";
 import { Constants } from "./constants";
 import UnitInfo from './unit-info';
 import { db } from './local-database';
@@ -6,9 +6,11 @@ import { db } from './local-database';
 
 export function setupContextMenu()
 {
+    // Disable info card for people who have localstorage turned off
+    // It doesn't work for how the inmemory window is setup
+    // Plus have the functionality is to save things
     if (!db.inMemory)
     {
-
         OBR.contextMenu.create({
             id: `${Constants.EXTENSIONID}/context-menu-sheet`,
             icons: [
@@ -69,21 +71,27 @@ export function setupContextMenu()
             const addToInitiative = context.items.every(
                 (item) => item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`] === undefined
             );
+            
+            //Convert items over to images to access Text fields
+            const contextImages = context.items as Image[];
 
             let ids: { id: string; name: string; }[] = [];
             if (addToInitiative)
             {
-                OBR.scene.items.updateItems(context.items, (items) =>
+                //Add units to OBR metadata for contextmenu update
+                OBR.scene.items.updateItems(contextImages, (items) =>
                 {
                     for (let item of items)
                     {
-                        ids.push({ id: item.id, name: item.name });
+                        //Add to ID list for DB update
+                        ids.push({ id: item.id, name: item.text.plainText || item.name });
                         item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`] = { initiative };
                     }
                 });
 
                 ids.forEach(async item => 
                 {
+                    //Check if unit is in our ActiveList (via menu Info Card), if not - activate and add
                     const checkUnit = await db.ActiveEncounter.get(item.id);
                     if (!checkUnit)
                     {
@@ -93,6 +101,7 @@ export function setupContextMenu()
                     }
                     else
                     {
+                        //If not-active, but is in Active Encountres (menu info card) activate this unit
                         await db.ActiveEncounter.update(item.id, { isActive: 1 });
                     }
                 });
