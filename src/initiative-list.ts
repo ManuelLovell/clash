@@ -88,7 +88,7 @@ export class InitiativeList
         }
 
         // Subscribe to on-change to detect if a token was deleted
-        OBR.scene.items.onChange((items)=>
+        OBR.scene.items.onChange(async (items)=>
         {
             let missingIds = this.activeUnits.filter(({ id: listId }) => !items.some(({ id: itemId }) => itemId === listId));
             missingIds.forEach(async unit => 
