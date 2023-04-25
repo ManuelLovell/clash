@@ -13,6 +13,7 @@ export class SubMenu
     dbImport: IUnitInfo | undefined;
     currentUnit: UnitInfo;
     freshImport: boolean;
+    favorite: boolean;
 
     open5eApiString: string = "https://api.open5e.com/monsters/?format=json&search=";
     POPOVERSUBMENUID: string = "";
@@ -20,6 +21,7 @@ export class SubMenu
     constructor()
     {
         this.freshImport = false;
+        this.favorite = false;
 
         const queryString = window.location.search;
         const urlParams = new URLSearchParams(queryString);
@@ -219,6 +221,7 @@ export class SubMenu
                 });
             });
 
+            this.AppendFavoriteButton();
             this.AppendCollectionSaveButton();
             this.AppendUnitExportButton();
             this.AppendUnitSaveButton();
@@ -249,7 +252,7 @@ export class SubMenu
                 {
                     if (e && e.currentTarget && score.firstChild)
                     {
-                        const number = Math.floor((Number(score.firstChild?.textContent) - 10) /2);
+                        const number = Math.floor((Number(score.firstChild?.textContent) - 10) / 2);
                         let toRoll = number == 0 ? `(1d20)` : `(1d20 + ${number})`;
 
                         e.preventDefault();
@@ -280,11 +283,39 @@ export class SubMenu
 
     private async renderSearchForm(document: Document): Promise<void>
     {
+        const favIcon = "♥";
         var self = this;
         document.querySelector<HTMLDivElement>('#searchmenu')!.innerHTML = `
             <div id="searchResultsContainer"><ul id="monsterList"></ul></div>
             <footer></span><span class="returnFloatRight" id="searchFooterButtonContainer"></span></footer>
            `;
+
+        //Show favorites
+        const favoriteSearch = await db.Creatures.filter(unit => unit.favorite == true).toArray();
+        if (favoriteSearch.length > 0)
+        {
+            const list = document.querySelector<HTMLDivElement>('#monsterList')!;
+            let monsterInformationHtml = "";
+            favoriteSearch.forEach((monster) =>
+            {
+                const fav = monster.favorite ? favIcon : "";
+                const importCollection = document.createElement('input');
+                importCollection.type = "button";
+                importCollection.id = `${monster.id}`;
+                importCollection.className = "collectionImportButtonConfirm"
+                importCollection.value = "Import";
+                importCollection.title = `Import ${monster.unitName} onto this Unit`;
+
+                monsterInformationHtml += `<li style="--tooltip-color:${ColorName(monster.dataSlug)}" data-tag="🡆 from [Collection] User:${monster.dataSlug}"><div class="monsterNameList">${fav} ${TruncateName(monster.unitName)}</div><div class="monsterImportButtonContainer">${importCollection.outerHTML}</div></li>`;
+            });
+            list.innerHTML = monsterInformationHtml;
+            // Add collection buttons
+            const collbBttns = document.querySelectorAll('.collectionImportButtonConfirm');
+            collbBttns.forEach(btn =>
+            {
+                btn.addEventListener('click', async (e: Event) => await self.ImportCollectionMonsterInfo((e.currentTarget as Element).id));
+            });
+        }
 
         const searchBarContainer = document.getElementById("searchFooterButtonContainer");
 
@@ -350,6 +381,7 @@ export class SubMenu
             {
                 dexieSearch.forEach((monster) =>
                 {
+                    const fav = monster.favorite ? favIcon : "";
                     const importCollection = document.createElement('input');
                     importCollection.type = "button";
                     importCollection.id = `${monster.id}`;
@@ -357,7 +389,7 @@ export class SubMenu
                     importCollection.value = "Import";
                     importCollection.title = `Import ${monster.unitName} onto this Unit`;
 
-                    monsterInformationHtml += `<li style="--tooltip-color:${ColorName(monster.dataSlug)}" data-tag="🡆 from [Collection] User:${monster.dataSlug}"><div class="monsterNameList">${TruncateName(monster.unitName)}</div><div class="monsterImportButtonContainer">${importCollection.outerHTML}</div></li>`;
+                    monsterInformationHtml += `<li style="--tooltip-color:${ColorName(monster.dataSlug)}" data-tag="🡆 from [Collection] User:${monster.dataSlug}"><div class="monsterNameList">${fav} ${TruncateName(monster.unitName)}</div><div class="monsterImportButtonContainer">${importCollection.outerHTML}</div></li>`;
                 });
             }
 
@@ -376,7 +408,6 @@ export class SubMenu
                 const collbBttns = document.querySelectorAll('.collectionImportButtonConfirm');
                 collbBttns.forEach(btn =>
                 {
-                    console.log(btn.id);
                     btn.addEventListener('click', async (e: Event) => await self.ImportCollectionMonsterInfo((e.currentTarget as Element).id));
                 });
             }
@@ -670,6 +701,48 @@ export class SubMenu
         buttonContainer?.appendChild(saveButton);
     }
 
+    private AppendFavoriteButton(): void
+    {
+        var self = this;
+        //Get Button Container
+        const buttonContainer = document.getElementById("buttonContainer");
+
+        //Create Favorite Button
+        const favoriteButton = document.createElement('input');
+        favoriteButton.type = "image";
+        favoriteButton.id = "favoriteButton";
+        favoriteButton.value = "false";
+        favoriteButton.className = "clickable";
+        favoriteButton.onclick = async function () 
+        {
+            const collectionButton = <HTMLInputElement>document.getElementById("collectionButton");
+            if (favoriteButton.value == "false")
+            {
+                favoriteButton.value = "true";
+                favoriteButton.src = "/favorite.svg";
+                favoriteButton.className = "clickable favorite";
+                collectionButton.className = "clickable favorite";
+                collectionButton.title = "Save to Collection & Favorite";
+                self.favorite = true;
+            }
+            else
+            {
+                favoriteButton.value = "false";
+                favoriteButton.src = "/favoriteline.svg";
+                favoriteButton.className = "clickable";
+                collectionButton.className = "clickable";
+                collectionButton.title = "Save to Collection";
+                self.favorite = false;
+            }
+        }
+        favoriteButton.src = "/favoriteline.svg";
+        favoriteButton.title = "Toggle Favorite on Export";
+        favoriteButton.height = 20;
+        favoriteButton.width = 20;
+
+        buttonContainer?.appendChild(favoriteButton);
+    }
+
     private AppendCollectionSaveButton(): void
     {
         var self = this;
@@ -692,7 +765,6 @@ export class SubMenu
             cleanCopy.id = "";
             cleanCopy.tokenId = "";
             cleanCopy.dataSlug = authorName;
-            //cleanCopy.dataSlug = myname;
 
             //Check DB for Creature by same name
             const dupe = await db.Creatures.get({ unitName: self.currentUnit.unitName, dataSlug: authorName });
@@ -702,6 +774,7 @@ export class SubMenu
                 {
                     // Has permission to save
                     cleanCopy.id = dupe.id;
+                    cleanCopy.favorite = self.favorite;
                     await db.Creatures.put(cleanCopy, dupe.id);
                 }
             }
@@ -710,6 +783,7 @@ export class SubMenu
                 // Doesn't need permission
                 const freshGuid = Utilities.GetGUID();
                 cleanCopy.id = freshGuid;
+                cleanCopy.favorite = self.favorite;
                 await db.Creatures.put(cleanCopy, freshGuid);
             }
         }

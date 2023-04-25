@@ -61,4 +61,5 @@ export interface IUnitInfo
     speedSwim: number;
 
     dataSlug: string;
+    favorite: boolean;
 }

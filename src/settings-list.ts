@@ -108,7 +108,6 @@ export async function RenderSettings(document: Document, list: InitiativeList): 
 
             reader.onload = function ()
             {
-                console.log(reader.result);
                 try
                 {
                     const units: UnitInfo[] = JSON.parse(reader.result as string);

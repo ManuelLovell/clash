@@ -28,7 +28,6 @@ export class InitiativeList
     /**Render the main initiatve form from the GM perspective */
     public async RenderInitiativeList(document: Document): Promise<void>
     {
-
         this.ShowSettingsMenu(false);
         this.ShowMainMenu(true);
 
@@ -87,6 +86,17 @@ export class InitiativeList
         {
             await db.Tracker.add({ id: Constants.TURNTRACKER, currentRound: 1, currentTurn: 1 });
         }
+
+        // Subscribe to on-change to detect if a token was deleted
+        OBR.scene.items.onChange((items)=>
+        {
+            let missingIds = this.activeUnits.filter(({ id: listId }) => !items.some(({ id: itemId }) => itemId === listId));
+            missingIds.forEach(async unit => 
+            {
+                // Update will trigger Refreshlist, do not want to call directly
+                await db.ActiveEncounter.update(unit.id, { isActive: 0 });
+            });
+        });
 
         // The purpose of these is to catch the Add/Remove from Owlbear-ContextMenu without OBRs listener
         let updateDb = liveQuery(() => db.ActiveEncounter.toArray());
@@ -170,13 +180,11 @@ export class InitiativeList
             {
                 if (nameToggle.className == "isMonster")
                 {
-                    console.log("Swapped to PLAYER");
                     nameToggle.value = unit.unitName;
                     nameToggle.className = "";
                 }
                 else
                 {
-                    console.log("Swapped to MONSTER");
                     nameToggle.value = `ʳ ${unit.unitName} ʴ`;
                     nameToggle.className = "isMonster";
                 }
@@ -413,7 +421,8 @@ export class InitiativeList
             url: `/submenu/subindex.html?unitid=${unitId}`,
             height: 700,
             width: 350,
-            //anchorElementId: `tB${unitId}`,
+            anchorElementId: `000`, // This defaults to center.
+            anchorReference: "ELEMENT"
             //anchorReference: "ELEMENT"
         });
     }

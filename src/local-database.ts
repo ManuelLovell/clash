@@ -66,6 +66,8 @@ export default class DexieDatabase extends Dexie
         dataSlug
         `;
 
+        const storedAttv3 = storedAttr + ", favorite";
+
         this.version(1).stores({
             ActiveEncounter: storedAttr,
             Creatures: storedAttr,
@@ -76,6 +78,13 @@ export default class DexieDatabase extends Dexie
         this.version(2).stores({
             ActiveEncounter: storedAttr,
             Creatures: storedAttr,
+            Tracker: `id, currentTurn, currentRound`,
+            Settings: `id, gmHideHp, gmHideAll, gmDisableLabel, gmTurnText, disableFocus, gmReverseList`,
+        });
+        
+        this.version(3).stores({
+            ActiveEncounter: storedAttv3,
+            Creatures: storedAttv3,
             Tracker: `id, currentTurn, currentRound`,
             Settings: `id, gmHideHp, gmHideAll, gmDisableLabel, gmTurnText, disableFocus, gmReverseList`,
         });

@@ -102,6 +102,10 @@ ul li:after {
 .HealthInput {
     width: 30px;
 }
+.favorite
+{
+    filter: invert(16%) sepia(20%) saturate(5804%) hue-rotate(299deg) brightness(90%) contrast(154%);
+}
 .clickableRoller{
     display: inline-block;
     cursor: pointer;

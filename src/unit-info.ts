@@ -63,6 +63,7 @@ export default class UnitInfo implements IUnitInfo
     speedSwim: number;
 
     dataSlug: string;
+    favorite: boolean;
 
     // Set the base values that the form needs to not error out and display correctly.
     constructor(tokenId: string, name?: string)
@@ -107,6 +108,7 @@ export default class UnitInfo implements IUnitInfo
         this.specialAbilities = [];
         this.spellList = [];
         this.dataSlug = "";
+        this.favorite = false;
     }
 
     /** Import Custom JSON data to a UnitInfo model */
