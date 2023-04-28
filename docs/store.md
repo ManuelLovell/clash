@@ -19,7 +19,7 @@ Track the turn-order and abilities of unit's in combat.  In addition to the base
 **Getting Familiar**
 
 
-![context menu](https://raw.githubusercontent.com/ManuelLovell/clash/main/docs/logo.png)
+![context menu](https://raw.githubusercontent.com/ManuelLovell/clash/main/docs/menuview.png)
 
 
 You can add a unit to the Initiative List by clicking on a character token and selecting the Add icon.
