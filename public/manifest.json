@@ -1,11 +1,11 @@
 {
-  "name": "Clash!DEV",
-  "version": "1.0.3",
+  "name": "Clash!",
+  "version": "1.0.4",
   "author": "Discord: Que?#5327",
   "manifest_version": 1,
   "action": {
     "title": "Clash!",
-    "icon": "/icon.svg",
+    "icon": "/icon3.svg",
     "popover": "/",
     "height": 600,
     "width": 400

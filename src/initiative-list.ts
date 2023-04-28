@@ -94,34 +94,7 @@ export class InitiativeList
         {
             if (ready)
             {
-                // Find all units in this scene with active initiative metadata
-                const units = await OBR.scene.items.getItems((item) =>
-                    item.layer === "CHARACTER"
-                    && item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`] !== undefined)
-
-                if (units.length > 0)
-                {
-                    // Grab by the id
-                    this.inSceneUnits = units.map(unit => unit.id);
-
-                    // Get all units from ActiveEncounter table
-                    const tableUnits = await db.ActiveEncounter.toCollection();
-
-                    // Turn to Array
-                    const activatedUnits = await tableUnits.toArray();
-
-                    // Filter the resulting list by Scene Data to see if they belong
-                    this.activeUnits = activatedUnits.filter(aUnits => this.inSceneUnits.includes(aUnits.id));
-
-                    // Reactivate Units as needed
-                    this.activeUnits.forEach(async unit => 
-                    {
-                        // Update will trigger Refreshlist, do not want to call directly
-                        await db.ActiveEncounter.update(unit.id, { isActive: 1 });
-                    });
-                }
-
-                this.RefreshList();
+                await this.CheckIniativeList();
             }
         });
 
@@ -140,9 +113,40 @@ export class InitiativeList
         let updateDb = liveQuery(() => db.ActiveEncounter.toArray());
         updateDb.subscribe(() => this.RefreshList(), error => console.error('Clash!SubscriptionError: ' + error));
 
-        this.RefreshList();
+        this.CheckIniativeList();
     }
 
+    private async CheckIniativeList(): Promise<void>
+    {
+        // Find all units in this scene with active initiative metadata
+        const units = await OBR.scene.items.getItems((item) =>
+            item.layer === "CHARACTER"
+            && item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`] !== undefined)
+
+        if (units.length > 0)
+        {
+            // Grab by the id
+            this.inSceneUnits = units.map(unit => unit.id);
+
+            // Get all units from ActiveEncounter table
+            const tableUnits = await db.ActiveEncounter.toCollection();
+
+            // Turn to Array
+            const activatedUnits = await tableUnits.toArray();
+
+            // Filter the resulting list by Scene Data to see if they belong
+            this.activeUnits = activatedUnits.filter(aUnits => this.inSceneUnits.includes(aUnits.id));
+
+            // Reactivate Units as needed
+            this.activeUnits.forEach(async unit => 
+            {
+                // Update will trigger Refreshlist, do not want to call directly
+                await db.ActiveEncounter.update(unit.id, { isActive: 1 });
+            });
+        }
+
+        this.RefreshList();
+    }
     public async RefreshList(): Promise<void>
     {
         // Reference to initiative list
@@ -332,7 +336,7 @@ export class InitiativeList
         await this.ShowTurnSelection();
     }
 
-    private async ShowTurnSelection(): Promise<void>
+    public async ShowTurnSelection(): Promise<void>
     {
         const table = <HTMLTableElement>document.getElementById("initiative-list");
         if (table.rows?.length > 1)
@@ -402,7 +406,7 @@ export class InitiativeList
         await this.UpdateTrackerForPlayers();
     }
 
-    private async UpdateTrackerForPlayers()
+    public async UpdateTrackerForPlayers()
     {
         let trackedUnits: IUnitTrack[] = [];
         for (const unit of this.activeUnits)
@@ -470,7 +474,6 @@ export class InitiativeList
 
     private setupContextMenu(mainList: InitiativeList)
     {
-        console.log("hello i have a list")
         // Disable info card for people who have localstorage turned off
         // It doesn't work for how the inmemory window is setup
         // Plus have the functionality is to save things

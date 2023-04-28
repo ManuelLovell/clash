@@ -143,6 +143,29 @@ export function AppendClearListButton(document: Document, list: InitiativeList):
     //Get Reset Container
     const resetContainer = document.getElementById("resetContainer")!;
 
+    //Create Turn Reset Button
+    const resetTurnButton = document.createElement('input');
+    resetTurnButton.type = "button";
+    resetTurnButton.id = "resetTurnButton";
+    resetTurnButton.value = "Reset List"
+    resetTurnButton.title = "Reset List"
+    resetTurnButton.className = "tinyType";
+    resetTurnButton.onclick = async function () 
+    {
+        self.turnCounter = 1;
+        self.roundCounter = 1;
+        const counterHtml = document.getElementById("roundCount")!;
+        counterHtml.innerText = `Round: ${self.roundCounter}`;
+
+        await db.Tracker.clear();
+        await db.Tracker.add({ id: Constants.TURNTRACKER, currentRound: 1, currentTurn: 1 });
+
+        await OBR.scene.items.deleteItems([Constants.LABEL]);
+        await list.UpdateTrackerForPlayers();
+        await list.ShowTurnSelection();
+    }
+    resetContainer.appendChild(resetTurnButton);
+
     //Create Soft Reset Button
     const clearButton = document.createElement('input');
     clearButton.type = "button";
