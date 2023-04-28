@@ -147,8 +147,8 @@ export function AppendClearListButton(document: Document, list: InitiativeList):
     const resetTurnButton = document.createElement('input');
     resetTurnButton.type = "button";
     resetTurnButton.id = "resetTurnButton";
-    resetTurnButton.value = "Reset List"
-    resetTurnButton.title = "Reset List"
+    resetTurnButton.value = "Reset Round"
+    resetTurnButton.title = "Reset Round"
     resetTurnButton.className = "tinyType";
     resetTurnButton.onclick = async function () 
     {
