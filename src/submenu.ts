@@ -7,6 +7,7 @@ import { db } from './local-database';
 import * as Utilities from './utilities';
 import '/src/css/mini-style.css'
 import { IUnitInfo } from './interfaces/unit-info';
+import { Metadata } from '@owlbear-rodeo/sdk';
 
 export class SubMenu
 {
@@ -67,22 +68,22 @@ export class SubMenu
             //Unit Attribute Scores
             let unitScoresHtml = '<table>';
             unitScoresHtml += '<tr class="red"><th>STR    </th><th>DEX   </th><th>CON    </th><th>INT   </th><th>WIS   </th><th>CHA   </th></tr>';
-            unitScoresHtml += `<tr><td><div class="rollableScore"><span id="formStrScore" contentEditable="true">${this.currentUnit.strScore}</span></div></td>
-                            <td><div class="rollableScore"><span id="formDexScore" contentEditable="true">${this.currentUnit.dexScore}</span></div></td>
-                            <td><div class="rollableScore"><span id="formConScore" contentEditable="true">${this.currentUnit.conScore}</span></div></td>
-                            <td><div class="rollableScore"><span id="formIntScore" contentEditable="true">${this.currentUnit.intScore}</span></div></td>
-                            <td><div class="rollableScore"><span id="formWisScore" contentEditable="true">${this.currentUnit.wisScore}</span></div></td>
-                            <td><div class="rollableScore"><span id="formChaScore" contentEditable="true">${this.currentUnit.chaScore}</span></div></td></tr>`;
+            unitScoresHtml += `<tr><td><div class="rollableScore" data-name="Strength"><span id="formStrScore" contentEditable="true">${this.currentUnit.strScore}</span></div></td>
+                            <td><div class="rollableScore" data-name="Dexterity"><span id="formDexScore" contentEditable="true">${this.currentUnit.dexScore}</span></div></td>
+                            <td><div class="rollableScore" data-name="Constitution"><span id="formConScore" contentEditable="true">${this.currentUnit.conScore}</span></div></td>
+                            <td><div class="rollableScore" data-name="Intelligence"><span id="formIntScore" contentEditable="true">${this.currentUnit.intScore}</span></div></td>
+                            <td><div class="rollableScore" data-name="Wisdom"><span id="formWisScore" contentEditable="true">${this.currentUnit.wisScore}</span></div></td>
+                            <td><div class="rollableScore" data-name="Charisma"><span id="formChaScore" contentEditable="true">${this.currentUnit.chaScore}</span></div></td></tr>`;
             unitScoresHtml += '</table>';
 
             //Unit Save Scores
             let unitSavesHtml = '<div class="center red bold">Saving Throws</div><table>';
-            unitSavesHtml += `<tr><td><div class="rollableSave"><span id="formStrSave" contentEditable="true">${this.currentUnit.strSave}</span></div></td>
-                            <td><div class="rollableSave"><span id="formDexSave" contentEditable="true">${this.currentUnit.dexSave}</span></div></td>
-                            <td><div class="rollableSave"><span id="formConSave" contentEditable="true">${this.currentUnit.conSave}</span></div></td>
-                            <td><div class="rollableSave"><span id="formIntSave" contentEditable="true">${this.currentUnit.intSave}</span></div></td>
-                            <td><div class="rollableSave"><span id="formWisSave" contentEditable="true">${this.currentUnit.wisSave}</span></div></td>
-                            <td><div class="rollableSave"><span id="formChaSave" contentEditable="true">${this.currentUnit.chaSave}</span></div></td></tr>`;
+            unitSavesHtml += `<tr><td><div class="rollableSave" data-name="Strength Save"><span id="formStrSave" contentEditable="true">${this.currentUnit.strSave}</span></div></td>
+                            <td><div class="rollableSave" data-name="Dexterity Save"><span id="formDexSave" contentEditable="true">${this.currentUnit.dexSave}</span></div></td>
+                            <td><div class="rollableSave" data-name="Constitution Save"><span id="formConSave" contentEditable="true">${this.currentUnit.conSave}</span></div></td>
+                            <td><div class="rollableSave" data-name="Intelligence Save"><span id="formIntSave" contentEditable="true">${this.currentUnit.intSave}</span></div></td>
+                            <td><div class="rollableSave" data-name="Wisdom Save"><span id="formWisSave" contentEditable="true">${this.currentUnit.wisSave}</span></div></td>
+                            <td><div class="rollableSave" data-name="Charisma Save"><span id="formChaSave" contentEditable="true">${this.currentUnit.chaSave}</span></div></td></tr>`;
             unitSavesHtml += '</table>';
 
             //Unit Senses, Languages, ChallengeRating/XP
@@ -107,7 +108,7 @@ export class SubMenu
                 {
                     unitAbilitiesHtml += `<div id="formAbilityContainer" class="Ability">`;
                     unitAbilitiesHtml += `<span id="formAbilityName" class="abilityname" contentEditable="true">${action.name}</span>.  `;
-                    unitAbilitiesHtml += `<span id="formAbilityDesc" class="description" contentEditable="true">${action.desc}</span>`;
+                    unitAbilitiesHtml += `<span id="formAbilityDesc" class="description" contentEditable="true">${this.SetClassOnRollable(action.desc!)}</span>`;
                     unitAbilitiesHtml += `</div>`;
                 }
             }
@@ -136,7 +137,7 @@ export class SubMenu
                 {
                     unitReactionsHtml += `<div id="formReactionContainer" class="Reaction">`;
                     unitReactionsHtml += `<span id="formReactionName" class="reactionname">${action.name}</span>.  `;
-                    unitReactionsHtml += `<span id="formReactionDesc" class="description">${action.desc}</span>`;
+                    unitReactionsHtml += `<span id="formReactionDesc" class="description">${this.SetClassOnRollable(action.desc!)}</span>`;
                     unitReactionsHtml += `</div>`;
                 }
                 unitReactionsHtml += "</div>";
@@ -151,7 +152,7 @@ export class SubMenu
                 {
                     unitLegendaryHtml += `<div id="formLegendaryContainer" class="Legendary">`;
                     unitLegendaryHtml += `<span id="formLegendaryName" class="legendaryname">${action.name}</span>.  `;
-                    unitLegendaryHtml += `<span id="formLegendaryDesc" class="description">${action.desc}</span>`;
+                    unitLegendaryHtml += `<span id="formLegendaryDesc" class="description">${this.SetClassOnRollable(action.desc!)}</span>`;
                     unitLegendaryHtml += `</div>`;
                 }
                 unitLegendaryHtml += "</div>";
@@ -234,12 +235,18 @@ export class SubMenu
             {
                 roller.addEventListener('click', async (e: Event) =>
                 {
+                    const element = roller as HTMLElement;
+                    let attack = element?.parentElement?.previousElementSibling?.textContent;
+                    attack = attack ? attack : "<Nameless>";
                     if (e && e.currentTarget)
                     {
                         e.preventDefault();
                         const value = e.currentTarget as Element;
                         value.parentElement?.blur();
-                        return await OBR.notification.show(`Rolled ${value.textContent} for ... ${DiceRoller.RollString(value.textContent!)}!`);
+
+                        const message = `${this.currentUnit.unitName} used ${attack} and rolled ${value.textContent} for ... ${DiceRoller.RollString(value.textContent!)}!`;
+                        this.SendtoChatLog(message)
+                        return await OBR.notification.show(message);
                     }
                     return null;
                 });
@@ -250,13 +257,18 @@ export class SubMenu
             {
                 score.addEventListener('click', async (e: Event) =>
                 {
+                    const element = score as HTMLElement;
+                    const attribute = element.dataset.name;
                     if (e && e.currentTarget && score.firstChild)
                     {
                         const number = Math.floor((Number(score.firstChild?.textContent) - 10) / 2);
                         let toRoll = number == 0 ? `(1d20)` : `(1d20 + ${number})`;
 
                         e.preventDefault();
-                        return await OBR.notification.show(`Rolled ${toRoll} for ... ${DiceRoller.RollString(toRoll)}!`);
+
+                        const message = `${this.currentUnit.unitName} rolled ${attribute} ${toRoll} for ... ${DiceRoller.RollString(toRoll)}!`;
+                        this.SendtoChatLog(message)
+                        return await OBR.notification.show(message);
                     }
                     return null;
                 });
@@ -267,13 +279,18 @@ export class SubMenu
             {
                 save.addEventListener('click', async (e: Event) =>
                 {
+                    const element = save as HTMLElement;
+                    const attribute = element.dataset.name;
                     if (e && e.currentTarget && save.firstChild)
                     {
                         const number = Number(save.firstChild?.textContent);
                         let toRoll = number == 0 ? `(1d20)` : `(1d20 + ${number})`;
 
                         e.preventDefault();
-                        return await OBR.notification.show(`Rolled ${toRoll} for ... ${DiceRoller.RollString(toRoll)}!`);
+
+                        const message = `${this.currentUnit.unitName} rolled ${attribute} ${toRoll} for ... ${DiceRoller.RollString(toRoll)}!`;
+                        this.SendtoChatLog(message)
+                        return await OBR.notification.show(message);
                     }
                     return null;
                 });
@@ -536,6 +553,8 @@ export class SubMenu
             try 
             {
                 subMenu.freshImport = true;
+                //TODO: Add UnitCheck to see if UnitID still exists in OBR
+                //Delete hook will remove it from DB
 
                 subMenu.currentUnit.ImportFromJSON(customData);
                 subMenu.renderUnitInfo(document);
@@ -957,6 +976,13 @@ export class SubMenu
     private SetClassOnRollable(desc: string): string
     {
         return desc.replaceAll(Constants.PARENTHESESMATCH, "<span class='clickableRoller' contenteditable='false'>($1)</span>");
+    }
+
+    private async SendtoChatLog(chatlog: string): Promise<void>
+    {
+        const metadata: Metadata = {};
+        metadata[`${Constants.EXTENSIONID}/metadata_chatlog`] = {chatlog};
+        return await OBR.scene.setMetadata(metadata);
     }
 }
 

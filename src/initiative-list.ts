@@ -1,16 +1,17 @@
-import OBR, { Metadata } from "@owlbear-rodeo/sdk";
+import OBR, { Metadata, Image } from "@owlbear-rodeo/sdk";
 import { Constants } from "./constants";
 import { ViewportFunctions } from './viewport';
-import { IOBRTracker, IUnitTrack } from './interfaces/turn-tracker-item';
 import { ICurrentTurnUnit } from './interfaces/current-turn-unit';
 import { LabelLogic } from "./label-logic";
 import { db } from './local-database';
 import { IUnitInfo } from "./interfaces/unit-info";
 import { liveQuery } from "dexie";
 import * as Buttons from "./initiative-list-buttons";
+import UnitInfo from "./unit-info";
 
 export class InitiativeList
 {
+    inSceneUnits: string[] = [];
     // Counter per round
     roundCounter: number = 1;
     // Counter per turn
@@ -28,6 +29,7 @@ export class InitiativeList
     /**Render the main initiatve form from the GM perspective */
     public async RenderInitiativeList(document: Document): Promise<void>
     {
+        this.setupContextMenu(this);
         this.ShowSettingsMenu(false);
         this.ShowMainMenu(true);
 
@@ -87,8 +89,44 @@ export class InitiativeList
             await db.Tracker.add({ id: Constants.TURNTRACKER, currentRound: 1, currentTurn: 1 });
         }
 
+        // Subscribe to scene-onready event to check for scene change
+        OBR.scene.onReadyChange(async (ready) =>
+        {
+            if (ready)
+            {
+                // Find all units in this scene with active initiative metadata
+                const units = await OBR.scene.items.getItems((item) =>
+                    item.layer === "CHARACTER"
+                    && item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`] !== undefined)
+
+                if (units.length > 0)
+                {
+                    // Grab by the id
+                    this.inSceneUnits = units.map(unit => unit.id);
+
+                    // Get all units from ActiveEncounter table
+                    const tableUnits = await db.ActiveEncounter.toCollection();
+
+                    // Turn to Array
+                    const activatedUnits = await tableUnits.toArray();
+
+                    // Filter the resulting list by Scene Data to see if they belong
+                    this.activeUnits = activatedUnits.filter(aUnits => this.inSceneUnits.includes(aUnits.id));
+
+                    // Reactivate Units as needed
+                    this.activeUnits.forEach(async unit => 
+                    {
+                        // Update will trigger Refreshlist, do not want to call directly
+                        await db.ActiveEncounter.update(unit.id, { isActive: 1 });
+                    });
+                }
+
+                this.RefreshList();
+            }
+        });
+
         // Subscribe to on-change to detect if a token was deleted
-        OBR.scene.items.onChange(async (items)=>
+        OBR.scene.items.onChange(async (items) =>
         {
             let missingIds = this.activeUnits.filter(({ id: listId }) => !items.some(({ id: itemId }) => itemId === listId));
             missingIds.forEach(async unit => 
@@ -117,7 +155,10 @@ export class InitiativeList
         const tableUnits = await db.ActiveEncounter.toCollection();
 
         // Unit list
-        this.activeUnits = (await tableUnits.toArray()).filter(x => x.isActive == 1);
+        const activatedUnits = (await tableUnits.toArray()).filter(x => x.isActive == 1);
+
+        // Filter the resulting list by Scene Data to see if they belong
+        this.activeUnits = activatedUnits.filter(aUnits => this.inSceneUnits.includes(aUnits.id));
 
         // Sort unts based on Reverse Setting or not
         const sortedUnits = this.gmReverseList ? this.activeUnits.sort((a, b) => a.initiative - b.initiative || a.unitName.localeCompare(b.unitName)!)
@@ -424,6 +465,132 @@ export class InitiativeList
             anchorElementId: `000`, // This defaults to center.
             anchorReference: "ELEMENT"
             //anchorReference: "ELEMENT"
+        });
+    }
+
+    private setupContextMenu(mainList: InitiativeList)
+    {
+        console.log("hello i have a list")
+        // Disable info card for people who have localstorage turned off
+        // It doesn't work for how the inmemory window is setup
+        // Plus have the functionality is to save things
+        if (!db.inMemory)
+        {
+            OBR.contextMenu.create({
+                id: `${Constants.EXTENSIONID}/context-menu-sheet`,
+                icons: [
+                    {
+                        icon: "/sheet.svg",
+                        label: "[Clash!] View Info",
+                        filter: {
+                            max: 1,
+                            every: [{ key: "layer", value: "CHARACTER" }],
+                        },
+                    },
+                ],
+                async onClick(context, elementId: string)
+                {
+                    const unit = context.items[0];
+                    const dbUnitInfo = await db.ActiveEncounter.get(unit.id);
+
+                    if (!dbUnitInfo)
+                    {
+                        let unitInfo = new UnitInfo(unit.id, unit.name);
+                        await unitInfo.SaveToDB();
+                    }
+
+                    await OBR.popover.open({
+                        id: Constants.EXTENSIONSUBMENUID,
+                        url: `/submenu/subindex.html?unitid=${unit.id}`,
+                        height: 700,
+                        width: 325,
+                        anchorElementId: elementId
+                    });
+                }
+            });
+        }
+        OBR.contextMenu.create({
+            id: `${Constants.EXTENSIONID}/context-menu`,
+            icons: [
+                {
+                    icon: "/addunit.svg",
+                    label: "[Clash!] Add to Initiative",
+                    filter: {
+                        every: [
+                            { key: "layer", value: "CHARACTER" },
+                            { key: ["metadata", `${Constants.EXTENSIONID}/metadata_initiative`], value: undefined },
+                        ],
+                    },
+                },
+                {
+                    icon: "/removeunit.svg",
+                    label: "[Clash!] Remove from Initiative",
+                    filter: {
+                        every: [{ key: "layer", value: "CHARACTER" }],
+                    },
+                },
+            ],
+            async onClick(context)
+            {
+                const initiative = true;
+                const addToInitiative = context.items.every(
+                    (item) => item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`] === undefined
+                );
+
+                //Convert items over to images to access Text fields
+                const contextImages = context.items as Image[];
+
+                let ids: { id: string; name: string; }[] = [];
+                if (addToInitiative)
+                {
+                    //Add units to OBR metadata for contextmenu update
+                    OBR.scene.items.updateItems(contextImages, (items) =>
+                    {
+                        for (let item of items)
+                        {
+                            //Add to ID list for DB update
+                            ids.push({ id: item.id, name: item.text.plainText || item.name });
+                            item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`] = { initiative };
+                        }
+                    });
+
+                    ids.forEach(async item => 
+                    {
+                        //Check if unit is in our ActiveList (via menu Info Card), if not - activate and add
+                        const checkUnit = await db.ActiveEncounter.get(item.id);
+                        if (!checkUnit)
+                        {
+                            let unitInfo = new UnitInfo(item.id, item.name);
+                            unitInfo.isActive = 1;
+                            unitInfo.SaveToDB();
+                        }
+                        else
+                        {
+                            //If not-active, but is in Active Encountres (menu info card) activate this unit
+                            await db.ActiveEncounter.update(item.id, { isActive: 1 });
+                        }
+                        mainList.inSceneUnits.push(item.id); // For tracking scene state
+                    });
+                }
+                else
+                {
+                    OBR.scene.items.updateItems(context.items, (items) =>
+                    {
+                        for (let item of items)
+                        {
+                            ids.push({ id: item.id, name: item.name });
+
+                            delete item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`];
+                        }
+                    });
+
+                    ids.forEach(async item => 
+                    {
+                        await db.ActiveEncounter.update(item.id, { isActive: 0 });
+                        mainList.inSceneUnits = mainList.inSceneUnits.filter(id => id != item.id); // For tracking scene state
+                    });
+                }
+            },
         });
     }
 }

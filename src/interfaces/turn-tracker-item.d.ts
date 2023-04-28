@@ -1,4 +1,4 @@
-export interface IOBRTracker
+interface IOBRTracker
 {
     turn: number;
     round: number;
@@ -8,7 +8,7 @@ export interface IOBRTracker
     units: UnitTrack[];
 }
 
-export interface IUnitTrack
+interface IUnitTrack
 {
     id: string;
     name: string;

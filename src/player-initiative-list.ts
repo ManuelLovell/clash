@@ -1,7 +1,6 @@
 import OBR, { Metadata } from "@owlbear-rodeo/sdk";
 import { Constants } from "./constants";
 import { ViewportFunctions } from "./viewport";
-import { IOBRTracker } from "./interfaces/turn-tracker-item";
 import { ICurrentTurnUnit } from "./interfaces/current-turn-unit";
 import { LabelLogic } from "./label-logic";
 
@@ -58,7 +57,7 @@ export class PlayerList
     public async RefreshList(metadata: Metadata): Promise<void>
     {
         const meta = metadata[`${Constants.EXTENSIONID}/metadata_trackeritem`] as any;
-        const trackerData = meta.Tracker as IOBRTracker;
+        const trackerData = meta?.Tracker as IOBRTracker;
 
         if (!trackerData || !trackerData.units) return;
         

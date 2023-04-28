@@ -1,5 +1,4 @@
 import OBR from "@owlbear-rodeo/sdk";
-import { setupContextMenu } from "./context-menu";
 import { InitiativeList } from './initiative-list';
 import { PlayerList } from "./player-initiative-list";
 import { db } from "./local-database";
@@ -17,7 +16,7 @@ app!.innerHTML = `
   <div>
     <h1>Loading...</h1>
   </div>
-`
+`;
 
 // Setup OBR functions
 OBR.onReady(async () =>
@@ -26,10 +25,9 @@ OBR.onReady(async () =>
     if (user === "GM")
     {
         await main.RenderInitiativeList(document);
-        setupContextMenu();
     }
     else
     {
-        sub.Render(document);
+        await sub.Render(document);
     }
 });
