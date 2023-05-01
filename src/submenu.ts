@@ -978,10 +978,11 @@ export class SubMenu
         return desc.replaceAll(Constants.PARENTHESESMATCH, "<span class='clickableRoller' contenteditable='false'>($1)</span>");
     }
 
-    private async SendtoChatLog(chatlog: string): Promise<void>
+    private async SendtoChatLog(message: string): Promise<void>
     {
+        const now = new Date().toISOString();
         const metadata: Metadata = {};
-        metadata[`${Constants.EXTENSIONID}/metadata_chatlog`] = {chatlog};
+        metadata[`${Constants.EXTENSIONID}/metadata_chatlog`] = { chatlog: message, sender: "Clash!", created: now, color: "#ff9294" };
         return await OBR.scene.setMetadata(metadata);
     }
 }
