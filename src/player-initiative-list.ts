@@ -9,6 +9,7 @@ export class PlayerList
     roundCounter: number = 1;
     turnCounter: number = 1;
     disableFocus: boolean = false;
+    lastUpdate: string = "";
 
     /**Render the main initiatve list */
     public async Render(document: Document): Promise<void>
@@ -59,8 +60,11 @@ export class PlayerList
         const meta = metadata[`${Constants.EXTENSIONID}/metadata_trackeritem`] as any;
         const trackerData = meta?.Tracker as IOBRTracker;
 
-        if (!trackerData || !trackerData.units) return;
-        
+        if (!trackerData || !trackerData.units || trackerData.lastUpdate == this.lastUpdate) return;
+
+        // Set a stamp so we know not to update twice.
+        this.lastUpdate = trackerData.lastUpdate;
+
         // Reference to initiative list
         const tableElement = <HTMLTableElement>document.querySelector("#unit-list")!;
 

@@ -409,6 +409,7 @@ export class InitiativeList
     public async UpdateTrackerForPlayers()
     {
         let trackedUnits: IUnitTrack[] = [];
+        let now = new Date().toISOString();
         for (const unit of this.activeUnits)
         {
             trackedUnits.push(
@@ -422,7 +423,15 @@ export class InitiativeList
             );
         }
 
-        let Tracker: IOBRTracker = { turn: this.turnCounter, round: this.roundCounter, units: trackedUnits, gmHideHp: this.gmHideHp, gmHideAll: this.gmHideAll, gmReverseList: this.gmReverseList };
+        let Tracker: IOBRTracker = {
+            turn: this.turnCounter,
+            round: this.roundCounter,
+            units: trackedUnits,
+            gmHideHp: this.gmHideHp,
+            gmHideAll: this.gmHideAll,
+            gmReverseList: this.gmReverseList,
+            lastUpdate: now,
+        };
 
         let trackerMeta: Metadata = {};
         trackerMeta[`${Constants.EXTENSIONID}/metadata_trackeritem`] = { Tracker };

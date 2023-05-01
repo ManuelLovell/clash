@@ -6,6 +6,7 @@ interface IOBRTracker
     gmHideAll: boolean;
     gmReverseList: boolean;
     units: UnitTrack[];
+    lastUpdate: string;
 }
 
 interface IUnitTrack
