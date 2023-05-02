@@ -5,9 +5,8 @@ author: Manuel DeJesus
 image: https://raw.githubusercontent.com/ManuelLovell/clash/main/docs/preview.png
 icon: https://raw.githubusercontent.com/ManuelLovell/clash/main/docs/logo.png
 tags:
-  - Initiative Tracker
-  - Dungeons & Dragons 5E
-  - Stat Blocks
+  - tool
+  - combat
 manifest: https://clash-initiative-tracker.onrender.com/manifest.json
 learn-more: mdjxbl+owlbear@gmail.com
 ---
