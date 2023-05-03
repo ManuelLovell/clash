@@ -6,5 +6,6 @@ interface ISettingsData
     gmDisableLabel: boolean;
     gmReverseList: boolean;
     gmTurnText: string;
+    gmRumbleLog: boolean;
     disableFocus: boolean;
 }

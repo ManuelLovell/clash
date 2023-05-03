@@ -24,6 +24,7 @@ export class InitiativeList
     gmDisableLabel = false;
     gmDisableFocus = false;
     gmReverseList = false;
+    gmRumbleLog = false;
     gmTurnText = "";
 
     /**Render the main initiatve form from the GM perspective */
@@ -70,11 +71,12 @@ export class InitiativeList
             this.gmDisableLabel = settingData.gmDisableLabel;
             this.gmDisableFocus = settingData.disableFocus;
             this.gmReverseList = settingData.gmReverseList;
+            this.gmRumbleLog = settingData.gmRumbleLog;
             this.gmTurnText = settingData.gmTurnText;
         }
         else
         {
-            await db.Settings.add({ id: Constants.SETTINGSID, gmHideHp: false, gmHideAll: false, gmDisableLabel: false, gmTurnText: "", gmReverseList: false, disableFocus: false });
+            await db.Settings.add({ id: Constants.SETTINGSID, gmHideHp: false, gmHideAll: false, gmDisableLabel: false, gmTurnText: "", gmReverseList: false, gmRumbleLog: false, disableFocus: false });
         }
 
         // Initialize base turn order if none exists

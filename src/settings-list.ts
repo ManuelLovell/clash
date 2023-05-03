@@ -13,6 +13,7 @@ export class SettingsData implements ISettingsData
     gmDisableLabel: boolean;
     gmReverseList: boolean;
     gmTurnText: string;
+    gmRumbleLog: boolean;
     disableFocus: boolean;
 
     constructor()
@@ -22,6 +23,7 @@ export class SettingsData implements ISettingsData
         this.gmHideAll = false;
         this.gmDisableLabel = false;
         this.gmReverseList = false;
+        this.gmRumbleLog = false;
         this.disableFocus = false;
         this.gmTurnText = "";
     }
@@ -30,7 +32,7 @@ export class SettingsData implements ISettingsData
 export async function RenderSettings(document: Document, list: InitiativeList): Promise<void>
 {
     var self = list;
-    const smallBreak = '<hr style="height:10px; margin-top: 4px; margin-bottom: 4px; visibility:hidden;" />';
+    const smallBreak = '<hr style="height:5px; margin-top: 4px; margin-bottom: 4px; visibility:hidden;" />';
 
     document.querySelector<HTMLDivElement>('#clash-main-body-settings')!.innerHTML = `
         <div id="settingsContainer">
@@ -58,6 +60,8 @@ export async function RenderSettings(document: Document, list: InitiativeList): 
         ${smallBreak}
         <div>${CreateSlider("noLabel")}</span>&emsp;Disable Turn Label </div>
         <div id="turnLabelTextContainer">&emsp;&emsp;&emsp;&emsp;</div>
+        ${smallBreak}
+        <div>${CreateSlider("logToGM")}</span>&emsp;[Rumble!] Send Log to GM Only </div>
         <footer><span class="returnFloatLeft" id="settingsReturnContainer"></span></footer>
         </div>
        `;
@@ -67,6 +71,7 @@ export async function RenderSettings(document: Document, list: InitiativeList): 
     SetCheckbox(document, "reverseList", list.gmReverseList, list);
     SetCheckbox(document, "noFocus", list.gmDisableFocus, list);
     SetCheckbox(document, "noLabel", list.gmDisableLabel, list);
+    SetCheckbox(document, "logToGM", list.gmRumbleLog, list);
 
 
     //Create TextLabel Input
@@ -198,6 +203,7 @@ export async function RenderSettings(document: Document, list: InitiativeList): 
                 gmDisableLabel: list.gmDisableLabel,
                 gmReverseList: list.gmReverseList,
                 gmTurnText: list.gmTurnText,
+                gmRumbleLog: list.gmRumbleLog,
                 disableFocus: list.gmDisableFocus,
             });
         if (list.gmDisableLabel)
@@ -243,6 +249,9 @@ export async function RenderSettings(document: Document, list: InitiativeList): 
                     break;
                 case "reverseList":
                     list.gmReverseList = target.checked;
+                    break;
+                case "logToGM":
+                    list.gmRumbleLog = target.checked;
                     break;
                 default:
                     break;

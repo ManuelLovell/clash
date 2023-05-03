@@ -88,6 +88,13 @@ export default class DexieDatabase extends Dexie
             Tracker: `id, currentTurn, currentRound`,
             Settings: `id, gmHideHp, gmHideAll, gmDisableLabel, gmTurnText, disableFocus, gmReverseList`,
         });
+
+        this.version(4).stores({
+            ActiveEncounter: storedAttv3,
+            Creatures: storedAttv3,
+            Tracker: `id, currentTurn, currentRound`,
+            Settings: `id, gmHideHp, gmHideAll, gmDisableLabel, gmTurnText, disableFocus, gmReverseList, gmRumbleLog`,
+        });
     }
 
     public async SaveToCreatureStorage(unit: UnitInfo): Promise<string>

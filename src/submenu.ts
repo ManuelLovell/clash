@@ -15,6 +15,7 @@ export class SubMenu
     currentUnit: UnitInfo;
     freshImport: boolean;
     favorite: boolean;
+    userId: string | undefined;
 
     open5eApiString: string = "https://api.open5e.com/monsters/?format=json&search=";
     POPOVERSUBMENUID: string = "";
@@ -41,6 +42,8 @@ export class SubMenu
         this.ShowSubMenu(true);
         OBR.onReady(async () =>
         {
+            
+            this.userId = await OBR.player.getId();
             if (!this.freshImport)
             {
                 await this.currentUnit.ImportFromDatabase(this.POPOVERSUBMENUID);
@@ -980,9 +983,12 @@ export class SubMenu
 
     private async SendtoChatLog(message: string): Promise<void>
     {
+        const settingData = await db.Settings.get(Constants.SETTINGSID);
+        const targetId = settingData?.gmRumbleLog ? this.userId : "0000";
+
         const now = new Date().toISOString();
         const metadata: Metadata = {};
-        metadata[`${Constants.EXTENSIONID}/metadata_chatlog`] = { chatlog: message, sender: "Clash!", created: now, color: "#ff9294" };
+        metadata[`${Constants.EXTENSIONID}/metadata_chatlog`] = { chatlog: message, sender: "Clash!", targetId: targetId, created: now, color: "#ff9294" };
         return await OBR.scene.setMetadata(metadata);
     }
 }
