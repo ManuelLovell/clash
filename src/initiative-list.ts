@@ -472,14 +472,11 @@ export class InitiativeList
 
     private async OpenSubMenu(unitId: string): Promise<void>
     {
-        await OBR.popover.open({
+        await OBR.modal.open({
             id: Constants.EXTENSIONSUBMENUID,
             url: `/submenu/subindex.html?unitid=${unitId}`,
             height: 700,
             width: 350,
-            anchorElementId: `000`, // This defaults to center.
-            anchorReference: "ELEMENT"
-            //anchorReference: "ELEMENT"
         });
     }
 
