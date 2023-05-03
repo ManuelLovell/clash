@@ -10,4 +10,5 @@ export class Constants
     static DICENOTATION = /(\d+)[dD](\d+)(.*)$/i;
     static DICEMODIFIER = /([+-])(\d+)/;
     static PARENTHESESMATCH = /\((\d[^)]*)\)/g;
+    static PLUSMATCH = /\s(\+\d+)\s/g;
 }

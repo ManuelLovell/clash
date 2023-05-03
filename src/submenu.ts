@@ -233,8 +233,8 @@ export class SubMenu
             this.AppendImportUnitButton();
             this.AppendJSONButton();
 
-            const rollables = document.querySelectorAll('.clickableRoller');
-            rollables.forEach(roller =>
+            const dmgRollables = document.querySelectorAll('.clickableRollerDmg');
+            dmgRollables.forEach(roller =>
             {
                 roller.addEventListener('click', async (e: Event) =>
                 {
@@ -248,6 +248,34 @@ export class SubMenu
                         value.parentElement?.blur();
 
                         const message = `${this.currentUnit.unitName} used ${attack} and rolled ${value.textContent} for ... ${DiceRoller.RollString(value.textContent!)}!`;
+                        this.SendtoChatLog(message)
+                        return await OBR.notification.show(message);
+                    }
+                    return null;
+                });
+            });
+
+            const atkRollables = document.querySelectorAll('.clickableRollerAtk');
+            atkRollables.forEach(roller =>
+            {
+                roller.addEventListener('click', async (e: Event) =>
+                {
+                    const element = roller as HTMLElement;
+                    let attack = element?.parentElement?.previousElementSibling?.textContent;
+                    attack = attack ? attack : "<Nameless>";
+                    if (e && e.currentTarget)
+                    {
+                        e.preventDefault();
+                        const value = e.currentTarget as Element;
+                        value.parentElement?.blur();
+
+                        let hitValue = value.textContent?.replace(/[()]/g,'');
+
+                        const bonus = Number(hitValue?.substring(1));
+                        const roll = bonus == 0 ? `(1d20)` : `(1d20 + ${bonus})`;
+                        console.log(bonus);
+
+                        const message = `${this.currentUnit.unitName} used ${attack} and rolled ${value.textContent} for ... ${DiceRoller.RollString(roll!)} to hit!`;
                         this.SendtoChatLog(message)
                         return await OBR.notification.show(message);
                     }
@@ -978,7 +1006,10 @@ export class SubMenu
 
     private SetClassOnRollable(desc: string): string
     {
-        return desc.replaceAll(Constants.PARENTHESESMATCH, "<span class='clickableRoller' contenteditable='false'>($1)</span>");
+        let string = "";
+        string = desc.replaceAll(Constants.PARENTHESESMATCH, "<span class='clickableRollerDmg' contenteditable='false'>($1)</span>");
+        string = string.replaceAll(Constants.PLUSMATCH, "<span class='clickableRollerAtk' contenteditable='false'>($1)</span>");
+        return string;
     }
 
     private async SendtoChatLog(message: string): Promise<void>
