@@ -84,7 +84,7 @@ export async function RenderSettings(document: Document, list: InitiativeList): 
     textLabelButton.maxLength = 40;
     textLabelButton.value = list.gmTurnText ? list.gmTurnText : "";
     textLabelButton.size = 30;
-    textLabelButton.className = "";
+    textLabelButton.className = "textInput";
     turnLabelTextContainer?.appendChild(textLabelButton);
 
     //Create Import ALL Button

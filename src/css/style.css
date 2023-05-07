@@ -4,7 +4,7 @@
     font-weight: 400;
 
     color-scheme: light dark;
-    color: var(-light-letters);
+    color: var(--light-letters);
     background-color: var(--dark-background);
 
     font-synthesis: none;
@@ -14,6 +14,7 @@
     -webkit-text-size-adjust: 100%;
 
     --dark-background: #242424;
+    --dark-name-input: #6b6b6b;
     --light-letters: white;
     --invert: none;
     --invert-click: invert(52%) sepia(81%) saturate(5333%) hue-rotate(331deg) brightness(90%) contrast(88%);
@@ -26,6 +27,7 @@
 {
     :root{
         --dark-background: #f3f3fc;
+        --dark-name-input: #e9e9e9;
         --light-letters: black;
         --invert: invert(1);
         --invert-click: none;
@@ -137,7 +139,7 @@ footer {
 }
 
 .isMonster {
-    background-color: var(--monster-red);
+    background-color: var(--monster-red) !important;
     border-width: 0px;
     border-radius: 5px;
 }
@@ -145,14 +147,29 @@ footer {
 .chalkBorder {
     border-color: #ffffff;
     border-radius: 5px;
+    background-color: var(--dark-name-input);
+    color: var(--light-letters);
     font-size: .85em;
+}
+.textInput,
+.nameToggleInput
+{
+    background-color: var(--dark-name-input);
+    color: var(--light-letters);
+    border-style: solid;
+    border-width: 1px;
+    border-radius: 1px;
 }
 
 .ArmorInput,
 .InitiativeInput,
 .HealthInput {
-
-    font-size: .70em;
+    font-size: .90em;
+    background-color: var(--dark-background);
+    color: var(--light-letters);
+    border-style: solid;
+    border-width: 1px;
+    border-radius: 1px;
 }
 .clickable:not(.RollerButton) {
     filter: var(--invert);
@@ -168,6 +185,7 @@ footer {
 
 .tinyType {
     background-color: var(--dark-background);
+    color: var(--light-letters);
     font-size: 10px;
     margin-right: 15px;
 }

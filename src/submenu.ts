@@ -61,12 +61,19 @@ export class SubMenu
         this.ShowSubMenu(true);
         OBR.onReady(async () =>
         {
-
+            // Set theme accordingly
+            const theme = await OBR.theme.getTheme();
+            Utilities.SetThemeMode(theme, document);
+            OBR.theme.onChange((theme) =>
+            {
+                Utilities.SetThemeMode(theme, document);
+            })
             this.userId = await OBR.player.getId(); // For rumble
             if (!this.freshImport && !this.multiSheet)
             {
                 await this.currentUnit.ImportFromDatabase(this.POPOVERSUBMENUID);
             }
+
             this.freshImport = false;
 
             //Text formatters
@@ -358,7 +365,10 @@ export class SubMenu
            `;
 
         //Show favorites
-        const favoriteSearch = await db.Creatures.filter(unit => unit.favorite == true).toArray();
+        let favoriteSearch = await db.Creatures.filter(unit => unit.favorite == true).toArray();
+        //Sort alphabetically
+        favoriteSearch = favoriteSearch.sort((a, b) => a.unitName.localeCompare(b.unitName));
+
         if (favoriteSearch.length > 0)
         {
             const list = document.querySelector<HTMLDivElement>('#monsterList')!;
@@ -417,7 +427,7 @@ export class SubMenu
         const searchValueButton = document.createElement('input');
         searchValueButton.type = "search";
         searchValueButton.id = "searchValue";
-        searchValueButton.className = "";
+        searchValueButton.className = "textInput";
         searchValueButton.title = "Type a value to filter monsters by"
 
         //Create Search Confirm Button

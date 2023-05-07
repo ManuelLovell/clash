@@ -4,7 +4,7 @@
     font-weight: 400;
 
     color-scheme: light dark;
-    color: var(-light-letters);
+    color: var(--light-letters);
     background-color: var(--dark-background);
 
     font-synthesis: none;
@@ -14,6 +14,7 @@
     -webkit-text-size-adjust: 100%;
 
     --dark-background: #242424;
+    --dark-name-input: #6b6b6b;
     --light-letters: white;
     --headline-red: #A73335;
     --invert: none;
@@ -25,7 +26,8 @@
 
 @media (prefers-color-scheme: light) {
     :root {
-        --dark-background: #d5d3dd;
+        --dark-background: #ebeaee;
+        --dark-name-input: #e9e9e9;
         --light-letters: black;
         --headline-red: #8a8a8a;
         --pink-x: rgb(255, 128, 170);
@@ -83,6 +85,16 @@ body::-webkit-scrollbar {
     display: none;
 }
 
+.textInput,
+.collectionImportButtonConfirm,
+.removeCollectionButtonConfirm
+{
+    background-color: var(--dark-name-input);
+    color: var(--light-letters);
+    border-style: solid;
+    border-width: 1px;
+    border-radius: 1px;
+}
 .removeCollectionButtonConfirm {
     color: rgb(255, 128, 170);
     -webkit-text-fill-color: rgb(255, 128, 170);
@@ -94,6 +106,8 @@ body::-webkit-scrollbar {
 .chalkBorder {
     border-color: #ffffff;
     border-radius: 5px;
+    background-color: var(--dark-name-input);
+    color: var(--light-letters);
     font-size: .85em;
 }
 

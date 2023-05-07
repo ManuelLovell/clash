@@ -8,6 +8,7 @@ import { IUnitInfo } from "./interfaces/unit-info";
 import { liveQuery } from "dexie";
 import * as Buttons from "./initiative-list-buttons";
 import UnitInfo from "./unit-info";
+import * as Utilities from './utilities';
 
 export class InitiativeList
 {
@@ -99,6 +100,14 @@ export class InitiativeList
                 await this.CheckIniativeList();
             }
         });
+
+        // Set theme accordingly
+        const theme = await OBR.theme.getTheme();
+        Utilities.SetThemeMode(theme, document);
+        OBR.theme.onChange((theme) =>
+        {
+            Utilities.SetThemeMode(theme, document);
+        })
 
         // Subscribe to on-change to detect if a token was deleted
         OBR.scene.items.onChange(async (items) =>
@@ -248,18 +257,18 @@ export class InitiativeList
             nameToggle.style.textOverflow = "ellipsis";
             nameToggle.style.overflow = "hidden";
 
-            nameToggle.className = unit.isMonster ? "isMonster" : "";
+            nameToggle.className = unit.isMonster ? "isMonster nameToggleInput" : "nameToggleInput";
             nameToggle.onclick = async function () 
             {
-                if (nameToggle.className == "isMonster")
+                if (nameToggle.className == "isMonster nameToggleInput")
                 {
                     nameToggle.value = unit.unitName;
-                    nameToggle.className = "";
+                    nameToggle.className = "nameToggleInput";
                 }
                 else
                 {
                     nameToggle.value = `ʳ ${unit.unitName} ʴ`;
-                    nameToggle.className = "isMonster";
+                    nameToggle.className = "isMonster nameToggleInput";
                 }
             };
 
@@ -289,6 +298,7 @@ export class InitiativeList
                     heartInputMin.title = heartInputMin.value;
                     e.preventDefault();
                 }
+                self.Save();
             };
             heartInputMin.onkeydown = function (e)
             {
@@ -309,6 +319,7 @@ export class InitiativeList
                     heartInputMin.title = heartInputMin.value;
                     e.preventDefault();
                 }
+                self.Save();
             }
 
             const heartInputMax = document.createElement('input');
@@ -411,7 +422,7 @@ export class InitiativeList
             const armorClass = acElement.value ? acElement.value : "10";
 
             const nameElement = document.querySelector(`#nT${unitId}`) as HTMLInputElement;
-            const isMonster = (nameElement.className == "isMonster");
+            const isMonster = (nameElement.className == "isMonster nameToggleInput");
 
             if (!unitId || !initiative) return;
 
