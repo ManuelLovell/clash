@@ -103,6 +103,26 @@ export class InitiativeList
         // Subscribe to on-change to detect if a token was deleted
         OBR.scene.items.onChange(async (items) =>
         {
+            // Get all units from activeencounter
+            //const tableUnits = await db.ActiveEncounter.toCollection();
+            //const activeUnits = (await tableUnits.toArray());
+
+            // This feels expensive, on change happens on every key press
+            items.forEach(async unit =>
+            {
+                const imageUnit = unit as Image;
+                const unitName = imageUnit.text?.plainText || imageUnit.name;
+                const tableUnit = this.activeUnits.find(x => x.id === imageUnit.id);
+                if (tableUnit && tableUnit.unitName !== unitName)
+                {
+                    await db.ActiveEncounter.update(tableUnit.id, { unitName: unitName });
+                }
+                if (unit.metadata[`${Constants.EXTENSIONID}/metadata_initiative`] !== undefined && tableUnit?.isActive == 0)
+                {
+                    await db.ActiveEncounter.update(tableUnit.id, { isActive: 1 });
+                }
+            });
+
             let missingIds = this.activeUnits.filter(({ id: listId }) => !items.some(({ id: itemId }) => itemId === listId));
             missingIds.forEach(async unit => 
             {
@@ -112,8 +132,13 @@ export class InitiativeList
         });
 
         // The purpose of these is to catch the Add/Remove from Owlbear-ContextMenu without OBRs listener
-        let updateDb = liveQuery(() => db.ActiveEncounter.toArray());
-        updateDb.subscribe(() => this.RefreshList(), error => console.error('Clash!SubscriptionError: ' + error));
+        let updateDb = liveQuery(async () => await db.ActiveEncounter.toArray());
+        //updateDb.subscribe(() => this.RefreshList(), error => console.error('Clash!SubscriptionError: ' + error));
+
+        updateDb.subscribe({
+            next: result => this.RefreshList(result),
+            error: error => console.log("Error refreshing list: " + error)
+        });
 
         this.CheckIniativeList();
     }
@@ -125,6 +150,7 @@ export class InitiativeList
             item.layer === "CHARACTER"
             && item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`] !== undefined)
 
+        let activeEncounterUnits: IUnitInfo[] = [];
         if (units.length > 0)
         {
             // Grab by the id
@@ -134,10 +160,10 @@ export class InitiativeList
             const tableUnits = await db.ActiveEncounter.toCollection();
 
             // Turn to Array
-            const activatedUnits = await tableUnits.toArray();
+            activeEncounterUnits = await tableUnits.toArray();
 
             // Filter the resulting list by Scene Data to see if they belong
-            this.activeUnits = activatedUnits.filter(aUnits => this.inSceneUnits.includes(aUnits.id));
+            this.activeUnits = activeEncounterUnits.filter(aUnits => this.inSceneUnits.includes(aUnits.id));
 
             // Reactivate Units as needed
             this.activeUnits.forEach(async unit => 
@@ -147,9 +173,9 @@ export class InitiativeList
             });
         }
 
-        this.RefreshList();
+        this.RefreshList(activeEncounterUnits);
     }
-    public async RefreshList(): Promise<void>
+    public async RefreshList(unitList: IUnitInfo[]): Promise<void>
     {
         // Reference to initiative list
         const tableElement = <HTMLTableElement>document.querySelector("#unit-list")!;
@@ -158,10 +184,10 @@ export class InitiativeList
         const self = this;
 
         // Get all units from activeencounter
-        const tableUnits = await db.ActiveEncounter.toCollection();
+        //const tableUnits = await db.ActiveEncounter.toCollection();
 
         // Unit list
-        const activatedUnits = (await tableUnits.toArray()).filter(x => x.isActive == 1);
+        const activatedUnits = unitList.filter(x => x.isActive == 1);
 
         // Filter the resulting list by Scene Data to see if they belong
         this.activeUnits = activatedUnits.filter(aUnits => this.inSceneUnits.includes(aUnits.id));
@@ -404,7 +430,7 @@ export class InitiativeList
             }
         });
         await db.Tracker.update(Constants.TURNTRACKER, { id: Constants.TURNTRACKER, currentTurn: this.turnCounter, currentRound: this.roundCounter });
-        await this.RefreshList();
+        await this.CheckIniativeList();
         await this.UpdateTrackerForPlayers();
     }
 
@@ -472,10 +498,14 @@ export class InitiativeList
 
     private async OpenSubMenu(unitId: string): Promise<void>
     {
+        const modalBuffer = 100;
+        const windowHeight = window.outerHeight - 150; // Magic number to account for browser bars, can't access parent (CORS)
+        const viewableHeight = windowHeight > 800 ? 700 : windowHeight - modalBuffer; // Using 100 as a buffer to account for padding.
+        console.log(windowHeight);
         await OBR.modal.open({
             id: Constants.EXTENSIONSUBMENUID,
             url: `/submenu/subindex.html?unitid=${unitId}`,
-            height: 700,
+            height: viewableHeight,
             width: 350,
         });
     }
@@ -498,25 +528,72 @@ export class InitiativeList
                             every: [{ key: "layer", value: "CHARACTER" }],
                         },
                     },
+                    {
+                        icon: "/multi-sheet.svg",
+                        label: "[Clash!] View Info",
+                        filter: {
+                            min: 2,
+                            every: [{ key: "layer", value: "CHARACTER" }],
+                        },
+                    },
                 ],
                 async onClick(context, elementId: string)
                 {
-                    const unit = context.items[0];
-                    const dbUnitInfo = await db.ActiveEncounter.get(unit.id);
-
-                    if (!dbUnitInfo)
+                    if (context.items.length == 1)
                     {
-                        let unitInfo = new UnitInfo(unit.id, unit.name);
-                        await unitInfo.SaveToDB();
-                    }
 
-                    await OBR.popover.open({
-                        id: Constants.EXTENSIONSUBMENUID,
-                        url: `/submenu/subindex.html?unitid=${unit.id}`,
-                        height: 700,
-                        width: 325,
-                        anchorElementId: elementId
-                    });
+                        const unit = context.items[0];
+                        const dbUnitInfo = await db.ActiveEncounter.get(unit.id);
+
+                        if (!dbUnitInfo)
+                        {
+                            let unitInfo = new UnitInfo(unit.id, unit.name);
+                            await unitInfo.SaveToDB();
+                        }
+
+                        const modalBuffer = 100;
+                        const windowHeight = window.outerHeight - 150; // Magic number to account for browser bars, can't access parent (CORS)
+                        const viewableHeight = windowHeight > 800 ? 700 : windowHeight - modalBuffer; // Using 100 as a buffer to account for padding.
+
+                        await OBR.popover.open({
+                            id: Constants.EXTENSIONSUBMENUID,
+                            url: `/submenu/subindex.html?unitid=${unit.id}`,
+                            height: viewableHeight,
+                            width: 325,
+                            anchorElementId: elementId
+                        });
+                    }
+                    else
+                    {
+                        // Go through the list and make sure everyone is in the DB first
+                        context.items.forEach(async unit =>
+                        {
+                            const dbUnitInfo = await db.ActiveEncounter.get(unit.id);
+
+                            if (!dbUnitInfo)
+                            {
+                                let unitInfo = new UnitInfo(unit.id, unit.name);
+                                await unitInfo.SaveToDB();
+                            }
+                        });
+
+                        //set up a lot of things
+                        console.log(context.items.map(item => item.id));
+                        const unitIdString = context.items.map(item => item.id).toString();
+                        const unitActiveStatus = context.items.map(item => item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`] !== undefined).toString();
+
+                        const modalBuffer = 100;
+                        const windowHeight = window.outerHeight - 150; // Magic number to account for browser bars, can't access parent (CORS)
+                        const viewableHeight = windowHeight > 800 ? 700 : windowHeight - modalBuffer; // Using 100 as a buffer to account for padding.
+
+                        await OBR.popover.open({
+                            id: Constants.EXTENSIONSUBMENUID,
+                            url: `/submenu/subindex.html?unitid=${unitIdString}&unitactive=${unitActiveStatus}&multi=true`,
+                            height: viewableHeight,
+                            width: 325,
+                            anchorElementId: elementId
+                        });
+                    }
                 }
             });
         }
@@ -560,7 +637,7 @@ export class InitiativeList
                         for (let item of items)
                         {
                             //Add to ID list for DB update
-                            ids.push({ id: item.id, name: item.text.plainText || item.name });
+                            ids.push({ id: item.id, name: item.text?.plainText || item.name });
                             item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`] = { initiative };
                         }
                     });

@@ -1,5 +1,5 @@
 import { Constants } from './constants';
-import OBR from '@owlbear-rodeo/sdk';
+import OBR, { Item, Image, Metadata } from '@owlbear-rodeo/sdk';
 import UnitInfo from './unit-info';
 import { IOpen5eMonsterListResponse } from './interfaces/api-response-open5e';
 import { DiceRoller } from './dice-roller';
@@ -7,7 +7,6 @@ import { db } from './local-database';
 import * as Utilities from './utilities';
 import '/src/css/mini-style.css'
 import { IUnitInfo } from './interfaces/unit-info';
-import { Metadata } from '@owlbear-rodeo/sdk';
 
 export class SubMenu
 {
@@ -19,6 +18,9 @@ export class SubMenu
 
     open5eApiString: string = "https://api.open5e.com/monsters/?format=json&search=";
     POPOVERSUBMENUID: string = "";
+    multiSheet: boolean = false;
+    multiActive: string[] = [];
+    multiIds: string[] = [];
 
     constructor()
     {
@@ -27,7 +29,24 @@ export class SubMenu
 
         const queryString = window.location.search;
         const urlParams = new URLSearchParams(queryString);
-        this.POPOVERSUBMENUID = urlParams.get('unitid')!;
+        const idParam = urlParams.get('unitid')!;
+        // If found, it means multiple sheet updates
+        const multiParam = urlParams.get('multi');
+        const mActiveParam = urlParams.get('unitactive');
+
+        if (multiParam && mActiveParam)
+        {
+            this.multiSheet = true;
+            this.multiIds = idParam.split(",");
+            this.multiActive = mActiveParam?.split(",");
+            this.POPOVERSUBMENUID = Constants.MULTISHEETID;
+            document.documentElement.style.borderColor = "deeppink"
+        }
+        else
+        {
+            document.getElementById("groupEdit")!.hidden = true;
+            this.POPOVERSUBMENUID = idParam;
+        }
 
         this.currentUnit = new UnitInfo(this.POPOVERSUBMENUID, "Default");
     }
@@ -42,9 +61,9 @@ export class SubMenu
         this.ShowSubMenu(true);
         OBR.onReady(async () =>
         {
-            
-            this.userId = await OBR.player.getId();
-            if (!this.freshImport)
+
+            this.userId = await OBR.player.getId(); // For rumble
+            if (!this.freshImport && !this.multiSheet)
             {
                 await this.currentUnit.ImportFromDatabase(this.POPOVERSUBMENUID);
             }
@@ -269,7 +288,7 @@ export class SubMenu
                         const value = e.currentTarget as Element;
                         value.parentElement?.blur();
 
-                        let hitValue = value.textContent?.replace(/[()]/g,'');
+                        let hitValue = value.textContent?.replace(/[()]/g, '');
 
                         const bonus = Number(hitValue?.substring(1));
                         const roll = bonus == 0 ? `(1d20)` : `(1d20 + ${bonus})`;
@@ -334,7 +353,7 @@ export class SubMenu
         const favIcon = "♥";
         var self = this;
         document.querySelector<HTMLDivElement>('#searchmenu')!.innerHTML = `
-            <div id="searchResultsContainer"><ul id="monsterList"></ul></div>
+            <div id="searchResultsContainer"><ul id="monsterList"><div class="superCenter">No favorites to show.</div></ul></div>
             <footer></span><span class="returnFloatRight" id="searchFooterButtonContainer"></span></footer>
            `;
 
@@ -354,7 +373,14 @@ export class SubMenu
                 importCollection.value = "Import";
                 importCollection.title = `Import ${monster.unitName} onto this Unit`;
 
-                monsterInformationHtml += `<li style="--tooltip-color:${ColorName(monster.dataSlug)}" data-tag="🡆 from [Collection] User:${monster.dataSlug}"><div class="monsterNameList">${fav} ${TruncateName(monster.unitName)}</div><div class="monsterImportButtonContainer">${importCollection.outerHTML}</div></li>`;
+                const removeCollection = document.createElement('input');
+                removeCollection.type = "button";
+                removeCollection.id = `del-${monster.id}`;
+                removeCollection.className = "removeCollectionButtonConfirm";
+                removeCollection.value = "⨉"
+                removeCollection.title = `Remove ${monster.unitName} from Collection`;
+
+                monsterInformationHtml += `<li id="listItem-${monster.id}" style="--tooltip-color:${ColorName(monster.dataSlug)}" data-tag="🡆 from [Collection] User:${monster.dataSlug}"><div class="monsterNameList">${fav} ${TruncateName(monster.unitName)}</div><div class="monsterImportButtonContainer">${removeCollection.outerHTML} ${importCollection.outerHTML}</div></li>`;
             });
             list.innerHTML = monsterInformationHtml;
             // Add collection buttons
@@ -362,6 +388,12 @@ export class SubMenu
             collbBttns.forEach(btn =>
             {
                 btn.addEventListener('click', async (e: Event) => await self.ImportCollectionMonsterInfo((e.currentTarget as Element).id));
+            });
+            // Add remove from collection buttons
+            const removeBttns = document.querySelectorAll('.removeCollectionButtonConfirm');
+            removeBttns.forEach(btn =>
+            {
+                btn.addEventListener('click', async (e: Event) => await self.DeleteCollectionMonsterInfo((e.currentTarget as Element).id));
             });
         }
 
@@ -399,7 +431,7 @@ export class SubMenu
         searchConfirmButton.onclick = async function () 
         {
             const list = document.querySelector<HTMLDivElement>('#monsterList')!;
-            list.innerHTML = "Searching...";
+            list.innerHTML = `<div class="superCenter">Searching...</div>`;
             let monsterInformationHtml = "";
 
             await fetch(`${self.open5eApiString}${searchValueButton.value}`)
@@ -433,11 +465,19 @@ export class SubMenu
                     const importCollection = document.createElement('input');
                     importCollection.type = "button";
                     importCollection.id = `${monster.id}`;
-                    importCollection.className = "collectionImportButtonConfirm"
+                    importCollection.className = "collectionImportButtonConfirm";
                     importCollection.value = "Import";
                     importCollection.title = `Import ${monster.unitName} onto this Unit`;
 
-                    monsterInformationHtml += `<li style="--tooltip-color:${ColorName(monster.dataSlug)}" data-tag="🡆 from [Collection] User:${monster.dataSlug}"><div class="monsterNameList">${fav} ${TruncateName(monster.unitName)}</div><div class="monsterImportButtonContainer">${importCollection.outerHTML}</div></li>`;
+                    const removeCollection = document.createElement('input');
+                    removeCollection.type = "button";
+                    removeCollection.id = `del-${monster.id}`;
+                    removeCollection.className = "removeCollectionButtonConfirm";
+                    removeCollection.value = "⨉"
+                    removeCollection.title = `Remove ${monster.unitName} from Collection`;
+
+
+                    monsterInformationHtml += `<li id="listItem-${monster.id}" style="--tooltip-color:${ColorName(monster.dataSlug)}" data-tag="🡆 from [Collection] User:${monster.dataSlug}"><div class="monsterNameList">${fav} ${TruncateName(monster.unitName)}</div><div class="monsterImportButtonContainer">${removeCollection.outerHTML} ${importCollection.outerHTML}</div></li>`;
                 });
             }
 
@@ -457,6 +497,13 @@ export class SubMenu
                 collbBttns.forEach(btn =>
                 {
                     btn.addEventListener('click', async (e: Event) => await self.ImportCollectionMonsterInfo((e.currentTarget as Element).id));
+                });
+
+                // Add remove from collection buttons
+                const removeBttns = document.querySelectorAll('.removeCollectionButtonConfirm');
+                removeBttns.forEach(btn =>
+                {
+                    btn.addEventListener('click', async (e: Event) => await self.DeleteCollectionMonsterInfo((e.currentTarget as Element).id));
                 });
             }
             else
@@ -739,9 +786,49 @@ export class SubMenu
         {
             //Validate form inputs
             self.currentUnit.ImportCustomFormInputs(document);
-
             //Save to DB
-            await db.ActiveEncounter.put(self.currentUnit, self.POPOVERSUBMENUID);
+            if (self.multiSheet)
+            {
+                const baseName = self.currentUnit.unitName;
+                let unitSaveList: IUnitInfo[] = [];
+                for (var i = 0, id; id = self.multiIds[i]; i++) 
+                {
+                    self.currentUnit.id = id;
+                    self.currentUnit.tokenId = id;
+                    self.currentUnit.isActive = self.multiActive[i] === "true" ? 1 : 0;
+                    self.currentUnit.unitName = baseName + ` ${String.fromCharCode('A'.charCodeAt(0) + i)}`;
+                    const copyStart = JSON.stringify(self.currentUnit);
+                    const copyEnd = JSON.parse(copyStart);
+                    unitSaveList.push(copyEnd);
+                }
+
+                await OBR.scene.items.updateItems(
+                    (item: Item) => item.id === unitSaveList.find(unit => unit.id === item.id)?.id,
+                    (items: Image[]) =>
+                    {
+                        for (let item of items)
+                        {
+                            item.text.plainText = unitSaveList.find(unit => unit.id === item.id)!.unitName!;
+                        };
+                    });
+                await db.ActiveEncounter.bulkPut(unitSaveList);
+            }
+            else
+            {
+                await db.ActiveEncounter.put(self.currentUnit, self.POPOVERSUBMENUID);
+
+                //Update name in OBR
+                console.log(OBR.isReady);
+                await OBR.scene.items.updateItems(
+                    (item: Item) => item.id == self.currentUnit.id,
+                    (items: Image[]) =>
+                    {
+                        for (let item of items)
+                        {
+                            item.text.plainText = self.currentUnit.unitName;
+                        };
+                    });
+            }
         }
         saveButton.src = "/save.svg";
         saveButton.title = "Save Changes";
@@ -983,6 +1070,9 @@ export class SubMenu
             }).then(async function (data)
             {
                 let importUnit = new UnitInfo(subMenu.POPOVERSUBMENUID);
+
+                const list = document.querySelector<HTMLDivElement>('#monsterList')!;
+                list.innerHTML = `<div class="superCenter">Loading...</div>`;
                 await importUnit.ImportOpen5eResponse(data);
                 importUnit.isActive = subMenu.currentUnit.isActive;
                 importUnit.currentHP = importUnit.maxHP;
@@ -1004,11 +1094,20 @@ export class SubMenu
         }
     }
 
+    private async DeleteCollectionMonsterInfo(id: string): Promise<void>
+    {
+        // Syntax is 'del-[monsterid]'
+        const cleanedId = id.substring(4);
+        await db.Creatures.delete(cleanedId);
+        let node = document.getElementById(`listItem-${cleanedId}`);
+        node?.remove();
+    }
+
     private SetClassOnRollable(desc: string): string
     {
         let string = "";
         string = desc.replaceAll(Constants.PARENTHESESMATCH, "<span class='clickableRollerDmg' contenteditable='false'>($1)</span>");
-        string = string.replaceAll(Constants.PLUSMATCH, "<span class='clickableRollerAtk' contenteditable='false'>($1)</span>");
+        string = string.replaceAll(Constants.PLUSMATCH, "<span class='clickableRollerAtk' contenteditable='false'>$1</span>");
         return string;
     }
 

@@ -19,7 +19,7 @@ export class LabelLogic
             label.visible = false;
             label.type = "LABEL";
             label.id = Constants.LABEL;
-            label.style = { backgroundColor: "#A73335", backgroundOpacity: .5, pointerDirection: "UP", pointerWidth: 15, pointerHeight: 15, cornerRadius: 10 };
+            label.style = { backgroundColor: "#A73335", backgroundOpacity: .5, pointerDirection: "DOWN", pointerWidth: 15, pointerHeight: 15, cornerRadius: 10 };
             const table = <HTMLTableElement>document.getElementById("initiative-list");
             if (table.rows?.length > 1)
             {
@@ -28,7 +28,7 @@ export class LabelLogic
                     if (row.className == "turnOutline")
                     {
 
-                        label.position = { x: ctu.xpos, y: ctu.ypos + 50 };
+                        label.position = { x: ctu.xpos, y: ctu.ypos - 100 };
                         label.visible = ctu.visible ? true : false;
                         label.text.plainText = label.visible ? labelText : labelText + "\r\n(Hidden)";
                         label.attachedTo = ctu.id;
@@ -59,7 +59,7 @@ export class LabelLogic
                                 if (row.className == "turnOutline")
                                 {
 
-                                    label.position = { x: ctu.xpos, y: ctu.ypos + 50 };
+                                    label.position = { x: ctu.xpos, y: ctu.ypos - 100 };
                                     label.visible = ctu.visible ? true : false;
                                     label.text.plainText = label.visible ? labelText : labelText + "\r\n(Hidden)";
                                     label.attachedTo = ctu.id;

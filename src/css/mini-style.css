@@ -12,53 +12,68 @@
     -moz-osx-font-smoothing: grayscale;
     -webkit-text-size-adjust: 100%;
 }
+
 body {
+    text-size-adjust: none;
     margin: 0;
     padding: 5px;
     display: flex;
     height: 95%;
     flex-direction: column;
 }
+
 h2 {
     text-align: center;
     color: #A73335;
 }
-#submenu
-{
+
+#submenu {
     height: 100%;
     overflow-x: scroll;
 }
-#submenu::-webkit-scrollbar{
+
+#submenu::-webkit-scrollbar {
     display: none;
 }
-#customJsonValueBox
-{
+
+#customJsonValueBox {
     width: 98%;
     height: 500px;
     resize: none;
 }
-body::-webkit-scrollbar{
+
+body::-webkit-scrollbar {
     display: none;
 }
 
-#searchmenu
-{
+#searchmenu {
     height: 100%;
     overflow-x: scroll;
 }
-#searchmenu::-webkit-scrollbar{
+
+#searchmenu::-webkit-scrollbar {
     display: none;
 }
+
+.removeCollectionButtonConfirm {
+    color: rgb(255, 128, 170);
+    -webkit-text-fill-color: rgb(255, 128, 170); /* Will override color (regardless of order) */
+    -webkit-text-stroke-width: 2px;
+    -webkit-text-stroke-color: rgb(255, 128, 170);
+}
+
 .chalkBorder {
     border-color: #ffffff;
     border-radius: 5px;
+    font-size: .85em;
 }
-#importjsonmenu
-{
+
+#importjsonmenu {
     height: 100%;
     overflow-x: scroll;
 }
-#importjsonmenu::-webkit-scrollbar{
+
+#importjsonmenu::-webkit-scrollbar {
     display: none;
 }
 
@@ -72,20 +87,23 @@ footer {
     width: 100%;
     text-align: center;
 }
-.popColor
-{
-    border-style:solid;
+
+.popColor {
+    border-style: solid;
     border-radius: 16px;
     background-color: #242424;
 }
-#formMaxHP{
+
+#formMaxHP {
     white-space: pre-wrap;
 }
+
 ul {
     margin-right: 0;
     padding-left: 0;
     list-style: none;
 }
+
 ul li:after {
     content: attr(data-tag);
     width: 1em;
@@ -96,32 +114,38 @@ ul li:after {
     line-height: 1.0;
     margin-right: 0.5em;
 }
+
 .monsterImportButtonContainer {
-    float:right;
+    float: right;
 }
+
 .HealthInput {
     width: 30px;
 }
-.favorite
-{
+
+.favorite {
     filter: invert(16%) sepia(20%) saturate(5804%) hue-rotate(299deg) brightness(90%) contrast(154%);
 }
-.clickableRollerAtk,.clickableRollerDmg{
+
+.clickableRollerAtk,
+.clickableRollerDmg {
     display: inline-block;
     cursor: pointer;
     font-weight: bold;
     font-style: normal;
     color: #f9f9f9;
     background-color: rgb(87, 11, 11);
-    border-radius:10px;
-    border-color:#f9f9f9;
+    border-radius: 10px;
+    border-color: #f9f9f9;
     border-style: outset;
     border-width: 1px;
     padding-bottom: 3px;
     padding-left: 2px;
     padding-right: 2px;
 }
-.rollableScore,.rollableSave {
+
+.rollableScore,
+.rollableSave {
     display: inline-block;
     width: 80%;
     cursor: pointer;
@@ -129,36 +153,42 @@ ul li:after {
     font-style: normal;
     color: #f9f9f9;
     background-color: rgb(87, 11, 11);
-    border-radius:10px;
-    border-color:#f9f9f9;
+    border-radius: 10px;
+    border-color: #f9f9f9;
     border-style: outset;
     border-width: 1px;
     padding-bottom: 3px;
     padding-left: 2px;
     padding-right: 2px;
 }
+
 .Icon {
     vertical-align: text-bottom;
     height: 20px;
     width: 20px;
 }
-.searchFloatRight
-{
+
+.searchFloatRight {
     float: right;
     width: 75%;
 }
-.returnFloatLeft
-{
+
+#searchValue {
+    width: 50%;
+}
+
+.returnFloatLeft {
     padding-left: 2px;
     text-align: left;
     float: left;
 }
+
 #unitinfo {
     max-width: 400px;
     padding: .5rem;
 }
 
-.clickable:active{
+.clickable:active {
     filter: invert(52%) sepia(81%) saturate(5333%) hue-rotate(331deg) brightness(90%) contrast(88%);
     transform: scale(1.5);
 }
@@ -172,11 +202,13 @@ ul li:after {
 
 [contenteditable]:empty::before {
     content: "...";
-    border: 1px solid #A73335;;
+    border: 1px solid #A73335;
+    ;
     height: 1.25em;
     width: 50px;
     line-height: 1.25;
 }
+
 .name {
     font-size: 150%;
     font-family: Georgia, serif;
@@ -192,17 +224,33 @@ ul li:after {
 .center {
     text-align: center;
 }
+.pink {
+    color: deeppink;
+    font-weight: bold;
+}
+
+.superCenter {
+    font-weight: bold;
+    font-size: 150%;
+    text-align: center;
+    margin: auto;
+    width: 50%;
+    padding: 10px;
+}
+
 .floatright {
-    float:right;
+    float: right;
 }
 
 .bold {
     font-weight: bold;
     color: #FF9294;
 }
+
 .white {
     color: #E1D0D0;
 }
+
 .red {
     color: #FF9294;
 }
@@ -230,11 +278,15 @@ td {
     height: 2px;
 }
 
-.attack,.ability,.spell {
+.attack,
+.ability,
+.spell {
     margin: 5px 0px;
 }
 
-.attackname,.spellname,.abilityname {
+.attackname,
+.spellname,
+.abilityname {
     font-weight: bold;
     font-style: italic;
 }
