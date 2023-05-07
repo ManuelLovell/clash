@@ -14,6 +14,12 @@ export function GetGUID(): string
 
 export function SetThemeMode(theme: Theme, document: Document): void
 {
+    const darkThemeMq = window.matchMedia("(prefers-color-scheme: dark)");
+    console.log(darkThemeMq.matches);
+    
+    const darkTheme = darkThemeMq.matches ? "dark" : "light";
+    const lightTheme = darkThemeMq.matches ? "light" : "dark";
+    
     for (var s = 0; s < document.styleSheets.length; s++)
     {
         for (var i = 0; i < document.styleSheets[s].cssRules.length; i++)
@@ -24,20 +30,20 @@ export function SetThemeMode(theme: Theme, document: Document): void
             {
                 if (theme.mode == "LIGHT")
                 {
-                    //document.documentElement.setAttribute("data-theme", "dark");
-                    rule.media.appendMedium("(prefers-color-scheme: dark)");
-                    if (rule.media.mediaText.includes("light"))
+                    rule.media.appendMedium(`(prefers-color-scheme: ${darkTheme})`);
+
+                    if (rule.media.mediaText.includes(lightTheme))
                     {
-                        rule.media.deleteMedium("(prefers-color-scheme: light)");
+                        rule.media.deleteMedium(`(prefers-color-scheme: ${lightTheme})`);
                     }
                 }
                 else if (theme.mode == "DARK")
                 {
-                    //document.documentElement.setAttribute("data-theme", "light");
-                    rule.media.appendMedium("(prefers-color-scheme: light)");
-                    if (rule.media.mediaText.includes("dark"))
+                    rule.media.appendMedium(`(prefers-color-scheme: ${lightTheme})`);
+
+                    if (rule.media.mediaText.includes(darkTheme))
                     {
-                        rule.media.deleteMedium("(prefers-color-scheme: dark)");
+                        rule.media.deleteMedium(`(prefers-color-scheme: ${darkTheme})`);
                     }
                 }
             }
