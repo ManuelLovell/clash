@@ -3,6 +3,7 @@ import { Constants } from "./constants";
 import { ViewportFunctions } from "./viewport";
 import { ICurrentTurnUnit } from "./interfaces/current-turn-unit";
 import { LabelLogic } from "./label-logic";
+import * as Utilities from "./utilities";
 
 export class PlayerList
 {
@@ -49,6 +50,14 @@ export class PlayerList
             container?.insertBefore(slider, container.firstChild);
             
         OBR.scene.onMetadataChange((metadata) => this.RefreshList(metadata));
+
+        // Set theme accordingly
+        const theme = await OBR.theme.getTheme();
+        Utilities.SetThemeMode(theme, document);
+        OBR.theme.onChange((theme) =>
+        {
+            Utilities.SetThemeMode(theme, document);
+        })
 
         const metadata = await OBR.scene.getMetadata();
         await this.RefreshList(metadata);
