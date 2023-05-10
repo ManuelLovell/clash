@@ -1117,7 +1117,7 @@ export class SubMenu
     {
         let string = "";
         string = desc.replaceAll(Constants.PARENTHESESMATCH, "<span class='clickableRollerDmg' contenteditable='false'>($1)</span>");
-        string = string.replaceAll(Constants.PLUSMATCH, "<span class='clickableRollerAtk' contenteditable='false'>$1</span>");
+        string = string.replaceAll(Constants.PLUSMATCH, "<span class='clickableRollerAtk' contenteditable='false'> $1 </span>");
         return string;
     }
 
