@@ -1,24 +1,25 @@
 ---
 title: Clash!
 description: Full-featured initiative tracking and creature management
-author: Manuel DeJesus
-image: https://raw.githubusercontent.com/ManuelLovell/clash/main/docs/preview.png
-icon: https://raw.githubusercontent.com/ManuelLovell/clash/main/docs/logo.png
+author: Battle-System
+image: https://battle-system.com/owlbear/clash-docs/preview.png
+icon: https://battle-system.com/owlbear/clash-docs/logo.png
 tags:
   - tool
   - combat
-manifest: https://clash-initiative-tracker.onrender.com/manifest.json
-learn-more: mdjxbl+owlbear@gmail.com
+manifest: https://clash.battle-system.com/manifest.json
+learn-more: manuel@battle-system.com
 ---
 
 # Clash! Initiative Tracker
 
 Track the turn-order and abilities of unit's in combat.  In addition to the base initiative list, you can also customize creature stat blocks (Designed for 5e) and save/share the data.
+(Note: If you have LocalStorage disabled, you will not be able to use/save the UnitInformation features. You can still use the Initiative tracker though!)
 
 **Getting Familiar**
 
 
-![context menu](https://raw.githubusercontent.com/ManuelLovell/clash/main/docs/menuview.png)
+![context menu](https://battle-system.com/owlbear/clash-docs/menuview.png)
 
 
 You can add a unit to the Initiative List by clicking on a character token and selecting the Add icon.
@@ -28,7 +29,7 @@ You can add a unit to the Initiative List by clicking on a character token and s
 2. **View UnitInfo**. This will show you the Info Card for this particular token. Useful if you want to store some data while not having them in the initiative yet.
 
 
-![main view](https://raw.githubusercontent.com/ManuelLovell/clash/main/docs/mainview.png)
+![main view](https://battle-system.com/owlbear/clash-docs/mainview.png)
 
 
 The main window is where you'll have most of your information at a glance, as well as some quick-access controls for getting things in order.
@@ -52,7 +53,7 @@ The main window is where you'll have most of your information at a glance, as we
 	**Settings**. This will take you to the Settings page.
 
 
-![sub view](https://raw.githubusercontent.com/ManuelLovell/clash/main/docs/subview.png)
+![sub view](https://battle-system.com/owlbear/clash-docs/subview.png)
 
 
 **Unit Information**
@@ -86,7 +87,7 @@ automatically formatted into a rollable. So when creating your own skills, try a
 * Import Custom JSON - This will let you dump a JSON blob and instantly have it set up on a unit. An easy way to get in a unit someone has shared with you. 
 
 
-![settings view](https://raw.githubusercontent.com/ManuelLovell/clash/main/docs/settingsview.png)
+![settings view](https://battle-system.com/owlbear/clash-docs/settingsview.png)
 
 
 **Settings**
@@ -110,10 +111,18 @@ Werewolf created by "Jim" is in your collection, and a mass import includes a We
 
 * Disable Label. This will remove the label that appears on the unit whose turn it is.  The text box next to it allows you to customize that label to say whatever you would prefer.
 
-![player view](https://raw.githubusercontent.com/ManuelLovell/clash/main/docs/playerview.png)
+![player view](https://battle-system.com/owlbear/clash-docs/playerview.png)
 
 Happy gaming.
 
 **Support**
 
 If you have questions, please join the [Owlbear Rodeo Discord](https://discord.gg/UY8AXjhzhe).
+
+
+**Changes**
+
+- v1.0.5 - Light/Dark mode can be toggled via the Owlbear settings.
+         - Group-Edit has been added, select a group of units and assign information all at once - once saved, the resulting units will have iterating letters at the end to differentiate. (Wolf A, Wolf B, Wolf C, etc..)
+
+![group view](https://battle-system.com/owlbear/clash-docs/groupview.png)
