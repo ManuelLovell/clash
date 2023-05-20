@@ -158,34 +158,32 @@ export class SubMenu
             unitActionsHtml += "</div>";
 
             //Unit Reactions
-            let unitReactionsHtml = "";
+            let unitReactionsHtml = `<div id="formReactionCollection">`;
             if (this.currentUnit.reactions && this.currentUnit.reactions?.length > 0)
             {
-                unitReactionsHtml += `<div id="formReactionCollection"><div class="actions red">Reactions</div><div class="hr"></div>`;
                 for (let action of this.currentUnit.reactions)
                 {
                     unitReactionsHtml += `<div id="formReactionContainer" class="Reaction">`;
-                    unitReactionsHtml += `<span id="formReactionName" class="reactionname">${action.name}</span>.  `;
-                    unitReactionsHtml += `<span id="formReactionDesc" class="description">${this.SetClassOnRollable(action.desc!)}</span>`;
+                    unitReactionsHtml += `<span id="formReactionName" class="reactionname" contentEditable="true">${action.name}</span>.  `;
+                    unitReactionsHtml += `<span id="formReactionDesc" class="description" contentEditable="true">${this.SetClassOnRollable(action.desc!)}</span>`;
                     unitReactionsHtml += `</div>`;
                 }
-                unitReactionsHtml += "</div>";
             }
+            unitReactionsHtml += "</div>";
 
             //Unit Legendary Actions
-            let unitLegendaryHtml = "";
+            let unitLegendaryHtml = `<div id="formLegendaryCollection">`;
             if (this.currentUnit.legendaryActions && this.currentUnit.legendaryActions?.length > 0)
             {
-                unitLegendaryHtml += `<div id="formLegendaryCollection"><div class="actions red">Legendary Actions</div><div class="hr"></div>`;
                 for (let action of this.currentUnit.legendaryActions)
                 {
                     unitLegendaryHtml += `<div id="formLegendaryContainer" class="Legendary">`;
-                    unitLegendaryHtml += `<span id="formLegendaryName" class="legendaryname">${action.name}</span>.  `;
-                    unitLegendaryHtml += `<span id="formLegendaryDesc" class="description">${this.SetClassOnRollable(action.desc!)}</span>`;
+                    unitLegendaryHtml += `<span id="formLegendaryName" class="legendaryname" contentEditable="true">${action.name}</span>.  `;
+                    unitLegendaryHtml += `<span id="formLegendaryDesc" class="description" contentEditable="true">${this.SetClassOnRollable(action.desc!)}</span>`;
                     unitLegendaryHtml += `</div>`;
                 }
-                unitLegendaryHtml += "</div>";
             }
+            unitLegendaryHtml += "</div>";
 
             //Spells Actions
             let unitSpellsHtml = `<div id="formSpellCollection">`;
@@ -227,7 +225,11 @@ export class SubMenu
             <div class="actions red">Actions<span id="addAttackButtonContainer" class="floatright"></span></div>
             <div class="hr"></div>
             ${unitActionsHtml}
+            <div class="actions red">Reactions<span id="addReactionButtonContainer" class="floatright"></span></div>
+            <div class="hr"></div>
             ${unitReactionsHtml}
+            <div class="actions red">Legendary Actions<span id="addLegendaryButtonContainer" class="floatright"></span></div>
+            <div class="hr"></div>
             ${unitLegendaryHtml}
             <div class="actions red">Spell List<span id="addSpellButtonContainer" class="floatright"></span></div>
             <div class="hr"></div>
@@ -429,6 +431,13 @@ export class SubMenu
         searchValueButton.id = "searchValue";
         searchValueButton.className = "textInput";
         searchValueButton.title = "Type a value to filter monsters by"
+        searchValueButton.addEventListener("keypress", async function (event)
+        {
+            if (event.key === "Enter")
+            {
+                await DoASearch();
+            }
+        });
 
         //Create Search Confirm Button
         const searchConfirmButton = document.createElement('input');
@@ -439,6 +448,11 @@ export class SubMenu
         searchConfirmButton.style.marginLeft = "4px";
         searchConfirmButton.title = "Click to send Search"
         searchConfirmButton.onclick = async function () 
+        {
+            await DoASearch();
+        }
+
+        async function DoASearch()
         {
             const list = document.querySelector<HTMLDivElement>('#monsterList')!;
             list.innerHTML = `<div class="superCenter">Searching...</div>`;
@@ -979,6 +993,52 @@ export class SubMenu
 
     private AppendAddActionButtons(): void
     {
+        //Get Button Container
+        const legendaryButtonContainer = document.getElementById("addLegendaryButtonContainer");
+
+        //Create Add Legendary Button
+        const addLegendaryButton = document.createElement('input');
+        addLegendaryButton.type = "image";
+        addLegendaryButton.id = "addButton";
+        addLegendaryButton.title = "Add new Legendary Action"
+        addLegendaryButton.className = "clickable";
+        addLegendaryButton.onclick = async function () 
+        {
+            //Add a blank action
+            const legendCollection = <HTMLElement>document.getElementById("formLegendaryCollection");
+            const baseLegendHtml = `<div id="formLegendaryContainer" class="Legendary"><span id="formLegendaryName" class="legendaryname" contentEditable="true">Legend-Name.</span>.
+                <span id="formLegendaryDesc" class="description" contentEditable="true">Legend-Desc</span></div>`;
+                legendCollection.insertAdjacentHTML('beforeend', baseLegendHtml);
+        }
+        addLegendaryButton.src = "/add.svg";
+        addLegendaryButton.height = 20;
+        addLegendaryButton.width = 20;
+
+        legendaryButtonContainer?.appendChild(addLegendaryButton);
+
+        //Get Button Container
+        const reactionButtonContainer = document.getElementById("addReactionButtonContainer");
+
+        //Create Add Reaction Button
+        const addReactionButton = document.createElement('input');
+        addReactionButton.type = "image";
+        addReactionButton.id = "addButton";
+        addReactionButton.title = "Add new Reaction"
+        addReactionButton.className = "clickable";
+        addReactionButton.onclick = async function () 
+        {
+            //Add a blank action
+            const reactCollection = <HTMLElement>document.getElementById("formReactionCollection");
+            const baseReactHtml = `<div id="formReactionContainer" class="Reaction"><span id="formReactionName" class="reactionname" contentEditable="true">React-Name.</span>.
+                <span id="formReactionDesc" class="description" contentEditable="true">React-Desc</span></div>`;
+                reactCollection.insertAdjacentHTML('beforeend', baseReactHtml);
+        }
+        addReactionButton.src = "/add.svg";
+        addReactionButton.height = 20;
+        addReactionButton.width = 20;
+
+        reactionButtonContainer?.appendChild(addReactionButton);
+
         //Get Button Container
         const attackButtonContainer = document.getElementById("addAttackButtonContainer");
 
