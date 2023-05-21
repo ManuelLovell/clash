@@ -328,12 +328,12 @@ export default class UnitInfo implements IUnitInfo
         this.wisScore ??= 10;
         this.chaScore ??= 10;
 
-        this.strSave ??= 2;
-        this.dexSave ??= 2;
-        this.conSave ??= 2;
-        this.intSave ??= 2;
-        this.wisSave ??= 2;
-        this.chaSave ??= 2;
+        this.strSave ??= Math.floor((Number(this.strScore) - 10) / 2);
+        this.dexSave ??= Math.floor((Number(this.dexScore) - 10) / 2);
+        this.conSave ??= Math.floor((Number(this.conScore) - 10) / 2);
+        this.intSave ??= Math.floor((Number(this.intScore) - 10) / 2);
+        this.wisSave ??= Math.floor((Number(this.wisScore) - 10) / 2);
+        this.chaSave ??= Math.floor((Number(this.chaScore) - 10) / 2);
 
         this.senses ??= "No unique senses.";
         this.languages ??= "No known languages.";
