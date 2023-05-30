@@ -55,7 +55,12 @@
     border-style: ridge;
     border-radius: 5px;
 }
-
+.noDatabase{
+    text-align: center;
+    color: var(--light-letters);
+    font-size: small;
+    font-style: italic;
+}
 .boldMiddle {
     font-weight: bold;
     text-align: center;
@@ -235,15 +240,20 @@ footer {
     left: 35%;
     margin-top: 10px;
 }
-
+#clash-main-body-settings{
+    height: calc(100% - 40px);
+}
 #settingsContainer {
     margin: 0;
     padding: 5px;
+    height: 100%;
     display: block;
-    height: 530px;
     padding-left: 10%;
     font-size: 16px;
-    overflow-y: hidden;
+    overflow-y: scroll;
+}
+#settingsContainer::-webkit-scrollbar {
+    display: none;
 }
 
 #prevContainer {

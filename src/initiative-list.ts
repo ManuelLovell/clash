@@ -35,8 +35,9 @@ export class InitiativeList
         this.ShowSettingsMenu(false);
         this.ShowMainMenu(true);
 
+        const mainContainer = document.querySelector<HTMLDivElement>('#clash-main-body-app')!;
         // Place base HTML and Containers
-        document.querySelector<HTMLDivElement>('#clash-main-body-app')!.innerHTML = `
+        mainContainer.innerHTML = `
         <table id="initiative-list">
         <thead>
             <tr>
@@ -55,6 +56,13 @@ export class InitiativeList
         <div id="bombContainer" class="bombBottom"><span id="resetContainer" class=""></span></div>
         </footer>
         `;
+        if (db.inMemory)
+        {
+            const warning: HTMLElement = document.createElement('div');
+            warning.innerText = "Local Storage Disabled - Features Limited";
+            warning.className = "noDatabase";
+            mainContainer.prepend(warning);
+        }
 
         // Append basic form buttons
         //this.AppendSaveOrderButton();
@@ -559,6 +567,13 @@ export class InitiativeList
                         if (!dbUnitInfo)
                         {
                             let unitInfo = new UnitInfo(unit.id, unit.name);
+                            // If the base token matches something in Collection, use that information
+                            const inCollection = await db.Creatures.get({ unitName: unit.name });
+                            if (inCollection)
+                            {
+                                unitInfo.SetToModel(inCollection);
+                            }
+
                             await unitInfo.SaveToDB();
                         }
 
@@ -584,6 +599,12 @@ export class InitiativeList
                             if (!dbUnitInfo)
                             {
                                 let unitInfo = new UnitInfo(unit.id, unit.name);
+                                // If the base token matches something in Collection, use that information
+                                const inCollection = await db.Creatures.get({ unitName: unit.name });
+                                if (inCollection)
+                                {
+                                    unitInfo.SetToModel(inCollection);
+                                }
                                 await unitInfo.SaveToDB();
                             }
                         });
@@ -660,12 +681,18 @@ export class InitiativeList
                         if (!checkUnit)
                         {
                             let unitInfo = new UnitInfo(item.id, item.name);
+                            // If the base token matches something in Collection, use that information
+                            const inCollection = await db.Creatures.get({ unitName: item.name });
+                            if (inCollection)
+                            {
+                                unitInfo.SetToModel(inCollection);
+                            }
                             unitInfo.isActive = 1;
                             unitInfo.SaveToDB();
                         }
                         else
                         {
-                            //If not-active, but is in Active Encountres (menu info card) activate this unit
+                            //If not-active, but is in Active Encounters (menu info card) activate this unit
                             await db.ActiveEncounter.update(item.id, { isActive: 1 });
                         }
                         mainList.inSceneUnits.push(item.id); // For tracking scene state
