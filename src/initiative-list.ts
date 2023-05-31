@@ -9,7 +9,6 @@ import { liveQuery } from "dexie";
 import * as Buttons from "./initiative-list-buttons";
 import UnitInfo from "./unit-info";
 import * as Utilities from './utilities';
-import { trim } from "jquery";
 
 export class InitiativeList
 {
