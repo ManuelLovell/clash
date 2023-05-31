@@ -121,6 +121,9 @@ If you have questions, please join the [Owlbear Rodeo Discord](https://discord.g
 
 
 **Changes**
+- v1.0.6 - Auto-Import for like named Tokens (from your Collection).
+          So if you have a Werewolf in your Collection, and drag in a token named Werewolf, it will auto-import the stat block when added to the initiative (or clicking View Unit Info). This will also work for 'incremented' names, like Werewolf A, Werewolf B or Werewolf 1 but should exclude names like Werewolf Rider or Werewolf Taskmaster.
+          (This only works on tokens that haven't been added to the list yet, or have had their info viewed via 'View UnitInfo' - as those two actions will populate the data based on the current name.)
 
 - v1.0.5 - Light/Dark mode can be toggled via the Owlbear settings.
          - Group-Edit has been added, select a group of units and assign information all at once - once saved, the resulting units will have iterating letters at the end to differentiate. (Wolf A, Wolf B, Wolf C, etc..)

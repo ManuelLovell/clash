@@ -163,6 +163,7 @@ export function AppendClearListButton(document: Document, list: InitiativeList):
         await OBR.scene.items.deleteItems([Constants.LABEL]);
         await list.UpdateTrackerForPlayers();
         await list.ShowTurnSelection();
+        await list.Save();
     }
     resetContainer.appendChild(resetTurnButton);
 
