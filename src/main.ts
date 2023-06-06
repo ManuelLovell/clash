@@ -24,7 +24,7 @@ OBR.onReady(async () =>
 {
     sceneReady = await OBR.scene.isReady();
     LoadScene(sceneReady);
-    
+
     OBR.scene.onReadyChange(async (ready) =>
     {
         LoadScene(ready);
@@ -50,6 +50,9 @@ async function LoadScene(ready: boolean)
         app!.innerHTML = `
             <div>
             <h1>Waiting for Scene...</h1>
+            <div class="imageContainer">
+            <img class="resize_fit_center" src="logo.png" alt="Clash!" class="center">
+            </div>
             </div>`;
     }
 }
