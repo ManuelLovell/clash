@@ -35,8 +35,9 @@ export class InitiativeList
         this.ShowSettingsMenu(false);
         this.ShowMainMenu(true);
 
+        const mainContainer = document.querySelector<HTMLDivElement>('#clash-main-body-app')!;
         // Place base HTML and Containers
-        document.querySelector<HTMLDivElement>('#clash-main-body-app')!.innerHTML = `
+        mainContainer.innerHTML = `
         <table id="initiative-list">
         <thead>
             <tr>
@@ -55,6 +56,13 @@ export class InitiativeList
         <div id="bombContainer" class="bombBottom"><span id="resetContainer" class=""></span></div>
         </footer>
         `;
+        if (db.inMemory)
+        {
+            const warning: HTMLElement = document.createElement('div');
+            warning.innerText = "Local Storage Disabled - Features Limited";
+            warning.className = "noDatabase";
+            mainContainer.prepend(warning);
+        }
 
         // Append basic form buttons
         //this.AppendSaveOrderButton();
@@ -133,7 +141,7 @@ export class InitiativeList
             });
 
             let missingIds = this.activeUnits.filter(({ id: listId }) => !items.some(({ id: itemId }) => itemId === listId));
-            missingIds.forEach(async unit => 
+            missingIds.forEach(async unit =>
             {
                 // Update will trigger Refreshlist, do not want to call directly
                 await db.ActiveEncounter.update(unit.id, { isActive: 0 });
@@ -174,7 +182,7 @@ export class InitiativeList
             this.activeUnits = activeEncounterUnits.filter(aUnits => this.inSceneUnits.includes(aUnits.id));
 
             // Reactivate Units as needed
-            this.activeUnits.forEach(async unit => 
+            this.activeUnits.forEach(async unit =>
             {
                 // Update will trigger Refreshlist, do not want to call directly
                 await db.ActiveEncounter.update(unit.id, { isActive: 1 });
@@ -238,7 +246,7 @@ export class InitiativeList
             rollerButton.title = "Roll this Unit's Iniative";
             rollerButton.id = `rB${unit.id}`;
             rollerButton.className = "clickable";
-            rollerButton.onclick = async function () 
+            rollerButton.onclick = async function ()
             {
                 const dexBonus = parseFloat(initiativeInput.getAttribute("unit-dexbonus")!);
                 initiativeInput.value = (dexBonus + Math.floor(Math.random() * (20 - 1) + 1)).toString();
@@ -257,7 +265,7 @@ export class InitiativeList
             nameToggle.style.overflow = "hidden";
 
             nameToggle.className = unit.isMonster ? "isMonster nameToggleInput" : "nameToggleInput";
-            nameToggle.onclick = async function () 
+            nameToggle.onclick = async function ()
             {
                 if (nameToggle.className == "isMonster nameToggleInput")
                 {
@@ -342,7 +350,7 @@ export class InitiativeList
             triangleImg.title = "View/Edit this Unit's Stats";
             triangleImg.id = `tB${unit.id}`;
             triangleImg.className = "clickable";
-            triangleImg.onclick = async function (e) 
+            triangleImg.onclick = async function (e)
             {
                 const currentTarget = e.currentTarget as HTMLInputElement;
                 await self.OpenSubMenu(currentTarget.id.substring(2));
@@ -379,7 +387,7 @@ export class InitiativeList
         const table = <HTMLTableElement>document.getElementById("initiative-list");
         if (table.rows?.length > 1)
         {
-            for (var i = 0, row; row = table.rows[i]; i++) 
+            for (var i = 0, row; row = table.rows[i]; i++)
             {
                 row.classList.remove("turnOutline");
             }
@@ -522,6 +530,9 @@ export class InitiativeList
 
     private setupContextMenu(mainList: InitiativeList)
     {
+        // Regex to match alphanumeric preceded by a space at end of string
+        const alphanumericmatchex = /\s[\da-zA-Z]$/;
+
         // Disable info card for people who have localstorage turned off
         // It doesn't work for how the inmemory window is setup
         // Plus have the functionality is to save things
@@ -552,12 +563,33 @@ export class InitiativeList
                     if (context.items.length == 1)
                     {
 
-                        const unit = context.items[0];
+                        const unit = context.items[0] as Image;
+                        const uName = unit.text?.plainText || unit.name;
                         const dbUnitInfo = await db.ActiveEncounter.get(unit.id);
 
                         if (!dbUnitInfo)
                         {
-                            let unitInfo = new UnitInfo(unit.id, unit.name);
+                            let unitInfo = new UnitInfo(unit.id, uName);
+
+                            // If the base token matches something in Collection, use that information
+                            if (alphanumericmatchex.test(uName))
+                            {
+                                const trimName = uName.slice(0, -2);
+                                const inCollection = await db.Creatures.get({ unitName: trimName });
+                                if (inCollection)
+                                {
+                                    unitInfo.SetToModel(inCollection);
+                                }
+                            }
+                            else 
+                            {
+                                const inCollection = await db.Creatures.get({ unitName: uName });
+                                if (inCollection)
+                                {
+                                    unitInfo.SetToModel(inCollection);
+                                }
+                            }
+
                             await unitInfo.SaveToDB();
                         }
 
@@ -578,11 +610,32 @@ export class InitiativeList
                         // Go through the list and make sure everyone is in the DB first
                         context.items.forEach(async unit =>
                         {
+                            const unitImage = unit as Image;
+                            const uName = unitImage.text?.plainText || unitImage.name;
+
                             const dbUnitInfo = await db.ActiveEncounter.get(unit.id);
 
                             if (!dbUnitInfo)
                             {
-                                let unitInfo = new UnitInfo(unit.id, unit.name);
+                                let unitInfo = new UnitInfo(unit.id, uName);
+                                // If the base token matches something in Collection, use that information
+                                if (alphanumericmatchex.test(uName))
+                                {
+                                    const trimName = uName.slice(0, -2);
+                                    const inCollection = await db.Creatures.get({ unitName: trimName });
+                                    if (inCollection)
+                                    {
+                                        unitInfo.SetToModel(inCollection);
+                                    }
+                                }
+                                else 
+                                {
+                                    const inCollection = await db.Creatures.get({ unitName: uName });
+                                    if (inCollection)
+                                    {
+                                        unitInfo.SetToModel(inCollection);
+                                    }
+                                }
                                 await unitInfo.SaveToDB();
                             }
                         });
@@ -651,19 +704,38 @@ export class InitiativeList
                         }
                     });
 
-                    ids.forEach(async item => 
+                    ids.forEach(async item =>
                     {
                         //Check if unit is in our ActiveList (via menu Info Card), if not - activate and add
                         const checkUnit = await db.ActiveEncounter.get(item.id);
                         if (!checkUnit)
                         {
                             let unitInfo = new UnitInfo(item.id, item.name);
+                            // If the base token matches something in Collection, use that information
+                            // If the base token matches something in Collection, use that information
+                            if (alphanumericmatchex.test(item.name))
+                            {
+                                const trimName = item.name.slice(0, -2);
+                                const inCollection = await db.Creatures.get({ unitName: trimName });
+                                if (inCollection)
+                                {
+                                    unitInfo.SetToModel(inCollection);
+                                }
+                            }
+                            else 
+                            {
+                                const inCollection = await db.Creatures.get({ unitName: item.name });
+                                if (inCollection)
+                                {
+                                    unitInfo.SetToModel(inCollection);
+                                }
+                            }
                             unitInfo.isActive = 1;
                             unitInfo.SaveToDB();
                         }
                         else
                         {
-                            //If not-active, but is in Active Encountres (menu info card) activate this unit
+                            //If not-active, but is in Active Encounters (menu info card) activate this unit
                             await db.ActiveEncounter.update(item.id, { isActive: 1 });
                         }
                         mainList.inSceneUnits.push(item.id); // For tracking scene state
@@ -681,7 +753,7 @@ export class InitiativeList
                         }
                     });
 
-                    ids.forEach(async item => 
+                    ids.forEach(async item =>
                     {
                         await db.ActiveEncounter.update(item.id, { isActive: 0 });
                         mainList.inSceneUnits = mainList.inSceneUnits.filter(id => id != item.id); // For tracking scene state
