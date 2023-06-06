@@ -7,6 +7,7 @@ import '/src/css/style.css'
 // Render main window
 const main = new InitiativeList();
 const sub = new PlayerList();
+let sceneReady = false;
 
 const app = document.querySelector<HTMLDivElement>('#clash-main-body-app');
 const database = db;
@@ -21,13 +22,34 @@ app!.innerHTML = `
 // Setup OBR functions
 OBR.onReady(async () =>
 {
-    const user = await OBR.player.getRole();
-    if (user === "GM")
+    sceneReady = await OBR.scene.isReady();
+    LoadScene(sceneReady);
+    
+    OBR.scene.onReadyChange(async (ready) =>
     {
-        await main.RenderInitiativeList(document);
+        LoadScene(ready);
+    });
+});
+
+async function LoadScene(ready: boolean)
+{
+    const user = await OBR.player.getRole();
+    if (ready)
+    {
+        if (user === "GM")
+        {
+            await main.RenderInitiativeList(document);
+        }
+        else
+        {
+            await sub.Render(document);
+        }
     }
     else
     {
-        await sub.Render(document);
+        app!.innerHTML = `
+            <div>
+            <h1>Waiting for Scene...</h1>
+            </div>`;
     }
-});
+}

@@ -115,7 +115,9 @@ footer {
     height: 48px;
     width: 100%;
 }
-
+h1 {
+    text-align: center;
+}
 .bottom {
     position: absolute;
     bottom: 0;

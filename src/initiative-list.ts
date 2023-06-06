@@ -213,7 +213,7 @@ export class InitiativeList
             : this.activeUnits.sort((a, b) => b.initiative - a.initiative || a.unitName.localeCompare(b.unitName)!);
 
         //Clear the table
-        while (tableElement.rows.length > 0)
+        while (tableElement?.rows.length > 0)
         {
             tableElement.deleteRow(0);
         }
