@@ -142,7 +142,6 @@ export class InitiativeList
 
         // The purpose of these is to catch the Add/Remove from Owlbear-ContextMenu without OBRs listener
         let updateDb = liveQuery(async () => await db.ActiveEncounter.toArray());
-        //updateDb.subscribe(() => this.RefreshList(), error => console.error('Clash!SubscriptionError: ' + error));
 
         updateDb.subscribe({
             next: result => this.RefreshList(result),
@@ -512,7 +511,7 @@ export class InitiativeList
         const modalBuffer = 100;
         const windowHeight = window.outerHeight - 150; // Magic number to account for browser bars, can't access parent (CORS)
         const viewableHeight = windowHeight > 800 ? 700 : windowHeight - modalBuffer; // Using 100 as a buffer to account for padding.
-        console.log(windowHeight);
+        
         await OBR.modal.open({
             id: Constants.EXTENSIONSUBMENUID,
             url: `/submenu/subindex.html?unitid=${unitId}`,
@@ -589,7 +588,6 @@ export class InitiativeList
                         });
 
                         //set up a lot of things
-                        console.log(context.items.map(item => item.id));
                         const unitIdString = context.items.map(item => item.id).toString();
                         const unitActiveStatus = context.items.map(item => item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`] !== undefined).toString();
 

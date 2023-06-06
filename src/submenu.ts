@@ -301,10 +301,11 @@ export class SubMenu
 
                         const bonus = Number(hitValue?.substring(1));
                         const roll = bonus == 0 ? `(1d20)` : `(1d20 + ${bonus})`;
-                        console.log(bonus);
+                        const result = DiceRoller.RollString(roll!);
 
-                        const message = `${this.currentUnit.unitName} used ${attack} and rolled ${value.textContent} for ... ${DiceRoller.RollString(roll!)} to hit!`;
-                        this.SendtoChatLog(message)
+                        const message = `${this.currentUnit.unitName} used ${attack} and rolled ${value.textContent} for ... ${result} to hit!`;
+                        const critical = (result - bonus) == 20 ? true : false;
+                        this.SendtoChatLog(message, critical);
                         return await OBR.notification.show(message);
                     }
                     return null;
@@ -842,7 +843,6 @@ export class SubMenu
                 await db.ActiveEncounter.put(self.currentUnit, self.POPOVERSUBMENUID);
 
                 //Update name in OBR
-                console.log(OBR.isReady);
                 await OBR.scene.items.updateItems(
                     (item: Item) => item.id == self.currentUnit.id,
                     (items: Image[]) =>
@@ -1181,15 +1181,15 @@ export class SubMenu
         return string;
     }
 
-    private async SendtoChatLog(message: string): Promise<void>
+    private async SendtoChatLog(message: string, crit = false): Promise<void>
     {
         const settingData = await db.Settings.get(Constants.SETTINGSID);
         const targetId = settingData?.gmRumbleLog ? this.userId : "0000";
 
         const now = new Date().toISOString();
         const metadata: Metadata = {};
-        metadata[`${Constants.EXTENSIONID}/metadata_chatlog`] = { chatlog: message, sender: "Clash!", targetId: targetId, created: now, color: "#ff9294" };
-        return await OBR.scene.setMetadata(metadata);
+        metadata[`${Constants.EXTENSIONID}/metadata_chatlog`] = { chatlog: message, sender: "Clash!", targetId: targetId, created: now, color: "#ff9294", critical: crit };
+        return await OBR.player.setMetadata(metadata);
     }
 }
 
