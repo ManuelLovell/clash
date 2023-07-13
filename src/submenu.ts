@@ -22,10 +22,20 @@ export class SubMenu
     multiActive: string[] = [];
     multiIds: string[] = [];
 
+    importReturnContainer: HTMLElement;
+    importBarContainer: HTMLElement;
+    searchBarContainer: HTMLElement;
+    mainFooterContainer: HTMLElement;
+
     constructor()
     {
         this.freshImport = false;
         this.favorite = false;
+
+        this.importReturnContainer = document.getElementById("importReturnContainer")!;
+        this.importBarContainer = document.getElementById("importFooterButtonContainer")!;
+        this.searchBarContainer = document.getElementById("searchFooterButtonContainer")!;
+        this.mainFooterContainer = document.getElementById("mainFooterContainer")!;
 
         const queryString = window.location.search;
         const urlParams = new URLSearchParams(queryString);
@@ -40,7 +50,12 @@ export class SubMenu
             this.multiIds = idParam.split(",");
             this.multiActive = mActiveParam?.split(",");
             this.POPOVERSUBMENUID = Constants.MULTISHEETID;
-            document.documentElement.style.borderColor = "deeppink"
+            document.documentElement.style.borderColor = "deeppink";
+            const subs = document.querySelectorAll<HTMLElement>("#submenu, #searchmenu, #importjsonmenu")!;
+            subs.forEach((sub: HTMLElement) =>
+            {
+                sub.style.height = "90%";
+            });
         }
         else
         {
@@ -235,8 +250,6 @@ export class SubMenu
             <div class="hr"></div>
             ${unitSpellsHtml}
             </div>
-            <footer id="footerButtonContainer">
-            </footer>
            `;
 
             // Stop linebreaks in contenteditables
@@ -259,6 +272,7 @@ export class SubMenu
             this.AppendUnitSaveButton();
             this.AppendAddActionButtons();
             this.AppendImportUnitButton();
+            this.AppendSearchButtons();
             this.AppendJSONButton();
 
             const dmgRollables = document.querySelectorAll('.clickableRollerDmg');
@@ -362,9 +376,24 @@ export class SubMenu
     {
         const favIcon = "♥";
         var self = this;
+
+        const searchButton = document.querySelector<HTMLInputElement>('#searchValue')!;
+        searchButton.addEventListener("keypress", async function (event)
+        {
+            if (event.key === "Enter")
+            {
+                await DoASearch();
+            }
+        });
+
+        const searchConfirmButton = document.querySelector<HTMLInputElement>("#searchConfirm")!;
+        searchConfirmButton.onclick = async function () 
+        {
+            await DoASearch();
+        };
+
         document.querySelector<HTMLDivElement>('#searchmenu')!.innerHTML = `
             <div id="searchResultsContainer"><ul id="monsterList"><div class="superCenter">No favorites to show.</div></ul></div>
-            <footer></span><span class="returnFloatRight" id="searchFooterButtonContainer"></span></footer>
            `;
 
         //Show favorites
@@ -410,56 +439,14 @@ export class SubMenu
             });
         }
 
-        const searchBarContainer = document.getElementById("searchFooterButtonContainer");
-
-        //Create Return Button
-        const goBackButton = document.createElement('input');
-        goBackButton.type = "button";
-        goBackButton.id = "returnButton";
-        goBackButton.className = "chalkBorder";
-        goBackButton.style.marginRight = "4px";
-        goBackButton.title = "Go back to Unit Information";
-        goBackButton.value = "Return";
-        goBackButton.onclick = async function () 
-        {
-            self.ShowSearchMenu(false);
-            self.ShowSubMenu(true);
-        }
-
-        //Create Search Input Button
-        const searchValueButton = document.createElement('input');
-        searchValueButton.type = "search";
-        searchValueButton.id = "searchValue";
-        searchValueButton.className = "textInput";
-        searchValueButton.title = "Type a value to filter monsters by"
-        searchValueButton.addEventListener("keypress", async function (event)
-        {
-            if (event.key === "Enter")
-            {
-                await DoASearch();
-            }
-        });
-
-        //Create Search Confirm Button
-        const searchConfirmButton = document.createElement('input');
-        searchConfirmButton.type = "button";
-        searchConfirmButton.id = "searchConfirm";
-        searchConfirmButton.value = "Search";
-        searchConfirmButton.className = "chalkBorder";
-        searchConfirmButton.style.marginLeft = "4px";
-        searchConfirmButton.title = "Click to send Search"
-        searchConfirmButton.onclick = async function () 
-        {
-            await DoASearch();
-        }
-
         async function DoASearch()
         {
             const list = document.querySelector<HTMLDivElement>('#monsterList')!;
+
             list.innerHTML = `<div class="superCenter">Searching...</div>`;
             let monsterInformationHtml = "";
 
-            await fetch(`${self.open5eApiString}${searchValueButton.value}`)
+            await fetch(`${self.open5eApiString}${searchButton.value}`)
                 .then(function (response)
                 {
                     return response.json();
@@ -481,7 +468,7 @@ export class SubMenu
                     }
                 });
 
-            const dexieSearch = await db.Creatures.filter(unit => unit.unitName.toLowerCase().includes(searchValueButton.value.toLocaleLowerCase())).toArray();
+            const dexieSearch = await db.Creatures.filter(unit => unit.unitName.toLowerCase().includes(searchButton.value.toLocaleLowerCase())).toArray();
             if (dexieSearch.length > 0)
             {
                 dexieSearch.forEach((monster) =>
@@ -538,9 +525,6 @@ export class SubMenu
             }
         }
 
-        searchBarContainer?.append(goBackButton);
-        searchBarContainer?.append(searchValueButton);
-        searchBarContainer?.append(searchConfirmButton);
 
         function TruncateName(name: string): string
         {
@@ -614,12 +598,9 @@ export class SubMenu
             <div class="hr"></div>
             <h3>Sub Types</h3>
             ${this.exampleTypesString()}
-            <footer><span id="importReturnContainer"></span><span id="importFooterButtonContainer"></span></footer>
            `;
 
         const importDataContainer = document.getElementById("importDataContainer");
-        const importReturnContainer = document.getElementById("importReturnContainer");
-        const importBarContainer = document.getElementById("importFooterButtonContainer");
 
         //Create JSON Return Button
         const goBackButton = document.createElement('input');
@@ -668,9 +649,9 @@ export class SubMenu
             }
         }
 
-        importReturnContainer?.append(goBackButton);
+        this.importReturnContainer?.append(goBackButton);
         importDataContainer?.append(importValueButton);
-        importBarContainer?.append(importConfirmButton);
+        this.importBarContainer?.append(importConfirmButton);
     }
 
     private exampleInterfaceString(): string
@@ -752,9 +733,6 @@ export class SubMenu
     {
         var self = this;
 
-        //Get footer Container
-        const footerContainer = document.getElementById("footerButtonContainer");
-
         const gotoSearchButton = document.createElement('input');
         gotoSearchButton.type = "button";
         gotoSearchButton.id = "gotoMonsterSearchButton";
@@ -769,15 +747,50 @@ export class SubMenu
             self.renderSearchForm(document);
         }
 
-        footerContainer?.appendChild(gotoSearchButton);
+        this.mainFooterContainer.appendChild(gotoSearchButton);
     }
 
-    private AppendJSONButton(): void
+    private AppendSearchButtons(): void
     {
         var self = this;
 
-        //Get footer Container
-        const footerContainer = document.getElementById("footerButtonContainer");
+        //Create Return Button
+        const goBackButton = document.createElement('input');
+        goBackButton.type = "button";
+        goBackButton.id = "returnButton";
+        goBackButton.className = "chalkBorder";
+        goBackButton.style.marginRight = "4px";
+        goBackButton.title = "Go back to Unit Information";
+        goBackButton.value = "Return";
+        goBackButton.onclick = async function () 
+        {
+            self.ShowSearchMenu(false);
+            self.ShowSubMenu(true);
+        }
+
+        //Create Search Input Button
+        const searchValueButton = document.createElement('input');
+        searchValueButton.type = "search";
+        searchValueButton.id = "searchValue";
+        searchValueButton.className = "textInput";
+        searchValueButton.title = "Type a value to filter monsters by";
+
+        //Create Search Confirm Button
+        const searchConfirmButton = document.createElement('input');
+        searchConfirmButton.type = "button";
+        searchConfirmButton.id = "searchConfirm";
+        searchConfirmButton.value = "Search";
+        searchConfirmButton.className = "chalkBorder";
+        searchConfirmButton.style.marginLeft = "4px";
+        searchConfirmButton.title = "Click to send Search";
+
+        this.searchBarContainer?.append(goBackButton);
+        this.searchBarContainer?.append(searchValueButton);
+        this.searchBarContainer?.append(searchConfirmButton);
+    }
+    private AppendJSONButton(): void
+    {
+        var self = this;
 
         const gotoImportJSONButton = document.createElement('input');
         gotoImportJSONButton.type = "button";
@@ -793,7 +806,7 @@ export class SubMenu
             self.renderCustomImportForm(document);
         }
 
-        footerContainer?.appendChild(gotoImportJSONButton);
+        this.mainFooterContainer.appendChild(gotoImportJSONButton);
     }
 
     private AppendUnitSaveButton(): void
@@ -1008,7 +1021,7 @@ export class SubMenu
             const legendCollection = <HTMLElement>document.getElementById("formLegendaryCollection");
             const baseLegendHtml = `<div id="formLegendaryContainer" class="Legendary"><span id="formLegendaryName" class="legendaryname" contentEditable="true">Legend-Name.</span>.
                 <span id="formLegendaryDesc" class="description" contentEditable="true">Legend-Desc</span></div>`;
-                legendCollection.insertAdjacentHTML('beforeend', baseLegendHtml);
+            legendCollection.insertAdjacentHTML('beforeend', baseLegendHtml);
         }
         addLegendaryButton.src = "/add.svg";
         addLegendaryButton.height = 20;
@@ -1031,7 +1044,7 @@ export class SubMenu
             const reactCollection = <HTMLElement>document.getElementById("formReactionCollection");
             const baseReactHtml = `<div id="formReactionContainer" class="Reaction"><span id="formReactionName" class="reactionname" contentEditable="true">React-Name.</span>.
                 <span id="formReactionDesc" class="description" contentEditable="true">React-Desc</span></div>`;
-                reactCollection.insertAdjacentHTML('beforeend', baseReactHtml);
+            reactCollection.insertAdjacentHTML('beforeend', baseReactHtml);
         }
         addReactionButton.src = "/add.svg";
         addReactionButton.height = 20;
@@ -1116,18 +1129,33 @@ export class SubMenu
     {
         const page = document.querySelector<HTMLDivElement>('#submenu')!;
         page.hidden = !show;
+
+        this.importReturnContainer.hidden = true;
+        this.importBarContainer.hidden = true;
+        this.searchBarContainer.hidden = true;
+        this.mainFooterContainer.hidden = false;
     }
 
     private ShowSearchMenu(show: boolean): void
     {
         const page = document.querySelector<HTMLDivElement>('#searchmenu')!;
         page.hidden = !show;
+
+        this.importReturnContainer.hidden = true;
+        this.importBarContainer.hidden = true;
+        this.searchBarContainer.hidden = false;
+        this.mainFooterContainer.hidden = true;
     }
 
     private ShowImportJSONMenu(show: boolean): void
     {
         const page = document.querySelector<HTMLDivElement>('#importjsonmenu')!;
         page.hidden = !show;
+
+        this.importReturnContainer.hidden = false;
+        this.importBarContainer.hidden = false;
+        this.searchBarContainer.hidden = true;
+        this.mainFooterContainer.hidden = true;
     }
 
     private async ImportNewMonsterInfo(slug: string): Promise<void>

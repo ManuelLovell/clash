@@ -19,7 +19,7 @@ export class LabelLogic
             label.visible = false;
             label.type = "LABEL";
             label.id = Constants.LABEL;
-            label.style = { backgroundColor: "#A73335", backgroundOpacity: .5, pointerDirection: "DOWN", pointerWidth: 15, pointerHeight: 15, cornerRadius: 10 };
+            label.style = { backgroundColor: "#bb99ff", backgroundOpacity: .5, pointerDirection: "DOWN", pointerWidth: 15, pointerHeight: 15, cornerRadius: 10 };
             const table = <HTMLTableElement>document.getElementById("initiative-list");
             if (table.rows?.length > 1)
             {

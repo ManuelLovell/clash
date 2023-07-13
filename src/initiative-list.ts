@@ -602,7 +602,8 @@ export class InitiativeList
                             url: `/submenu/subindex.html?unitid=${unit.id}`,
                             height: viewableHeight,
                             width: 325,
-                            anchorElementId: elementId
+                            anchorElementId: elementId,
+                            hidePaper: true
                         });
                     }
                     else
@@ -653,7 +654,8 @@ export class InitiativeList
                             url: `/submenu/subindex.html?unitid=${unitIdString}&unitactive=${unitActiveStatus}&multi=true`,
                             height: viewableHeight,
                             width: 325,
-                            anchorElementId: elementId
+                            anchorElementId: elementId,
+                            hidePaper: true
                         });
                     }
                 }
