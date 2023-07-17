@@ -586,7 +586,6 @@ export class SubMenu
 
     private async renderCustomImportForm(document: Document): Promise<void>
     {
-        var self = this;
         document.querySelector<HTMLDivElement>('#importjsonmenu')!.innerHTML = `
             <h2>Import Custom JSON</h2>
             <div id="importDataContainer"></div>
@@ -602,56 +601,14 @@ export class SubMenu
 
         const importDataContainer = document.getElementById("importDataContainer");
 
-        //Create JSON Return Button
-        const goBackButton = document.createElement('input');
-        goBackButton.type = "button";
-        goBackButton.id = "returnButton";
-        goBackButton.className = "chalkBorder";
-        goBackButton.style.marginRight = "4px";
-        goBackButton.title = "Go back to Unit Information";
-        goBackButton.value = "Return";
-        goBackButton.onclick = async function () 
-        {
-            self.ShowImportJSONMenu(false);
-            self.ShowSubMenu(true);
-        }
-
         //Create import Input Button
         const importValueButton = document.createElement('textarea');
         importValueButton.id = "customJsonValueBox";
         importValueButton.className = "";
         importValueButton.title = "Type custom monster information here"
 
-        //Create import Confirm Button
-        const importConfirmButton = document.createElement('input');
-        importConfirmButton.type = "button";
-        importConfirmButton.id = "importConfirm";
-        importConfirmButton.value = "Confirm Import";
-        importConfirmButton.className = "chalkBorder";
-        importConfirmButton.style.marginLeft = "4px";
-        importConfirmButton.title = "Click to import custom data"
-        importConfirmButton.onclick = async function () 
-        {
-            const customData = importValueButton.value;
-
-            try 
-            {
-                subMenu.freshImport = true;
-                //TODO: Add UnitCheck to see if UnitID still exists in OBR
-                //Delete hook will remove it from DB
-
-                subMenu.currentUnit.ImportFromJSON(customData);
-                subMenu.renderUnitInfo(document);
-            }
-            catch (error) 
-            {
-                alert(`The import failed - ${error}`);
-            }
-        }
-
-        this.importReturnContainer?.append(goBackButton);
         importDataContainer?.append(importValueButton);
-        this.importBarContainer?.append(importConfirmButton);
+        this.AppendImportCustomButtons();
     }
 
     private exampleInterfaceString(): string
@@ -733,6 +690,9 @@ export class SubMenu
     {
         var self = this;
 
+        const buttonFound = document.getElementById("gotoMonsterSearchButton");
+        if (buttonFound) return;
+
         const gotoSearchButton = document.createElement('input');
         gotoSearchButton.type = "button";
         gotoSearchButton.id = "gotoMonsterSearchButton";
@@ -753,6 +713,9 @@ export class SubMenu
     private AppendSearchButtons(): void
     {
         var self = this;
+
+        const buttonFound = document.getElementById("returnButton");
+        if (buttonFound) return;
 
         //Create Return Button
         const goBackButton = document.createElement('input');
@@ -788,9 +751,67 @@ export class SubMenu
         this.searchBarContainer?.append(searchValueButton);
         this.searchBarContainer?.append(searchConfirmButton);
     }
+
+    private AppendImportCustomButtons(): void
+    {
+        var self = this;
+
+        const buttonFound = document.getElementById("importConfirm");
+        if (buttonFound) return;
+
+        //Create JSON Return Button
+        const goBackButton = document.createElement('input');
+        goBackButton.type = "button";
+        goBackButton.id = "returnButton";
+        goBackButton.className = "chalkBorder";
+        goBackButton.style.marginRight = "4px";
+        goBackButton.title = "Go back to Unit Information";
+        goBackButton.value = "Return";
+        goBackButton.onclick = async function () 
+        {
+            self.ShowImportJSONMenu(false);
+            self.ShowSubMenu(true);
+        }
+
+        const importValueButton = <HTMLTextAreaElement>document.getElementById("importConfirm")!;
+
+        //Create import Confirm Button
+        const importConfirmButton = document.createElement('input');
+        importConfirmButton.type = "button";
+        importConfirmButton.id = "importConfirm";
+        importConfirmButton.value = "Confirm Import";
+        importConfirmButton.className = "chalkBorder";
+        importConfirmButton.style.marginLeft = "4px";
+        importConfirmButton.title = "Click to import custom data"
+        importConfirmButton.onclick = async function () 
+        {
+            const customData = importValueButton.value;
+
+            try 
+            {
+                subMenu.freshImport = true;
+                //TODO: Add UnitCheck to see if UnitID still exists in OBR
+                //Delete hook will remove it from DB
+
+                subMenu.currentUnit.ImportFromJSON(customData);
+                subMenu.renderUnitInfo(document);
+            }
+            catch (error) 
+            {
+                alert(`The import failed - ${error}`);
+            }
+        }
+
+        this.importReturnContainer?.append(goBackButton);
+        this.importBarContainer?.append(importConfirmButton);
+    }
+
     private AppendJSONButton(): void
     {
         var self = this;
+
+        const buttonFound = document.getElementById("gotoImportMonsterButton");
+        if (buttonFound) return;
 
         const gotoImportJSONButton = document.createElement('input');
         gotoImportJSONButton.type = "button";
