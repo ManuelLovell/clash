@@ -773,7 +773,7 @@ export class SubMenu
             self.ShowSubMenu(true);
         }
 
-        const importValueButton = <HTMLTextAreaElement>document.getElementById("importConfirm")!;
+        const importValueButton = <HTMLTextAreaElement>document.getElementById("customJsonValueBox")!;
 
         //Create import Confirm Button
         const importConfirmButton = document.createElement('input');
