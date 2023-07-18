@@ -1,4 +1,4 @@
-import OBR, { Metadata, Image } from "@owlbear-rodeo/sdk";
+import OBR, { Metadata, Image, Label } from "@owlbear-rodeo/sdk";
 import { Constants } from "./constants";
 import { ViewportFunctions } from './viewport';
 import { ICurrentTurnUnit } from './interfaces/current-turn-unit';
@@ -379,8 +379,31 @@ export class InitiativeList
             };
         }
 
+        this.AttachFocusListeners();
         await this.ShowTurnSelection();
     }
+
+    public AttachFocusListeners(): void
+    {
+        const table = document.getElementById('initiative-list');
+        if (table)
+        {
+            table.addEventListener('dblclick', FocusUnit);
+        }
+
+        async function FocusUnit(event: MouseEvent): Promise<void>
+        {
+            event.preventDefault();
+            
+            const row = (event.target as HTMLElement).closest('tr') as HTMLTableRowElement;
+            
+            const ctu: ICurrentTurnUnit = await LabelLogic.GetCTUFromRow(row);
+
+            await ViewportFunctions.CenterViewportOnImage(ctu);
+            
+        }
+    }
+
 
     public async ShowTurnSelection(): Promise<void>
     {
@@ -454,8 +477,26 @@ export class InitiativeList
 
     public async UpdateTrackerForPlayers()
     {
-        let trackedUnits: IUnitTrack[] = [];
-        let now = new Date().toISOString();
+        const trackedUnits: IUnitTrack[] = [];
+        const now = new Date().toISOString();
+        const updateLabels: Label[] = [];
+        //Find all hp bars
+
+        const hpBarsToUpdate = await OBR.scene.items.getItems(((item) => item.id.endsWith("_hpbar")));
+
+        hpBarsToUpdate.forEach(hpbar =>
+        {
+            const label = hpbar as Label;
+            const unit = this.activeUnits.find(x => x.id === label.id.replace("_hpbar", ""));
+            if (unit)
+            {
+                label.text.plainText = LabelLogic.getHealthPercentageString(unit.currentHP, unit.maxHP);
+                label.text.style.fillColor = LabelLogic.getHealthColorString(unit.currentHP, unit.maxHP);
+                updateLabels.push(label);
+            }
+        });
+        await OBR.scene.items.addItems(updateLabels);
+
         for (const unit of this.activeUnits)
         {
             trackedUnits.push(
@@ -469,7 +510,7 @@ export class InitiativeList
             );
         }
 
-        let Tracker: IOBRTracker = {
+        const Tracker: IOBRTracker = {
             turn: this.turnCounter,
             round: this.roundCounter,
             units: trackedUnits,
@@ -479,7 +520,7 @@ export class InitiativeList
             lastUpdate: now,
         };
 
-        let trackerMeta: Metadata = {};
+        const trackerMeta: Metadata = {};
         trackerMeta[`${Constants.EXTENSIONID}/metadata_trackeritem`] = { Tracker };
         await OBR.scene.setMetadata(trackerMeta);
     }
@@ -519,7 +560,7 @@ export class InitiativeList
         const modalBuffer = 100;
         const windowHeight = window.outerHeight - 150; // Magic number to account for browser bars, can't access parent (CORS)
         const viewableHeight = windowHeight > 800 ? 700 : windowHeight - modalBuffer; // Using 100 as a buffer to account for padding.
-        
+
         await OBR.modal.open({
             id: Constants.EXTENSIONSUBMENUID,
             url: `/submenu/subindex.html?unitid=${unitId}`,
@@ -662,6 +703,69 @@ export class InitiativeList
             });
         }
         OBR.contextMenu.create({
+            id: `${Constants.EXTENSIONID}/context-hp-menu`,
+            icons: [{
+                icon: "/health.svg",
+                label: "[Clash!] Show HP Bar",
+                filter: {
+                    every: [
+                        { key: "layer", value: "CHARACTER" },
+                        { key: ["metadata", `${Constants.EXTENSIONID}/metadata_hpbar`], value: undefined },
+                        { key: ["metadata", `${Constants.EXTENSIONID}/metadata_initiative`], value: undefined, operator: "!=" },
+
+                    ],
+                },
+            },
+            {
+                icon: "/health-black.svg",
+                label: "[Clash!] Hide HP Bar",
+                filter: {
+                    every: [{ key: "layer", value: "CHARACTER" },
+                    { key: ["metadata", `${Constants.EXTENSIONID}/metadata_hpbar`], value: undefined, operator: "!=" },],
+                },
+            },],
+            async onClick(context)
+            {
+                const showHPBars = context.items.every(
+                    (item) => item.metadata[`${Constants.EXTENSIONID}/metadata_hpbar`] === undefined
+                );
+                if (showHPBars)
+                {
+                    const showHpBars = true;
+                    const createBars: Label[] = [];
+                    await OBR.scene.items.updateItems(context.items, (items) =>
+                    {
+                        for (let item of items)
+                        {
+                            const image = item as Image;
+                            const activeUnit = mainList.activeUnits.find(x => x.id === item.id);
+                            if (activeUnit)
+                            {
+                                item.metadata[`${Constants.EXTENSIONID}/metadata_hpbar`] = { showHpBars };
+                                createBars.push(LabelLogic.UpdateHPBar(image, activeUnit.currentHP, activeUnit.maxHP));
+                            }
+                        }
+
+                    });
+                    await OBR.scene.items.addItems(createBars);
+                }
+                else
+                {
+                    const deleteBars = context.items.map(x => x.id + "_hpbar");
+                    await OBR.scene.items.deleteItems(deleteBars);
+
+                    OBR.scene.items.updateItems(context.items, (items) =>
+                    {
+                        for (let item of items)
+                        {
+                            delete item.metadata[`${Constants.EXTENSIONID}/metadata_hpbar`];
+                        }
+                    });
+                }
+
+            }
+        });
+        OBR.contextMenu.create({
             id: `${Constants.EXTENSIONID}/context-menu`,
             icons: [
                 {
@@ -745,6 +849,9 @@ export class InitiativeList
                 }
                 else
                 {
+                    const deleteBars = context.items.map(x => x.id + "_hpbar");
+                    await OBR.scene.items.deleteItems(deleteBars);
+
                     OBR.scene.items.updateItems(context.items, (items) =>
                     {
                         for (let item of items)
@@ -752,6 +859,7 @@ export class InitiativeList
                             ids.push({ id: item.id, name: item.name });
 
                             delete item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`];
+                            delete item.metadata[`${Constants.EXTENSIONID}/metadata_hpbar`];
                         }
                     });
 

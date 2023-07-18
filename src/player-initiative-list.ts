@@ -139,7 +139,29 @@ export class PlayerList
         }
 
         console.log("Show turn selection");
+        this.AttachFocusListeners();
         await this.ShowTurnSelection();
+    }
+
+    public AttachFocusListeners(): void
+    {
+        const table = document.getElementById('initiative-list');
+        if (table)
+        {
+            table.addEventListener('dblclick', FocusUnit);
+        }
+
+        async function FocusUnit(event: MouseEvent): Promise<void>
+        {
+            event.preventDefault();
+            
+            const row = (event.target as HTMLElement).closest('tr') as HTMLTableRowElement;
+            
+            const ctu: ICurrentTurnUnit = await LabelLogic.GetCTUFromRow(row);
+
+            await ViewportFunctions.CenterViewportOnImage(ctu);
+            
+        }
     }
 
     private async ShowTurnSelection(): Promise<void>

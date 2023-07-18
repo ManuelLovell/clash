@@ -8,7 +8,7 @@ export class LabelLogic
     static async UpdateLabel(ctu: ICurrentTurnUnit, settingsText: string): Promise<void>
     {
         const labelItemExists = await OBR.scene.items.getItems([Constants.LABEL]);
-        
+
         const labelText = settingsText ? settingsText : "« Go! »";
         let foundRow = false;
 
@@ -75,6 +75,82 @@ export class LabelLogic
                     }
                 }
             );
+        }
+    }
+
+    static UpdateHPBar(image: Image, cHP: number, mHP: number)
+    {
+        const hpbarId = image.id + "_hpbar";
+        // Calculate offset based on DPI for images resizd in the manager
+        const dpiOffset = image.grid.dpi / 150;
+
+        const health = LabelLogic.getHealthPercentageString(cHP, mHP);
+        const hColor = LabelLogic.getHealthColorString(cHP, mHP);
+
+        const label = buildLabel().plainText(health).fillOpacity(.85).fillColor(hColor).strokeWidth(.5).strokeColor("white").strokeOpacity(.50).build();
+        label.id = hpbarId;
+        label.type = "LABEL"; // Set Item Type
+        label.attachedTo = image.id; // Set Token Attached To
+        label.visible = image.visible ? true : false; // Set Visibility
+        label.locked = true; // Set Lock, Don't want people to touch
+        label.position = { x: image.position.x + dpiOffset, y: image.position.y + dpiOffset };
+        //label.metadata = markMeta;
+        label.disableAttachmentBehavior = ["ROTATION", "SCALE"];
+        label.position.y += ((image.image.height * image.scale.y / 4) / dpiOffset) - 50;
+        label.text.style.fontFamily = "Segoe UI";
+
+        label.style = {
+            backgroundColor: "#242424",
+            backgroundOpacity: .75,
+            cornerRadius: 10,
+            pointerDirection: "UP",
+            pointerHeight: 1,
+        };
+
+        return label;
+    }
+
+    static getHealthPercentageString(currentHealth: number, maxHealth: number): string
+    {
+        const healthPercentage = (currentHealth / maxHealth) * 100;
+
+        switch (true)
+        {
+            case healthPercentage <= 10:
+                return '▰▱▱▱▱▱▱▱▱▱ 10%';
+            case healthPercentage <= 20:
+                return '▰▰▱▱▱▱▱▱▱▱ 20%';
+            case healthPercentage <= 30:
+                return '▰▰▰▱▱▱▱▱▱▱ 30%';
+            case healthPercentage <= 40:
+                return '▰▰▰▰▱▱▱▱▱▱ 40%';
+            case healthPercentage <= 50:
+                return '▰▰▰▰▰▱▱▱▱▱ 50%';
+            case healthPercentage <= 60:
+                return '▰▰▰▰▰▰▱▱▱▱ 60%';
+            case healthPercentage <= 70:
+                return '▰▰▰▰▰▰▰▱▱▱ 70%';
+            case healthPercentage <= 80:
+                return '▰▰▰▰▰▰▰▰▱▱ 80%';
+            case healthPercentage <= 90:
+                return '▰▰▰▰▰▰▰▰▰▱ 90%';
+            default:
+                return '▰▰▰▰▰▰▰▰▰▰ 100%';
+        }
+    }
+
+    static getHealthColorString(currentHealth: number, maxHealth: number): string
+    {
+        const healthPercentage = (currentHealth / maxHealth) * 100;
+
+        switch (true)
+        {
+            case healthPercentage <= 25:
+                return 'red';
+            case healthPercentage <= 50:
+                return 'yellow';
+            default:
+                return 'white';
         }
     }
 
