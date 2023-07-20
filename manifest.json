@@ -1,5 +1,6 @@
 {
   "name": "Clash!",
+  "description": "Initiative tracker with creature stat blocks, HP bars and more.",
   "version": "1.0.6",
   "author": "Battle-System",
   "manifest_version": 1,
