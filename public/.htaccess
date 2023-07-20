@@ -54,6 +54,6 @@ RewriteRule . /index.php [L]
 
 # BEGIN Owlbear
 <IfModule mod_headers.c>
-Header set Access-Control-Allow-Origin "https://www.owlbear.app"
+Header set Access-Control-Allow-Origin *
 </IfModule>
 # END Owlbear
