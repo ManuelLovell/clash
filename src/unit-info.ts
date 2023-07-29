@@ -133,7 +133,7 @@ export default class UnitInfo implements IUnitInfo
         this.isActive = dbUnit.isActive;
     }
 
-    public SetToModel(unit: IUnitInfo): void
+    public SetToModel(unit: IUnitInfo, favorite?: boolean): void
     {
         this.initiative = unit.initiative;
         this.currentHP = unit.maxHP
@@ -189,6 +189,7 @@ export default class UnitInfo implements IUnitInfo
         this.speedBurrow = unit.speedBurrow;
         this.speedSwim = unit.speedSwim;
         this.dataSlug = unit.dataSlug;
+        this.favorite = favorite ? unit.favorite : false;
         this.CheckDefaults();
     }
 

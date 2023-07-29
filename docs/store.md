@@ -121,6 +121,8 @@ If you have questions, please join the [Owlbear Rodeo Discord](https://discord.g
 
 
 **Changes**
+- v1.0.8 - Added list-focus (double click a unit in the List to focus your camera on it) and HP bars (turn them on via the context menu of a token)
+- v1.0.7 - Theme update.
 - v1.0.6 - Auto-Import for like named Tokens (from your Collection).
           So if you have a Werewolf in your Collection, and drag in a token named Werewolf, it will auto-import the stat block when added to the initiative (or clicking View Unit Info). This will also work for 'incremented' names, like Werewolf A, Werewolf B or Werewolf 1 but should exclude names like Werewolf Rider or Werewolf Taskmaster.
           (This only works on tokens that haven't been added to the list yet, or have had their info viewed via 'View UnitInfo' - as those two actions will populate the data based on the current name.)

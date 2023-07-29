@@ -95,6 +95,11 @@ export async function RenderSettings(document: Document, list: InitiativeList): 
     importButton.title = "Choose a file to import"
     importButton.className = "tinyType";
 
+    const favBox = document.createElement('input');
+    favBox.type = "checkbox";
+    favBox.id = "favBox";
+    favBox.title = "Unfavorite during Upload";
+
     const importSubmitContainer = document.getElementById("importSubmitContainer");
     const importSubmitButton = document.createElement('input');
     importSubmitButton.type = "button";
@@ -111,12 +116,13 @@ export async function RenderSettings(document: Document, list: InitiativeList): 
 
             reader.readAsText(file);
 
-            reader.onload = function ()
+            reader.onload = async function ()
             {
                 try
                 {
                     const units: UnitInfo[] = JSON.parse(reader.result as string);
-                    UploadCollection(units);
+                    await UploadCollection(units);
+                    OBR.notification.show("Import Complete!", "SUCCESS");
                 }
                 catch (error) 
                 {
@@ -131,6 +137,8 @@ export async function RenderSettings(document: Document, list: InitiativeList): 
         }
     }
 
+    importAllContainer?.appendChild(favBox);
+    importAllContainer?.appendChild(document.createTextNode(`Un-Favorite  ˣ  `));
     importAllContainer?.appendChild(importButton);
     importSubmitContainer?.appendChild(importSubmitButton);
 
@@ -281,7 +289,7 @@ export async function RenderSettings(document: Document, list: InitiativeList): 
         uploadedItem.forEach(unit =>
         {
             let defaultItem = new UnitInfo("", "Default");
-            defaultItem.SetToModel(unit);
+            defaultItem.SetToModel(unit, !favBox.checked); // If its checked, we unfavorite
             defaultItem.tokenId = "";
 
             const foundMatch = database.find(data => data.unitName == unit.unitName && data.dataSlug == unit.dataSlug);
