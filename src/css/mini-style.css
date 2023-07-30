@@ -327,7 +327,9 @@ td {
 
 .attackname,
 .spellname,
-.abilityname {
+.abilityname,
+.reactionname,
+.legendaryname {
     font-weight: bold;
     font-style: italic;
 }
