@@ -5,7 +5,7 @@ import { ICurrentTurnUnit } from './interfaces/current-turn-unit';
 import { LabelLogic } from "./label-logic";
 import { db } from './local-database';
 import { IUnitInfo } from "./interfaces/unit-info";
-import { liveQuery } from "dexie";
+import { liveQuery } from "dexie";  
 import * as Buttons from "./initiative-list-buttons";
 import UnitInfo from "./unit-info";
 import * as Utilities from './utilities';
