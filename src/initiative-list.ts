@@ -1,4 +1,4 @@
-import OBR, { Metadata, Image, Label } from "@owlbear-rodeo/sdk";
+import OBR, { Metadata, Image, Text } from "@owlbear-rodeo/sdk";
 import { Constants } from "./constants";
 import { ViewportFunctions } from './viewport';
 import { ICurrentTurnUnit } from './interfaces/current-turn-unit';
@@ -479,14 +479,14 @@ export class InitiativeList
     {
         const trackedUnits: IUnitTrack[] = [];
         const now = new Date().toISOString();
-        const updateLabels: Label[] = [];
+        const updateLabels: Text[] = [];
         //Find all hp bars
 
         const hpBarsToUpdate = await OBR.scene.items.getItems(((item) => item.id.endsWith("_hpbar")));
 
         hpBarsToUpdate.forEach(hpbar =>
         {
-            const label = hpbar as Label;
+            const label = hpbar as Text;
             const unit = this.activeUnits.find(x => x.id === label.id.replace("_hpbar", ""));
             if (unit)
             {
@@ -732,7 +732,7 @@ export class InitiativeList
                 if (showHPBars)
                 {
                     const showHpBars = true;
-                    const createBars: Label[] = [];
+                    const createBars: Text[] = [];
                     await OBR.scene.items.updateItems(context.items, (items) =>
                     {
                         for (let item of items)

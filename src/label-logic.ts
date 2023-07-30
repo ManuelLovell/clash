@@ -1,4 +1,4 @@
-import OBR, { Item, Image, Label, buildLabel } from "@owlbear-rodeo/sdk";
+import OBR, { Item, Image, Label, buildLabel, buildText } from "@owlbear-rodeo/sdk";
 import { Constants } from "./constants";
 import { ICurrentTurnUnit } from "./interfaces/current-turn-unit";
 
@@ -81,31 +81,22 @@ export class LabelLogic
     static UpdateHPBar(image: Image, cHP: number, mHP: number)
     {
         const hpbarId = image.id + "_hpbar";
-        // Calculate offset based on DPI for images resizd in the manager
-        const dpiOffset = image.grid.dpi / 150;
 
         const health = LabelLogic.getHealthPercentageString(cHP, mHP);
         const hColor = LabelLogic.getHealthColorString(cHP, mHP);
 
-        const label = buildLabel().plainText(health).fillOpacity(.85).fillColor(hColor).strokeWidth(.5).strokeColor("white").strokeOpacity(.50).build();
+        const label = buildText().plainText(health).fontWeight(800).fillOpacity(.5).fillColor(hColor).strokeWidth(1).strokeColor("black").strokeOpacity(1).build();
         label.id = hpbarId;
-        label.type = "LABEL"; // Set Item Type
+        label.type = "TEXT"; // Set Item Type
         label.attachedTo = image.id; // Set Token Attached To
         label.visible = image.visible ? true : false; // Set Visibility
         label.locked = true; // Set Lock, Don't want people to touch
-        label.position = { x: image.position.x + dpiOffset, y: image.position.y + dpiOffset };
-        //label.metadata = markMeta;
+        label.position = {x: image.position.x - 70, y: image.position.y + 25};
         label.disableAttachmentBehavior = ["ROTATION", "SCALE"];
-        label.position.y += ((image.image.height * image.scale.y / 4) / dpiOffset) - 50;
         label.text.style.fontFamily = "Segoe UI";
-
-        label.style = {
-            backgroundColor: "#242424",
-            backgroundOpacity: .75,
-            cornerRadius: 10,
-            pointerDirection: "UP",
-            pointerHeight: 1,
-        };
+        label.text.style.fontSize = 24;
+        label.text.type = "PLAIN";
+        label.text.style.textAlign = "CENTER";
 
         return label;
     }
