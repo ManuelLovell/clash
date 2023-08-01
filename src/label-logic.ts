@@ -85,13 +85,13 @@ export class LabelLogic
         const health = LabelLogic.getHealthPercentageString(cHP, mHP);
         const hColor = LabelLogic.getHealthColorString(cHP, mHP);
 
-        const label = buildText().plainText(health).fontWeight(800).fillOpacity(.5).fillColor(hColor).strokeWidth(1).strokeColor("black").strokeOpacity(1).build();
+        const label = buildText().plainText(health).fontWeight(800).fillOpacity(.75).fillColor(hColor).strokeWidth(1).strokeColor("black").strokeOpacity(1).build();
         label.id = hpbarId;
         label.type = "TEXT"; // Set Item Type
         label.attachedTo = image.id; // Set Token Attached To
         label.visible = image.visible ? true : false; // Set Visibility
         label.locked = true; // Set Lock, Don't want people to touch
-        label.position = {x: image.position.x - 70, y: image.position.y + 25};
+        label.position = {x: image.position.x - 85, y: image.position.y + 25};
         label.disableAttachmentBehavior = ["ROTATION", "SCALE"];
         label.text.style.fontFamily = "Segoe UI";
         label.text.style.fontSize = 24;
@@ -107,26 +107,16 @@ export class LabelLogic
 
         switch (true)
         {
-            case healthPercentage <= 10:
-                return '▰▱▱▱▱▱▱▱▱▱ 10%';
             case healthPercentage <= 20:
-                return '▰▰▱▱▱▱▱▱▱▱ 20%';
-            case healthPercentage <= 30:
-                return '▰▰▰▱▱▱▱▱▱▱ 30%';
+                return '▰▱▱▱▱ 20%';
             case healthPercentage <= 40:
-                return '▰▰▰▰▱▱▱▱▱▱ 40%';
-            case healthPercentage <= 50:
-                return '▰▰▰▰▰▱▱▱▱▱ 50%';
+                return '▰▰▱▱▱ 40%';
             case healthPercentage <= 60:
-                return '▰▰▰▰▰▰▱▱▱▱ 60%';
-            case healthPercentage <= 70:
-                return '▰▰▰▰▰▰▰▱▱▱ 70%';
+                return '▰▰▰▱▱ 60%';
             case healthPercentage <= 80:
-                return '▰▰▰▰▰▰▰▰▱▱ 80%';
-            case healthPercentage <= 90:
-                return '▰▰▰▰▰▰▰▰▰▱ 90%';
+                return '▰▰▰▰▱ 80%';
             default:
-                return '▰▰▰▰▰▰▰▰▰▰ 100%';
+                return '▰▰▰▰▰ 100%';
         }
     }
 
