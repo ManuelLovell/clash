@@ -107,6 +107,8 @@ export class LabelLogic
 
         switch (true)
         {
+            case healthPercentage == 0:
+                return '▱▱▱▱▱ 0%';
             case healthPercentage <= 20:
                 return '▰▱▱▱▱ 20%';
             case healthPercentage <= 40:
