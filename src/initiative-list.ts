@@ -30,7 +30,7 @@ export class InitiativeList
 
     /**Render the main initiatve form from the GM perspective */
     public async RenderInitiativeList(document: Document): Promise<void>
-    {
+    {        
         this.setupContextMenu(this);
         this.ShowSettingsMenu(false);
         this.ShowMainMenu(true);
@@ -260,7 +260,7 @@ export class InitiativeList
             nameToggle.value = unit.isMonster ? `ʳ ${unit.unitName} ʴ` : unit.unitName;
             nameToggle.title = "Change between Player and Monster groups";
             nameToggle.id = `nT${unit.id}`;
-            nameToggle.style.width = "140px";
+            nameToggle.style.width = "100%";
             nameToggle.style.textOverflow = "ellipsis";
             nameToggle.style.overflow = "hidden";
 
@@ -358,6 +358,7 @@ export class InitiativeList
             triangleImg.src = "/triangle.svg";
             triangleImg.height = 20;
             triangleImg.width = 20;
+            triangleImg.style.marginLeft = "5px";
 
             initCell.appendChild(initiativeInput);
             initCell.style.width = "8%";
@@ -558,15 +559,29 @@ export class InitiativeList
     private async OpenSubMenu(unitId: string): Promise<void>
     {
         const modalBuffer = 100;
+        const mobile = window.innerWidth < Constants.MOBILEWIDTH;
         const windowHeight = window.outerHeight - 150; // Magic number to account for browser bars, can't access parent (CORS)
         const viewableHeight = windowHeight > 800 ? 700 : windowHeight - modalBuffer; // Using 100 as a buffer to account for padding.
 
-        await OBR.modal.open({
-            id: Constants.EXTENSIONSUBMENUID,
-            url: `/submenu/subindex.html?unitid=${unitId}`,
-            height: viewableHeight,
-            width: 350,
-        });
+        if (mobile)
+        {
+            await OBR.popover.open({
+                id: Constants.EXTENSIONSUBMENUID,
+                url: `/submenu/subindex.html?unitid=${unitId}`,
+                height: viewableHeight,
+                width: 325,
+                hidePaper: true
+            });
+        }
+        else
+        {
+            await OBR.modal.open({
+                id: Constants.EXTENSIONSUBMENUID,
+                url: `/submenu/subindex.html?unitid=${unitId}`,
+                height: viewableHeight,
+                width: 350,
+            });
+        }
     }
 
     private setupContextMenu(mainList: InitiativeList)
@@ -817,7 +832,6 @@ export class InitiativeList
                         if (!checkUnit)
                         {
                             let unitInfo = new UnitInfo(item.id, item.name);
-                            // If the base token matches something in Collection, use that information
                             // If the base token matches something in Collection, use that information
                             if (alphanumericmatchex.test(item.name))
                             {
