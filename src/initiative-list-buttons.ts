@@ -161,7 +161,6 @@ export function AppendClearListButton(document: Document, list: InitiativeList):
         await db.Tracker.add({ id: Constants.TURNTRACKER, currentRound: 1, currentTurn: 1 });
 
         await OBR.scene.items.deleteItems([Constants.LABEL]);
-        await list.UpdateTrackerForPlayers();
         await list.ShowTurnSelection();
         await list.Save();
     }
@@ -197,6 +196,7 @@ export function AppendClearListButton(document: Document, list: InitiativeList):
                     delete item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`];
                 }
             });
+            await list.Save();
         }
     }
     resetContainer.appendChild(clearButton);

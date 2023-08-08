@@ -9,7 +9,7 @@ export class PlayerList
 {
     roundCounter: number = 1;
     turnCounter: number = 1;
-    disableFocus: boolean = false;
+    enableAutoFocus: boolean = false;
     lastUpdate: string = "";
 
     /**Render the main initiatve list */
@@ -29,7 +29,7 @@ export class PlayerList
             <div id="roundCounter" class="playerBottom">
             <label class="switch" id="settingnoFocusContainer">
             <span class="slider round"></span>
-            </label> No AutoFocus
+            </label> AutoFocus
             <span id="roundCount" class="playerCenterish">Round: ${this.roundCounter}</span>
             </div>
             </footer>
@@ -39,13 +39,13 @@ export class PlayerList
             const container = document.getElementById(`settingnoFocusContainer`);
             const slider = document.createElement('input');
             slider.type = "checkbox";
-            slider.value = String(this.disableFocus);
-            slider.checked = this.disableFocus;
+            slider.value = String(this.enableAutoFocus);
+            slider.checked = this.enableAutoFocus;
             slider.onclick = async function (element)
             {
                 const target = element.target as HTMLInputElement;
                 slider.value = String(target.checked);
-                self.disableFocus = target.checked;
+                self.enableAutoFocus = target.checked;
             }
             container?.insertBefore(slider, container.firstChild);
             
@@ -99,7 +99,9 @@ export class PlayerList
         {
             let row = tableElement.insertRow(-1);
             let initCell = row.insertCell(0);
+            initCell.style.placeContent = "center";
             let nameCell = row.insertCell(1);
+            nameCell.style.placeContent = "center";
             nameCell.style.textOverflow = "ellipsis";
             nameCell.style.overflow = "hidden";
             nameCell.style.whiteSpace = "nowrap";
@@ -193,7 +195,7 @@ export class PlayerList
                 if (ctu.visible)
                 {
                     //Move the view
-                    if (!this.disableFocus)
+                    if (this.enableAutoFocus)
                     {
                         await ViewportFunctions.CenterViewportOnImage(ctu);
                     }
