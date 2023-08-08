@@ -65,8 +65,10 @@ export default class UnitInfo implements IUnitInfo
     dataSlug: string;
     favorite: boolean;
 
+    ownerId?: string;
+
     // Set the base values that the form needs to not error out and display correctly.
-    constructor(tokenId: string, name?: string)
+    constructor(tokenId: string, name?: string, ownerId?: string)
     {
         this.id = tokenId;
         this.tokenId = tokenId;
@@ -109,6 +111,7 @@ export default class UnitInfo implements IUnitInfo
         this.spellList = [];
         this.dataSlug = "";
         this.favorite = false;
+        this.ownerId = ownerId;
     }
 
     /** Import Custom JSON data to a UnitInfo model */
@@ -417,7 +420,6 @@ export default class UnitInfo implements IUnitInfo
         const spellActions: IActionsEntity[] = [];
         for (var i = 0, spell; spell = spellList[i]; i++) 
         {
-            console.log(spell);
             await fetch(spell)
                 .then(function (response)
                 {

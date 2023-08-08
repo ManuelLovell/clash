@@ -1,11 +1,11 @@
-import OBR, { Metadata, Image, Text } from "@owlbear-rodeo/sdk";
+import OBR, { Metadata, Image, Text, Player } from "@owlbear-rodeo/sdk";
 import { Constants } from "./constants";
 import { ViewportFunctions } from './viewport';
 import { ICurrentTurnUnit } from './interfaces/current-turn-unit';
 import { LabelLogic } from "./label-logic";
 import { db } from './local-database';
 import { IUnitInfo } from "./interfaces/unit-info";
-import { liveQuery } from "dexie";  
+import { liveQuery } from "dexie";
 import * as Buttons from "./initiative-list-buttons";
 import UnitInfo from "./unit-info";
 import * as Utilities from './utilities';
@@ -19,6 +19,7 @@ export class InitiativeList
     turnCounter: number = 1;
     // Active Units
     activeUnits: IUnitInfo[] = [];
+    party: Player[] = [];
     // Setting Flags for GM
     gmHideHp = false;
     gmHideAll = false;
@@ -30,7 +31,7 @@ export class InitiativeList
 
     /**Render the main initiatve form from the GM perspective */
     public async RenderInitiativeList(document: Document): Promise<void>
-    {        
+    {
         this.setupContextMenu(this);
         this.ShowSettingsMenu(false);
         this.ShowMainMenu(true);
@@ -38,6 +39,9 @@ export class InitiativeList
         const mainContainer = document.querySelector<HTMLDivElement>('#clash-main-body-app')!;
         // Place base HTML and Containers
         mainContainer.innerHTML = `
+        <div id="contextMenu" class="context-menu" style="display: none">
+            <ul id="playerListing"></ul>
+        </div>
         <table id="initiative-list">
         <thead>
             <tr>
@@ -100,6 +104,65 @@ export class InitiativeList
             await db.Tracker.add({ id: Constants.TURNTRACKER, currentRound: 1, currentTurn: 1 });
         }
 
+        // Setup Players
+        const playerContextMenu = document.getElementById("playerListing")!;
+
+        this.party = await OBR.party.getPlayers();
+        playerContextMenu.appendChild(GetEmptyContextItem());
+        this.party.forEach(player =>
+        {
+            const listItem = document.createElement("li");
+            listItem.id = player.id;
+            listItem.textContent = player.name;
+            listItem.style.color = player.color;
+            playerContextMenu.appendChild(listItem);
+        });
+
+        OBR.party.onChange((party) =>
+        {
+            playerContextMenu.innerHTML = "";
+            playerContextMenu.appendChild(GetEmptyContextItem());
+
+            this.party = party;
+
+            party.forEach(async (player) =>
+            {
+                const listItem = document.createElement("li");
+                listItem.id = player.id;
+                listItem.textContent = player.name;
+                listItem.style.color = player.color;
+                playerContextMenu.appendChild(listItem);
+
+                const metadata = player.metadata as Metadata;
+                if (metadata[`${Constants.EXTENSIONID}/metadata_playerItem`] != undefined)
+                {
+                    const updateContainer = metadata[`${Constants.EXTENSIONID}/metadata_playerItem`] as any;
+                    const update: IUnitTrack = updateContainer.PlayerUpdate;
+                    if (!Utilities.IsThisOld(update.stamp!))
+                    {
+                        // Do stuff
+                        if (update.initiative)
+                        {
+                            await db.ActiveEncounter.update(update.id!, { initiative: update.initiative });
+                        }
+                        else if (update.cHp)
+                        {
+                            await db.ActiveEncounter.update(update.id!, { currentHP: update.cHp });
+                        }
+                        else if (update.mHp)
+                        {
+                            await db.ActiveEncounter.update(update.id!, { maxHP: update.mHp });
+                        }
+                        else if (update.aC)
+                        {
+                            await db.ActiveEncounter.update(update.id!, { armorClass: update.aC });
+                        }
+                        await this.UpdateTrackerForPlayers();
+                    }
+                }
+            });
+        });
+
         // Subscribe to scene-onready event to check for scene change
         OBR.scene.onReadyChange(async (ready) =>
         {
@@ -120,10 +183,6 @@ export class InitiativeList
         // Subscribe to on-change to detect if a token was deleted
         OBR.scene.items.onChange(async (items) =>
         {
-            // Get all units from activeencounter
-            //const tableUnits = await db.ActiveEncounter.toCollection();
-            //const activeUnits = (await tableUnits.toArray());
-
             // This feels expensive, on change happens on every key press
             items.forEach(async unit =>
             {
@@ -151,12 +210,15 @@ export class InitiativeList
         // The purpose of these is to catch the Add/Remove from Owlbear-ContextMenu without OBRs listener
         let updateDb = liveQuery(async () => await db.ActiveEncounter.toArray());
 
-        updateDb.subscribe({
-            next: result => this.RefreshList(result),
+        await updateDb.subscribe({
+            next: async (result) => 
+            {
+                this.RefreshList(result);
+            },
             error: error => console.log("Error refreshing list: " + error)
         });
 
-        this.CheckIniativeList();
+        await this.CheckIniativeList();
     }
 
     private async CheckIniativeList(): Promise<void>
@@ -189,18 +251,15 @@ export class InitiativeList
             });
         }
 
-        this.RefreshList(activeEncounterUnits);
+        await this.RefreshList(activeEncounterUnits);
     }
-    public async RefreshList(unitList: IUnitInfo[]): Promise<void>
+    public RefreshList(unitList: IUnitInfo[]): void
     {
         // Reference to initiative list
         const tableElement = <HTMLTableElement>document.querySelector("#unit-list")!;
 
         // Reference to InitiativeList class
         const self = this;
-
-        // Get all units from activeencounter
-        //const tableUnits = await db.ActiveEncounter.toCollection();
 
         // Unit list
         const activatedUnits = unitList.filter(x => x.isActive == 1);
@@ -220,6 +279,16 @@ export class InitiativeList
         //Rebuild the table in order
         for (const unit of sortedUnits)
         {
+            let alphaColor;
+            if (unit.ownerId)
+            {
+                //Find the owner
+                const ownerColor = this.party.find(player => player.id === unit.ownerId)?.color;
+                if (ownerColor)
+                {
+                    alphaColor = Utilities.HexToRgba(ownerColor, 0.4);
+                }
+            }
             let row = tableElement.insertRow(-1);
             let initCell = row.insertCell(0);
             let rollerCell = row.insertCell(1)
@@ -263,6 +332,10 @@ export class InitiativeList
             nameToggle.style.width = "100%";
             nameToggle.style.textOverflow = "ellipsis";
             nameToggle.style.overflow = "hidden";
+            if (alphaColor)
+            {
+                nameToggle.style.background = `linear-gradient(200deg, transparent, ${alphaColor})`;
+            }
 
             nameToggle.className = unit.isMonster ? "isMonster nameToggleInput" : "nameToggleInput";
             nameToggle.onclick = async function ()
@@ -278,6 +351,45 @@ export class InitiativeList
                     nameToggle.className = "isMonster nameToggleInput";
                 }
             };
+            nameToggle.oncontextmenu = async function (e)
+            {
+                e.preventDefault();
+
+                const contextMenu = document.getElementById("contextMenu")!;
+                // Add event listener for CTXMenu selection
+                contextMenu.addEventListener("click", async (event) =>
+                {
+                    event.stopPropagation();
+                    const target = event.target! as HTMLElement;
+                    const unitId = contextMenu.getAttribute("currentUnit")!;
+
+                    await db.ActiveEncounter.update(unitId, { ownerId: target.id });
+
+                });
+
+                // Store unit ID
+                contextMenu.setAttribute("currentUnit", unit.id);
+
+                // Add listener to click away
+                const onClickOutside = () =>
+                {
+                    contextMenu.style.display = "none";
+                    document.removeEventListener("click", onClickOutside);
+                };
+                document.addEventListener("click", onClickOutside);
+
+
+                if (contextMenu.style.display == "block")
+                {
+                    HideMenu();
+                }
+                else
+                {
+                    contextMenu.style.display = 'block';
+                    contextMenu.style.left = e.pageX + "px";
+                    contextMenu.style.top = e.pageY + "px";
+                }
+            }
 
             const heartInputMin = document.createElement('input');
             heartInputMin.className = "HealthInput";
@@ -381,7 +493,7 @@ export class InitiativeList
         }
 
         this.AttachFocusListeners();
-        await this.ShowTurnSelection();
+        this.ShowTurnSelection();
     }
 
     public AttachFocusListeners(): void
@@ -395,18 +507,17 @@ export class InitiativeList
         async function FocusUnit(event: MouseEvent): Promise<void>
         {
             event.preventDefault();
-            
+
             const row = (event.target as HTMLElement).closest('tr') as HTMLTableRowElement;
-            
+
             const ctu: ICurrentTurnUnit = await LabelLogic.GetCTUFromRow(row);
 
             await ViewportFunctions.CenterViewportOnImage(ctu);
-            
+
         }
     }
 
-
-    public async ShowTurnSelection(): Promise<void>
+    public ShowTurnSelection(): void
     {
         const table = <HTMLTableElement>document.getElementById("initiative-list");
         if (table.rows?.length > 1)
@@ -476,7 +587,7 @@ export class InitiativeList
         await this.UpdateTrackerForPlayers();
     }
 
-    public async UpdateTrackerForPlayers()
+    public async UpdateTrackerForPlayers(): Promise<void> 
     {
         const trackedUnits: IUnitTrack[] = [];
         const now = new Date().toISOString();
@@ -507,6 +618,8 @@ export class InitiativeList
                     initiative: unit.initiative,
                     cHp: unit.currentHP,
                     mHp: unit.maxHP,
+                    aC: unit.armorClass,
+                    owner: unit.ownerId
                 }
             );
         }
@@ -811,7 +924,7 @@ export class InitiativeList
                 //Convert items over to images to access Text fields
                 const contextImages = context.items as Image[];
 
-                let ids: { id: string; name: string; }[] = [];
+                let ids: { id: string; name: string; ownerId?: string; }[] = [];
                 if (addToInitiative)
                 {
                     //Add units to OBR metadata for contextmenu update
@@ -820,7 +933,7 @@ export class InitiativeList
                         for (let item of items)
                         {
                             //Add to ID list for DB update
-                            ids.push({ id: item.id, name: item.text?.plainText || item.name });
+                            ids.push({ id: item.id, name: item.text?.plainText || item.name, ownerId: item.createdUserId });
                             item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`] = { initiative };
                         }
                     });
@@ -831,7 +944,7 @@ export class InitiativeList
                         const checkUnit = await db.ActiveEncounter.get(item.id);
                         if (!checkUnit)
                         {
-                            let unitInfo = new UnitInfo(item.id, item.name);
+                            let unitInfo = new UnitInfo(item.id, item.name, item.ownerId);
                             // If the base token matches something in Collection, use that information
                             if (alphanumericmatchex.test(item.name))
                             {
@@ -886,4 +999,17 @@ export class InitiativeList
             },
         });
     }
+}
+
+function GetEmptyContextItem()
+{
+    const listItem = document.createElement("li");
+    listItem.id = "";
+    listItem.textContent = "No Owner";
+    return listItem;
+}
+function HideMenu()
+{
+    document.getElementById("contextMenu")!
+        .style.display = "none"
 }

@@ -12,14 +12,33 @@ export function GetGUID(): string
     return guid;
 }
 
+export function IsThisOld(created: string): boolean
+{
+    const TWO_SECONDS = 2 * 1000; // Mins - seconds - milliseconds
+
+    const currentTime: any = new Date();
+    const messageTime: any = new Date(created);
+    //Don't repeat messages older than 5 seconds (on refresh/reloads/dayslater)..
+    const pastDue = (currentTime - messageTime) > TWO_SECONDS;
+
+    return pastDue;
+}
+
+export function HexToRgba(hex: string, alpha: number): string
+{
+    const r = parseInt(hex.substring(1, 3), 16);
+    const g = parseInt(hex.substring(3, 5), 16);
+    const b = parseInt(hex.substring(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 export function SetThemeMode(theme: Theme, document: Document): void
 {
     const darkThemeMq = window.matchMedia("(prefers-color-scheme: dark)");
-    console.log(darkThemeMq.matches);
-    
+
     const darkTheme = darkThemeMq.matches ? "dark" : "light";
     const lightTheme = darkThemeMq.matches ? "light" : "dark";
-    
+
     for (var s = 0; s < document.styleSheets.length; s++)
     {
         for (var i = 0; i < document.styleSheets[s].cssRules.length; i++)

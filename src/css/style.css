@@ -42,15 +42,27 @@
 }
 
 .unitHappy {
-    color: white;
+    color: white !important;
+    text-shadow: -1px -1px 1px black,  
+                  1px -1px 1px black,
+                  -1px 1px 1px black,
+                  1px 1px 1px black;
 }
 
 .unitHurt {
-    color: yellow;
+    color: yellow !important;
+    text-shadow: -1px -1px 1px black,  
+                  1px -1px 1px black,
+                  -1px 1px 1px black,
+                  1px 1px 1px black;
 }
 
 .unitHarmed {
-    color: red;
+    color: red !important;
+    text-shadow: -1px -1px 1px black,  
+                  1px -1px 1px black,
+                  -1px 1px 1px black,
+                  1px 1px 1px black;
 }
 
 .RollerButton {
@@ -214,15 +226,22 @@ h1 {
 
 
 .HealthInput {
+    border-radius: 5px;
     width: 30px;
 }
 
 .ArmorInput {
+    border-radius: 5px;
     width: 20px;
 }
 
 .InitiativeInput {
     width: 15px;
+    border-radius: 5px;
+}
+
+.wide {
+    width: 25px !important;
 }
 
 .Icon:not(.RollerButton) {
@@ -371,4 +390,35 @@ input:checked+.slider:before {
     display: inline-flex;
     line-height: 1;
     margin-top: 5px;
+}
+
+.context-menu {
+    position: absolute;
+    text-align: center;
+    background: var(--OBR-offset-back);
+    border: 1px solid black;
+    border-radius: 10px;
+}
+
+.context-menu ul {
+    padding: 0px;
+    margin: 0px;
+    min-width: 120px;
+    list-style: none;
+}
+
+.context-menu ul li {
+    padding-bottom: 4px;
+    padding-top: 4px;
+    border: 1px solid black;
+    cursor:pointer;
+}
+
+.context-menu ul li a {
+    text-decoration: none;
+    color: black;
+}
+
+.context-menu ul li:hover {
+    background: var(--OBR-light-blue);
 }

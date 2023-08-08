@@ -5,15 +5,18 @@ interface IOBRTracker
     gmHideHp: boolean;
     gmHideAll: boolean;
     gmReverseList: boolean;
-    units: UnitTrack[];
+    units: IUnitTrack[];
     lastUpdate: string;
 }
 
 interface IUnitTrack
 {
-    id: string;
-    name: string;
-    initiative: number;
-    cHp: number;
-    mHp: number;
+    id?: string;
+    name?: string;
+    initiative?: number;
+    cHp?: number;
+    mHp?: number;
+    aC?: number;
+    owner?: string;
+    stamp?: string;
 }

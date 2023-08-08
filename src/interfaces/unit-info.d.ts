@@ -62,4 +62,6 @@ export interface IUnitInfo
 
     dataSlug: string;
     favorite: boolean;
+
+    ownerId?: string;
 }

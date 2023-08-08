@@ -307,6 +307,5 @@ export async function RenderSettings(document: Document, list: InitiativeList): 
         });
 
         await db.Creatures.bulkPut(verifiedItems);
-        console.log("Import complete.");
     }
 }
