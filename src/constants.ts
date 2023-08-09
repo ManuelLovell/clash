@@ -13,4 +13,5 @@ export class Constants
     static DICEMODIFIER = /([+-])(\d+)/;
     static PARENTHESESMATCH = /\((\d*d\d+\s*([+-]\s*\d+)?)\)/g;
     static PLUSMATCH = /\s(\+\d+)\s/g;
+    static ALPHANUMERICTEXTMATCH = /\s[\da-zA-Z]$/;
 }

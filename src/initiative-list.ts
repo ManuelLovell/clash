@@ -186,9 +186,12 @@ export class InitiativeList
             // This feels expensive, on change happens on every key press
             items.forEach(async unit =>
             {
+                if (unit.layer !== "CHARACTER") return;
+
                 const imageUnit = unit as Image;
                 const unitName = imageUnit.text?.plainText || imageUnit.name;
                 const tableUnit = this.activeUnits.find(x => x.id === imageUnit.id);
+
                 if (tableUnit && tableUnit.unitName !== unitName)
                 {
                     await db.ActiveEncounter.update(tableUnit.id, { unitName: unitName });
@@ -196,6 +199,54 @@ export class InitiativeList
                 if (unit.metadata[`${Constants.EXTENSIONID}/metadata_initiative`] !== undefined && tableUnit?.isActive == 0)
                 {
                     await db.ActiveEncounter.update(tableUnit.id, { isActive: 1 });
+                }
+                
+                if (unit.metadata[`${Constants.EXTENSIONID}/metadata_initiative`] !== undefined && !tableUnit)
+                {
+                    const otherUnit = this.activeUnits.find(x => x.unitName === unitName);
+
+                    if (Constants.ALPHANUMERICTEXTMATCH.test(unitName))
+                    {
+                        // If it's an iteration
+                        const trimName = unitName.slice(0, -2);
+                        const isActiveMonster = await db.ActiveEncounter.where("unitName").startsWith(trimName).first();
+
+                        if (isActiveMonster)
+                        {
+                            isActiveMonster.id = unit.id;
+                            let sUnitInfo = new UnitInfo(unit.id, unitName, unit.createdUserId);
+                            sUnitInfo.SetToModel(isActiveMonster);
+                            sUnitInfo.unitName = unitName;
+                            sUnitInfo.tokenId = unit.id;
+                            sUnitInfo.isActive = 1;
+                            await sUnitInfo.SaveToDB();
+                            this.inSceneUnits.push(unit.id);
+                        }
+                    }
+                    else if (otherUnit)
+                    {
+                        // If it's just another
+                        otherUnit.id = unit.id;
+                        let unitInfo = new UnitInfo(unit.id, unitName, unit.createdUserId);
+                        unitInfo.SetToModel(otherUnit);
+                        unitInfo.unitName = unitName;
+                        unitInfo.tokenId = unit.id;
+                        unitInfo.isActive = 1;
+                        await unitInfo.SaveToDB();
+                        this.inSceneUnits.push(unit.id);
+                    }
+                    else
+                    {
+                        // otherwise get rid of it
+                        await OBR.scene.items.updateItems((item) => item.id === unit.id, (itms) =>
+                        {
+                            for (let itm of itms)
+                            {
+                                delete itm.metadata[`${Constants.EXTENSIONID}/metadata_initiative`];
+                                delete itm.metadata[`${Constants.EXTENSIONID}/metadata_hpbar`];
+                            }
+                        });
+                    }
                 }
             });
 
@@ -699,9 +750,6 @@ export class InitiativeList
 
     private setupContextMenu(mainList: InitiativeList)
     {
-        // Regex to match alphanumeric preceded by a space at end of string
-        const alphanumericmatchex = /\s[\da-zA-Z]$/;
-
         // Disable info card for people who have localstorage turned off
         // It doesn't work for how the inmemory window is setup
         // Plus have the functionality is to save things
@@ -741,7 +789,7 @@ export class InitiativeList
                             let unitInfo = new UnitInfo(unit.id, uName);
 
                             // If the base token matches something in Collection, use that information
-                            if (alphanumericmatchex.test(uName))
+                            if (Constants.ALPHANUMERICTEXTMATCH.test(uName))
                             {
                                 const trimName = uName.slice(0, -2);
                                 const inCollection = await db.Creatures.get({ unitName: trimName });
@@ -789,7 +837,7 @@ export class InitiativeList
                             {
                                 let unitInfo = new UnitInfo(unit.id, uName);
                                 // If the base token matches something in Collection, use that information
-                                if (alphanumericmatchex.test(uName))
+                                if (Constants.ALPHANUMERICTEXTMATCH.test(uName))
                                 {
                                     const trimName = uName.slice(0, -2);
                                     const inCollection = await db.Creatures.get({ unitName: trimName });
@@ -946,7 +994,7 @@ export class InitiativeList
                         {
                             let unitInfo = new UnitInfo(item.id, item.name, item.ownerId);
                             // If the base token matches something in Collection, use that information
-                            if (alphanumericmatchex.test(item.name))
+                            if (Constants.ALPHANUMERICTEXTMATCH.test(item.name))
                             {
                                 const trimName = item.name.slice(0, -2);
                                 const inCollection = await db.Creatures.get({ unitName: trimName });
