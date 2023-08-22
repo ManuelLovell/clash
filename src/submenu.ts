@@ -21,6 +21,7 @@ export class SubMenu
     multiSheet: boolean = false;
     multiActive: string[] = [];
     multiIds: string[] = [];
+    sceneId: string = "";
 
     importReturnContainer: HTMLElement;
     importBarContainer: HTMLElement;
@@ -40,6 +41,7 @@ export class SubMenu
         const queryString = window.location.search;
         const urlParams = new URLSearchParams(queryString);
         const idParam = urlParams.get('unitid')!;
+        this.sceneId = urlParams.get('sceneid')!;
         // If found, it means multiple sheet updates
         const multiParam = urlParams.get('multi');
         const mActiveParam = urlParams.get('unitactive');
@@ -856,6 +858,7 @@ export class SubMenu
                     self.currentUnit.tokenId = id;
                     self.currentUnit.isActive = self.multiActive[i] === "true" ? 1 : 0;
                     self.currentUnit.unitName = baseName + ` ${String.fromCharCode('A'.charCodeAt(0) + i)}`;
+                    self.currentUnit.sceneId = self.sceneId;
                     const copyStart = JSON.stringify(self.currentUnit);
                     const copyEnd = JSON.parse(copyStart);
                     unitSaveList.push(copyEnd);
@@ -874,6 +877,7 @@ export class SubMenu
             }
             else
             {
+                self.currentUnit.sceneId = self.sceneId;
                 await db.ActiveEncounter.put(self.currentUnit, self.POPOVERSUBMENUID);
 
                 //Update name in OBR

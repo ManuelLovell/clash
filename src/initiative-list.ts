@@ -1,4 +1,4 @@
-import OBR, { Metadata, Image, Text, Item, Player } from "@owlbear-rodeo/sdk";
+import OBR, { Metadata, Image, Text, Player } from "@owlbear-rodeo/sdk";
 import { Constants } from "./constants";
 import { ViewportFunctions } from './viewport';
 import { ICurrentTurnUnit } from './interfaces/current-turn-unit';
@@ -12,13 +12,12 @@ import * as Utilities from './utilities';
 
 export class InitiativeList
 {
-    inSceneUnits: string[] = [];
+    unitsInScene: IUnitInfo[] = [];
     // Counter per round
     roundCounter: number = 1;
     // Counter per turn
     turnCounter: number = 1;
     // Active Units
-    activeUnits: IUnitInfo[] = [];
     party: Player[] = [];
     // Setting Flags for GM
     gmHideHp = false;
@@ -29,6 +28,8 @@ export class InitiativeList
     gmRumbleLog = false;
     gmTurnText = "";
     rendered = false;
+    sceneId = "";
+    itemOnChangeHandler!: () => void;
 
     /**Render the main initiatve form from the GM perspective */
     public async RenderInitiativeList(document: Document): Promise<void>
@@ -164,15 +165,6 @@ export class InitiativeList
             });
         });
 
-        // Subscribe to scene-onready event to check for scene change
-        OBR.scene.onReadyChange(async (ready) =>
-        {
-            if (ready)
-            {
-                await this.CheckIniativeList();
-            }
-        });
-
         // Set theme accordingly
         const theme = await OBR.theme.getTheme();
         Utilities.SetThemeMode(theme, document);
@@ -181,10 +173,28 @@ export class InitiativeList
             Utilities.SetThemeMode(theme, document);
         })
 
+        // The purpose of these is to catch the Add/Remove from Owlbear-ContextMenu without OBRs listener
+        let updateDb = liveQuery(async () => await db.ActiveEncounter.toArray());
+
+        await updateDb.subscribe({
+            next: async (result) => 
+            {
+                this.RefreshList(result);
+            },
+            error: error => console.log("Error refreshing list: " + error)
+        });
+
+        await this.RefreshList();
+        this.AttachFocusListeners();
+        this.rendered = true;
+    }
+
+    public SetupItemOnChangeHandler(): void
+    {
         // Subscribe to on-change to detect if a token was deleted
-        OBR.scene.items.onChange(async (items) =>
+        this.itemOnChangeHandler = OBR.scene.items.onChange(async (items) =>
         {
-            await this.UpdateActiveUnits(items);
+            const deleteIds: string[] = [];
 
             // This feels expensive, on change happens on every key press
             items.forEach(async unit =>
@@ -193,20 +203,21 @@ export class InitiativeList
 
                 const imageUnit = unit as Image;
                 const unitName = imageUnit.text?.plainText || imageUnit.name;
-                const tableUnit = this.activeUnits.find(x => x.id === imageUnit.id);
+                const tableUnit = this.unitsInScene.find(x => x.id === imageUnit.id);
 
                 if (tableUnit && tableUnit.unitName !== unitName)
                 {
-                    db.ActiveEncounter.update(tableUnit.id, { unitName: unitName });
+                    await db.ActiveEncounter.update(tableUnit.id, { unitName: unitName });
                 }
                 if (unit.metadata[`${Constants.EXTENSIONID}/metadata_initiative`] !== undefined && tableUnit?.isActive == 0)
                 {
-                    db.ActiveEncounter.update(tableUnit.id, { isActive: 1 });
+                    await db.ActiveEncounter.update(tableUnit.id, { isActive: 1 });
                 }
-                
+
                 if (unit.metadata[`${Constants.EXTENSIONID}/metadata_initiative`] !== undefined && !tableUnit)
                 {
-                    const otherUnit = this.activeUnits.find(x => x.unitName === unitName);
+                    const otherUnit = this.unitsInScene.find(x => x.unitName === unitName);
+                    const otherScene = await db.ActiveEncounter.where("id").equals(imageUnit.id).first();
 
                     if (Constants.ALPHANUMERICTEXTMATCH.test(unitName))
                     {
@@ -222,8 +233,7 @@ export class InitiativeList
                             sUnitInfo.unitName = unitName;
                             sUnitInfo.tokenId = unit.id;
                             sUnitInfo.isActive = 1;
-                            await sUnitInfo.SaveToDB();
-                            this.inSceneUnits.push(unit.id);
+                            await sUnitInfo.SaveToDB(this.sceneId);
                         }
                     }
                     else if (otherUnit)
@@ -235,104 +245,56 @@ export class InitiativeList
                         unitInfo.unitName = unitName;
                         unitInfo.tokenId = unit.id;
                         unitInfo.isActive = 1;
-                        await unitInfo.SaveToDB();
-                        this.inSceneUnits.push(unit.id);
+                        await unitInfo.SaveToDB(this.sceneId);
                     }
-                    else
+                    else if (otherScene?.sceneId === this.sceneId)
                     {
-                        // otherwise get rid of it
-                        await OBR.scene.items.updateItems((item) => item.id === unit.id, (itms) =>
-                        {
-                            for (let itm of itms)
-                            {
-                                delete itm.metadata[`${Constants.EXTENSIONID}/metadata_initiative`];
-                                delete itm.metadata[`${Constants.EXTENSIONID}/metadata_hpbar`];
-                            }
-                        });
+                        // This is for cleaning up units that belong ot this scene but are in an odd state
+                        deleteIds.push(unit.id);
                     }
                 }
             });
 
-            let missingIds = this.activeUnits.filter(({ id: listId }) => !items.some(({ id: itemId }) => itemId === listId));
-            missingIds.forEach(async unit =>
+            if (deleteIds.length > 0)
             {
-                // Update will trigger Refreshlist, do not want to call directly
-                db.ActiveEncounter.update(unit.id, { isActive: 0 });
-            });
+                await OBR.scene.items.updateItems((item) => deleteIds.includes(item.id), (itms) =>
+                {
+                    for (let itm of itms)
+                    {
+                        delete itm.metadata[`${Constants.EXTENSIONID}/metadata_initiative`];
+                        delete itm.metadata[`${Constants.EXTENSIONID}/metadata_hpbar`];
+                        console.log("Im lost and deleting");
+                    }
+                });
+            }
         });
-
-        // The purpose of these is to catch the Add/Remove from Owlbear-ContextMenu without OBRs listener
-        let updateDb = liveQuery(async () => await db.ActiveEncounter.toArray());
-
-        await updateDb.subscribe({
-            next: async (result) => 
-            {
-                this.RefreshList(result);
-            },
-            error: error => console.log("Error refreshing list: " + error)
-        });
-
-        await this.CheckIniativeList();
-        this.AttachFocusListeners();
-        this.rendered = true;
     }
 
-    private async UpdateActiveUnits(units: Item[]): Promise<void>
+    private async RefreshActiveUnits(list?: IUnitInfo[]): Promise<void>
     {
-        if (units.length > 0)
-        {
-            let activeEncounterUnits: IUnitInfo[] = [];
-            // Grab by the id
-            this.inSceneUnits = units.map(unit => unit.id);
+        // Get all units from ActiveEncounter table
+        const activeEncounterTableUnits = list ? list : await db.ActiveEncounter.toCollection().toArray();
 
-            // Get all units from ActiveEncounter table
-            const tableUnits = await db.ActiveEncounter.toCollection();
-
-            // Turn to Array
-            activeEncounterUnits = await tableUnits.toArray();
-
-            // Filter the resulting list by Scene Data to see if they belong
-            this.activeUnits = activeEncounterUnits.filter(aUnits => this.inSceneUnits.includes(aUnits.id));
-
-            // Reactivate Units as needed
-            this.activeUnits.forEach(async unit =>
-            {
-                // Update will trigger Refreshlist, do not want to call directly
-                await db.ActiveEncounter.update(unit.id, { isActive: 1 });
-                const updateUnit = activeEncounterUnits.find(x => x.id === unit.id);
-                updateUnit!.isActive = 1;
-            });
-        }
+        // Find units by matching SceneId with Active status
+        console.log("Getting units for scene:" + this.sceneId);
+        this.unitsInScene = activeEncounterTableUnits.filter(x => x.sceneId === this.sceneId);
     }
 
-    private async CheckIniativeList(): Promise<void>
-    {
-        // Find all units in this scene with active initiative metadata
-        const units = await OBR.scene.items.getItems((item) =>
-            item.layer === "CHARACTER"
-            && item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`] !== undefined)
-
-        await this.UpdateActiveUnits(units);
-
-        await this.RefreshList(this.activeUnits);
-    }
-    public RefreshList(unitList: IUnitInfo[]): void
+    public async RefreshList(list?: IUnitInfo[]): Promise<void>
     {
         // Reference to initiative list
         const tableElement = <HTMLTableElement>document.querySelector("#unit-list")!;
 
+        // Refresh the active unit list using ActiveEncounter table
+        await this.RefreshActiveUnits(list);
+        const activeUnits = this.unitsInScene.filter(x => x.isActive === 1);
+
         // Reference to InitiativeList class
         const self = this;
 
-        // Unit list
-        const activatedUnits = unitList.filter(x => x.isActive == 1);
-
-        // Filter the resulting list by Scene Data to see if they belong
-        this.activeUnits = activatedUnits.filter(aUnits => this.inSceneUnits.includes(aUnits.id));
-
         // Sort unts based on Reverse Setting or not
-        const sortedUnits = this.gmReverseList ? this.activeUnits.sort((a, b) => a.initiative - b.initiative || a.unitName.localeCompare(b.unitName)!)
-            : this.activeUnits.sort((a, b) => b.initiative - a.initiative || a.unitName.localeCompare(b.unitName)!);
+        const sortedUnits = this.gmReverseList ? activeUnits.sort((a, b) => a.initiative - b.initiative || a.unitName.localeCompare(b.unitName)!)
+            : activeUnits.sort((a, b) => b.initiative - a.initiative || a.unitName.localeCompare(b.unitName)!);
 
         //Clear the table
         while (tableElement?.rows.length > 0)
@@ -631,7 +593,7 @@ export class InitiativeList
 
             if (!unitId || !initiative) return;
 
-            let updateMe = this.activeUnits?.find(x => x.id == unitId);
+            let updateMe = this.unitsInScene?.find(x => x.id == unitId);
             if (updateMe)
             {
                 await db.ActiveEncounter.update(
@@ -646,7 +608,7 @@ export class InitiativeList
             }
         });
         await db.Tracker.update(Constants.TURNTRACKER, { id: Constants.TURNTRACKER, currentTurn: this.turnCounter, currentRound: this.roundCounter });
-        await this.CheckIniativeList();
+        await this.RefreshList();
         await this.UpdateTrackerForPlayers();
     }
 
@@ -662,7 +624,7 @@ export class InitiativeList
         hpBarsToUpdate.forEach(hpbar =>
         {
             const label = hpbar as Text;
-            const unit = this.activeUnits.find(x => x.id === label.id.replace("_hpbar", ""));
+            const unit = this.unitsInScene.find(x => x.id === label.id.replace("_hpbar", ""));
             if (unit)
             {
                 label.text.plainText = LabelLogic.getHealthPercentageString(unit.currentHP, unit.maxHP);
@@ -672,7 +634,7 @@ export class InitiativeList
         });
         await OBR.scene.items.addItems(updateLabels);
 
-        for (const unit of this.activeUnits)
+        for (const unit of this.unitsInScene)
         {
             trackedUnits.push(
                 {
@@ -743,7 +705,7 @@ export class InitiativeList
         {
             await OBR.popover.open({
                 id: Constants.EXTENSIONSUBMENUID,
-                url: `/submenu/subindex.html?unitid=${unitId}`,
+                url: `/submenu/subindex.html?unitid=${unitId}&sceneid=${this.sceneId}`,
                 height: viewableHeight,
                 width: 325,
                 hidePaper: true
@@ -753,7 +715,7 @@ export class InitiativeList
         {
             await OBR.modal.open({
                 id: Constants.EXTENSIONSUBMENUID,
-                url: `/submenu/subindex.html?unitid=${unitId}`,
+                url: `/submenu/subindex.html?unitid=${unitId}&sceneid=${this.sceneId}`,
                 height: viewableHeight,
                 width: 350,
             });
@@ -819,7 +781,7 @@ export class InitiativeList
                                 }
                             }
 
-                            await unitInfo.SaveToDB();
+                            await unitInfo.SaveToDB(mainList.sceneId);
                         }
 
                         const modalBuffer = 100;
@@ -828,7 +790,7 @@ export class InitiativeList
 
                         await OBR.popover.open({
                             id: Constants.EXTENSIONSUBMENUID,
-                            url: `/submenu/subindex.html?unitid=${unit.id}`,
+                            url: `/submenu/subindex.html?unitid=${unit.id}&sceneid=${mainList.sceneId}`,
                             height: viewableHeight,
                             width: 325,
                             anchorElementId: elementId,
@@ -866,7 +828,7 @@ export class InitiativeList
                                         unitInfo.SetToModel(inCollection);
                                     }
                                 }
-                                await unitInfo.SaveToDB();
+                                await unitInfo.SaveToDB(mainList.sceneId);
                             }
                         });
 
@@ -880,7 +842,7 @@ export class InitiativeList
 
                         await OBR.popover.open({
                             id: Constants.EXTENSIONSUBMENUID,
-                            url: `/submenu/subindex.html?unitid=${unitIdString}&unitactive=${unitActiveStatus}&multi=true`,
+                            url: `/submenu/subindex.html?unitid=${unitIdString}&unitactive=${unitActiveStatus}&multi=true&sceneid=${mainList.sceneId}`,
                             height: viewableHeight,
                             width: 325,
                             anchorElementId: elementId,
@@ -926,7 +888,7 @@ export class InitiativeList
                         for (let item of items)
                         {
                             const image = item as Image;
-                            const activeUnit = mainList.activeUnits.find(x => x.id === item.id);
+                            const activeUnit = mainList.unitsInScene.find(x => x.id === item.id);
                             if (activeUnit)
                             {
                                 item.metadata[`${Constants.EXTENSIONID}/metadata_hpbar`] = { showHpBars };
@@ -992,7 +954,6 @@ export class InitiativeList
 
                         //Check if unit is in our ActiveList (via menu Info Card), if not - activate and add
                         const checkUnit = await db.ActiveEncounter.get(item.id);
-                        mainList.inSceneUnits.push(item.id); // For tracking scene state
                         if (!checkUnit)
                         {
                             let unitInfo = new UnitInfo(item.id, itemName, item.createdUserId);
@@ -1015,8 +976,7 @@ export class InitiativeList
                                 }
                             }
                             unitInfo.isActive = 1;
-                            mainList.activeUnits.push(unitInfo);
-                            unitInfo.SaveToDB();
+                            unitInfo.SaveToDB(mainList.sceneId);
                         }
                         else
                         {
@@ -1051,7 +1011,6 @@ export class InitiativeList
                     contextImages.forEach(async item =>
                     {
                         db.ActiveEncounter.update(item.id, { isActive: 0 });
-                        mainList.inSceneUnits = mainList.inSceneUnits.filter(id => id != item.id); // For tracking scene state
                     });
                 }
             },

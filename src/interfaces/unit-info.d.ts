@@ -64,4 +64,5 @@ export interface IUnitInfo
     favorite: boolean;
 
     ownerId?: string;
+    sceneId?: string;
 }

@@ -66,6 +66,7 @@ export default class UnitInfo implements IUnitInfo
     favorite: boolean;
 
     ownerId?: string;
+    sceneId?: string;
 
     // Set the base values that the form needs to not error out and display correctly.
     constructor(tokenId: string, name?: string, ownerId?: string)
@@ -112,6 +113,7 @@ export default class UnitInfo implements IUnitInfo
         this.dataSlug = "";
         this.favorite = false;
         this.ownerId = ownerId;
+        this.sceneId = "";
     }
 
     /** Import Custom JSON data to a UnitInfo model */
@@ -433,8 +435,9 @@ export default class UnitInfo implements IUnitInfo
         return spellActions;
     }
 
-    public async SaveToDB(): Promise<string>
+    public async SaveToDB(sceneId: string): Promise<string>
     {
+        this.sceneId = sceneId;
         return await db.ActiveEncounter.add(this);
     }
 

@@ -68,6 +68,7 @@ export default class DexieDatabase extends Dexie
 
         const storedAttv3 = storedAttr + ", favorite";
         const storedAttv4 = storedAttv3 + ", ownerId";
+        const storedAttv5 = storedAttv4 + ", sceneId";
 
         this.version(1).stores({
             ActiveEncounter: storedAttr,
@@ -99,6 +100,13 @@ export default class DexieDatabase extends Dexie
         
         this.version(5).stores({
             ActiveEncounter: storedAttv4,
+            Creatures: storedAttv3,
+            Tracker: `id, currentTurn, currentRound`,
+            Settings: `id, gmHideHp, gmHideAll, gmDisableLabel, gmTurnText, disableFocus, gmReverseList, gmRumbleLog`,
+        });
+
+        this.version(6).stores({
+            ActiveEncounter: storedAttv5,
             Creatures: storedAttv3,
             Tracker: `id, currentTurn, currentRound`,
             Settings: `id, gmHideHp, gmHideAll, gmDisableLabel, gmTurnText, disableFocus, gmReverseList, gmRumbleLog`,

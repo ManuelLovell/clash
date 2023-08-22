@@ -1,8 +1,10 @@
-import OBR from "@owlbear-rodeo/sdk";
+import OBR, { Metadata } from "@owlbear-rodeo/sdk";
 import { InitiativeList } from './initiative-list';
 import { PlayerList } from "./player-initiative-list";
 import { db } from "./local-database";
+import * as Utilities from './utilities';
 import '/src/css/style.css'
+import { Constants } from "./constants";
 
 // Render main window
 const main = new InitiativeList();
@@ -46,7 +48,10 @@ async function LoadScene(ready: boolean)
     {
         if (user === "GM")
         {
+            await GetSceneId();
             if (!main.rendered) await main.RenderInitiativeList(document);
+            main.SetupItemOnChangeHandler();
+            main.RefreshList();
         }
         else
         {
@@ -57,7 +62,37 @@ async function LoadScene(ready: boolean)
     }
     else
     {
+        // Show loading, disable onchange handler
+        main.itemOnChangeHandler();
         app!.hidden = true;
         loading!.hidden = false;
     }
+}
+
+/** Set an unique id to the room to track units */
+async function GetSceneId(): Promise<void>
+{
+    const retrieveMeta = await OBR.scene.getMetadata();
+    const packageMeta = retrieveMeta[`${Constants.EXTENSIONID}/metadata_sceneid`] as any;
+    main.sceneId = packageMeta?.SceneId as string;
+
+    if (!main.sceneId)
+    {
+        const SceneId: string = Utilities.GetGUID();
+        const sceneMeta: Metadata = {};
+        sceneMeta[`${Constants.EXTENSIONID}/metadata_sceneid`] = { SceneId };
+        await OBR.scene.setMetadata(sceneMeta);
+        
+        main.sceneId = SceneId;
+    }
+
+    const trackerMeta = retrieveMeta[`${Constants.EXTENSIONID}/metadata_trackeritem`] as any;
+    const trackerData = trackerMeta?.Tracker as IOBRTracker;
+    if (trackerData)
+    {
+        main.roundCounter = trackerData.round;
+        main.turnCounter = trackerData.turn;
+    }
+
+    console.log("The scene ID is:" + main.sceneId);
 }
