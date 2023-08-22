@@ -263,10 +263,19 @@ export class InitiativeList
                     {
                         delete itm.metadata[`${Constants.EXTENSIONID}/metadata_initiative`];
                         delete itm.metadata[`${Constants.EXTENSIONID}/metadata_hpbar`];
-                        console.log("Im lost and deleting");
                     }
                 });
             }
+            const characterItems = items.filter(x => x.layer === "CHARACTER");
+            const missingIds = Utilities.FindUniqueIds(this.unitsInScene.map(x => x.id), characterItems.map(y => y.id));
+
+            // Cleanup Items that were deleted from Dexie
+            if (missingIds.length > 0)
+            {
+                await db.ActiveEncounter.bulkDelete(missingIds);
+            }
+
+            this.RefreshList();
         });
     }
 
@@ -276,7 +285,6 @@ export class InitiativeList
         const activeEncounterTableUnits = list ? list : await db.ActiveEncounter.toCollection().toArray();
 
         // Find units by matching SceneId with Active status
-        console.log("Getting units for scene:" + this.sceneId);
         this.unitsInScene = activeEncounterTableUnits.filter(x => x.sceneId === this.sceneId);
     }
 
@@ -938,7 +946,7 @@ export class InitiativeList
             ],
             async onClick(context)
             {
-                const initiative = true;
+                const initiative = mainList.sceneId;
                 const addToInitiative = context.items.every(
                     (item) => item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`] === undefined
                 );

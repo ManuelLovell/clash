@@ -93,6 +93,4 @@ async function GetSceneId(): Promise<void>
         main.roundCounter = trackerData.round;
         main.turnCounter = trackerData.turn;
     }
-
-    console.log("The scene ID is:" + main.sceneId);
 }

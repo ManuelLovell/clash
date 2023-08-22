@@ -12,6 +12,32 @@ export function GetGUID(): string
     return guid;
 }
 
+export function FindUniqueIds(array1: string[], array2: string[]): string[]
+{
+    const set1 = new Set(array1);
+    const set2 = new Set(array2);
+
+    const uniqueIds: string[] = [];
+
+    for (const id of array1)
+    {
+        if (!set2.has(id))
+        {
+            uniqueIds.push(id);
+        }
+    }
+
+    for (const id of array2)
+    {
+        if (!set1.has(id))
+        {
+            uniqueIds.push(id);
+        }
+    }
+
+    return uniqueIds;
+}
+
 export function IsThisOld(created: string): boolean
 {
     const TWO_SECONDS = 2 * 1000; // Mins - seconds - milliseconds
