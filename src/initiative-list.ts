@@ -197,11 +197,11 @@ export class InitiativeList
 
                 if (tableUnit && tableUnit.unitName !== unitName)
                 {
-                    await db.ActiveEncounter.update(tableUnit.id, { unitName: unitName });
+                    db.ActiveEncounter.update(tableUnit.id, { unitName: unitName });
                 }
                 if (unit.metadata[`${Constants.EXTENSIONID}/metadata_initiative`] !== undefined && tableUnit?.isActive == 0)
                 {
-                    await db.ActiveEncounter.update(tableUnit.id, { isActive: 1 });
+                    db.ActiveEncounter.update(tableUnit.id, { isActive: 1 });
                 }
                 
                 if (unit.metadata[`${Constants.EXTENSIONID}/metadata_initiative`] !== undefined && !tableUnit)
@@ -257,7 +257,7 @@ export class InitiativeList
             missingIds.forEach(async unit =>
             {
                 // Update will trigger Refreshlist, do not want to call directly
-                await db.ActiveEncounter.update(unit.id, { isActive: 0 });
+                db.ActiveEncounter.update(unit.id, { isActive: 0 });
             });
         });
 
@@ -1021,7 +1021,7 @@ export class InitiativeList
                         else
                         {
                             //If not-active, but is in Active Encounters (menu info card) activate this unit
-                            await db.ActiveEncounter.update(item.id, { isActive: 1 });
+                            db.ActiveEncounter.update(item.id, { isActive: 1 });
                         }
                     });
 
@@ -1050,7 +1050,7 @@ export class InitiativeList
 
                     contextImages.forEach(async item =>
                     {
-                        await db.ActiveEncounter.update(item.id, { isActive: 0 });
+                        db.ActiveEncounter.update(item.id, { isActive: 0 });
                         mainList.inSceneUnits = mainList.inSceneUnits.filter(id => id != item.id); // For tracking scene state
                     });
                 }
