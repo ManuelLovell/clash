@@ -1,4 +1,4 @@
-import OBR, { Metadata, Image, Text, Player } from "@owlbear-rodeo/sdk";
+import OBR, { Metadata, Image, Text, Item, Player } from "@owlbear-rodeo/sdk";
 import { Constants } from "./constants";
 import { ViewportFunctions } from './viewport';
 import { ICurrentTurnUnit } from './interfaces/current-turn-unit';
@@ -28,6 +28,7 @@ export class InitiativeList
     gmReverseList = false;
     gmRumbleLog = false;
     gmTurnText = "";
+    rendered = false;
 
     /**Render the main initiatve form from the GM perspective */
     public async RenderInitiativeList(document: Document): Promise<void>
@@ -183,6 +184,8 @@ export class InitiativeList
         // Subscribe to on-change to detect if a token was deleted
         OBR.scene.items.onChange(async (items) =>
         {
+            await this.UpdateActiveUnits(items);
+
             // This feels expensive, on change happens on every key press
             items.forEach(async unit =>
             {
@@ -270,18 +273,15 @@ export class InitiativeList
         });
 
         await this.CheckIniativeList();
+        this.AttachFocusListeners();
+        this.rendered = true;
     }
 
-    private async CheckIniativeList(): Promise<void>
+    private async UpdateActiveUnits(units: Item[]): Promise<void>
     {
-        // Find all units in this scene with active initiative metadata
-        const units = await OBR.scene.items.getItems((item) =>
-            item.layer === "CHARACTER"
-            && item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`] !== undefined)
-
-        let activeEncounterUnits: IUnitInfo[] = [];
         if (units.length > 0)
         {
+            let activeEncounterUnits: IUnitInfo[] = [];
             // Grab by the id
             this.inSceneUnits = units.map(unit => unit.id);
 
@@ -299,10 +299,22 @@ export class InitiativeList
             {
                 // Update will trigger Refreshlist, do not want to call directly
                 await db.ActiveEncounter.update(unit.id, { isActive: 1 });
+                const updateUnit = activeEncounterUnits.find(x => x.id === unit.id);
+                updateUnit!.isActive = 1;
             });
         }
+    }
 
-        await this.RefreshList(activeEncounterUnits);
+    private async CheckIniativeList(): Promise<void>
+    {
+        // Find all units in this scene with active initiative metadata
+        const units = await OBR.scene.items.getItems((item) =>
+            item.layer === "CHARACTER"
+            && item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`] !== undefined)
+
+        await this.UpdateActiveUnits(units);
+
+        await this.RefreshList(this.activeUnits);
     }
     public RefreshList(unitList: IUnitInfo[]): void
     {
@@ -327,6 +339,7 @@ export class InitiativeList
         {
             tableElement.deleteRow(0);
         }
+
         //Rebuild the table in order
         for (const unit of sortedUnits)
         {
@@ -543,7 +556,6 @@ export class InitiativeList
             };
         }
 
-        this.AttachFocusListeners();
         this.ShowTurnSelection();
     }
 
@@ -560,18 +572,18 @@ export class InitiativeList
             event.preventDefault();
 
             const row = (event.target as HTMLElement).closest('tr') as HTMLTableRowElement;
+            if (!row) return;
 
             const ctu: ICurrentTurnUnit = await LabelLogic.GetCTUFromRow(row);
 
             await ViewportFunctions.CenterViewportOnImage(ctu);
-
         }
     }
 
     public ShowTurnSelection(): void
     {
         const table = <HTMLTableElement>document.getElementById("initiative-list");
-        if (table.rows?.length > 1)
+        if (table && table.rows?.length > 1)
         {
             for (var i = 0, row; row = table.rows[i]; i++)
             {
@@ -930,7 +942,7 @@ export class InitiativeList
                     const deleteBars = context.items.map(x => x.id + "_hpbar");
                     await OBR.scene.items.deleteItems(deleteBars);
 
-                    OBR.scene.items.updateItems(context.items, (items) =>
+                    await OBR.scene.items.updateItems(context.items, (items) =>
                     {
                         for (let item of items)
                         {
@@ -972,31 +984,22 @@ export class InitiativeList
                 //Convert items over to images to access Text fields
                 const contextImages = context.items as Image[];
 
-                let ids: { id: string; name: string; ownerId?: string; }[] = [];
                 if (addToInitiative)
                 {
-                    //Add units to OBR metadata for contextmenu update
-                    OBR.scene.items.updateItems(contextImages, (items) =>
+                    contextImages.forEach(async item =>
                     {
-                        for (let item of items)
-                        {
-                            //Add to ID list for DB update
-                            ids.push({ id: item.id, name: item.text?.plainText || item.name, ownerId: item.createdUserId });
-                            item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`] = { initiative };
-                        }
-                    });
+                        const itemName = item.text?.plainText || item.name;
 
-                    ids.forEach(async item =>
-                    {
                         //Check if unit is in our ActiveList (via menu Info Card), if not - activate and add
                         const checkUnit = await db.ActiveEncounter.get(item.id);
+                        mainList.inSceneUnits.push(item.id); // For tracking scene state
                         if (!checkUnit)
                         {
-                            let unitInfo = new UnitInfo(item.id, item.name, item.ownerId);
+                            let unitInfo = new UnitInfo(item.id, itemName, item.createdUserId);
                             // If the base token matches something in Collection, use that information
                             if (Constants.ALPHANUMERICTEXTMATCH.test(item.name))
                             {
-                                const trimName = item.name.slice(0, -2);
+                                const trimName = itemName.slice(0, -2);
                                 const inCollection = await db.Creatures.get({ unitName: trimName });
                                 if (inCollection)
                                 {
@@ -1005,13 +1008,14 @@ export class InitiativeList
                             }
                             else 
                             {
-                                const inCollection = await db.Creatures.get({ unitName: item.name });
+                                const inCollection = await db.Creatures.get({ unitName: itemName });
                                 if (inCollection)
                                 {
                                     unitInfo.SetToModel(inCollection);
                                 }
                             }
                             unitInfo.isActive = 1;
+                            mainList.activeUnits.push(unitInfo);
                             unitInfo.SaveToDB();
                         }
                         else
@@ -1019,7 +1023,15 @@ export class InitiativeList
                             //If not-active, but is in Active Encounters (menu info card) activate this unit
                             await db.ActiveEncounter.update(item.id, { isActive: 1 });
                         }
-                        mainList.inSceneUnits.push(item.id); // For tracking scene state
+                    });
+
+                    //Add units to OBR metadata for contextmenu update
+                    await OBR.scene.items.updateItems(contextImages, (items) =>
+                    {
+                        for (let item of items)
+                        {
+                            item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`] = { initiative };
+                        }
                     });
                 }
                 else
@@ -1027,18 +1039,16 @@ export class InitiativeList
                     const deleteBars = context.items.map(x => x.id + "_hpbar");
                     await OBR.scene.items.deleteItems(deleteBars);
 
-                    OBR.scene.items.updateItems(context.items, (items) =>
+                    await OBR.scene.items.updateItems(context.items, (items) =>
                     {
                         for (let item of items)
                         {
-                            ids.push({ id: item.id, name: item.name });
-
                             delete item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`];
                             delete item.metadata[`${Constants.EXTENSIONID}/metadata_hpbar`];
                         }
                     });
 
-                    ids.forEach(async item =>
+                    contextImages.forEach(async item =>
                     {
                         await db.ActiveEncounter.update(item.id, { isActive: 0 });
                         mainList.inSceneUnits = mainList.inSceneUnits.filter(id => id != item.id); // For tracking scene state

@@ -14,6 +14,7 @@ export class PlayerList
     playerId: string = "";
     playerColor: string = "";
     party: Player[] = [];
+    rendered = false;
 
     /**Render the main initiatve list */
     public async Render(document: Document): Promise<void>
@@ -67,6 +68,7 @@ export class PlayerList
 
         const metadata = await OBR.scene.getMetadata();
         await this.RefreshList(metadata);
+        this.rendered = true;
     }
 
     /**Refresh the initiative list after updates */

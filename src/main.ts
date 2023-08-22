@@ -8,8 +8,9 @@ import '/src/css/style.css'
 const main = new InitiativeList();
 const sub = new PlayerList();
 let sceneReady = false;
-
+//clash-main-body-loading
 const app = document.querySelector<HTMLDivElement>('#clash-main-body-app');
+const loading = document.querySelector<HTMLDivElement>('#clash-main-body-loading');
 const database = db;
 database.Ready();
 
@@ -18,6 +19,13 @@ app!.innerHTML = `
     <h1>Loading...</h1>
   </div>
 `;
+loading!.innerHTML = `
+<div>
+<h1>Waiting for Scene...</h1>
+<div class="imageContainer">
+<img class="resize_fit_center" src="logo.png" alt="Clash!" class="center">
+</div>
+</div>`;
 
 // Setup OBR functions
 OBR.onReady(async () =>
@@ -38,21 +46,18 @@ async function LoadScene(ready: boolean)
     {
         if (user === "GM")
         {
-            await main.RenderInitiativeList(document);
+            if (!main.rendered) await main.RenderInitiativeList(document);
         }
         else
         {
-            await sub.Render(document);
+            if (!sub.rendered) await sub.Render(document);
         }
+        app!.hidden = false;
+        loading!.hidden = true;
     }
     else
     {
-        app!.innerHTML = `
-            <div>
-            <h1>Waiting for Scene...</h1>
-            <div class="imageContainer">
-            <img class="resize_fit_center" src="logo.png" alt="Clash!" class="center">
-            </div>
-            </div>`;
+        app!.hidden = true;
+        loading!.hidden = false;
     }
 }
