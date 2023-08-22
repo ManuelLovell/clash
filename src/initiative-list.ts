@@ -180,6 +180,7 @@ export class InitiativeList
             next: async (result) => 
             {
                 this.RefreshList(result);
+                //console.log("sub hit");
             },
             error: error => console.log("Error refreshing list: " + error)
         });
@@ -263,16 +264,50 @@ export class InitiativeList
                     {
                         delete itm.metadata[`${Constants.EXTENSIONID}/metadata_initiative`];
                         delete itm.metadata[`${Constants.EXTENSIONID}/metadata_hpbar`];
+                        //console.log("delete from obr:" + itm.name)
                     }
                 });
             }
             const characterItems = items.filter(x => x.layer === "CHARACTER");
             const missingIds = Utilities.FindUniqueIds(this.unitsInScene.map(x => x.id), characterItems.map(y => y.id));
 
+            const missingFromOBR = this.unitsInScene.filter(sceneUnit => !items.some(item => item.id === sceneUnit.id));
+            const missingFromDexie = characterItems.filter(item => !this.unitsInScene.some(sceneUnit => sceneUnit.id === item.id));
+
+            if (missingFromDexie.length > 0)
+            {
+                missingFromDexie.forEach(async (missing) =>
+                {
+                    const image = missing as Image;
+                    const itemName = image.text?.plainText || image.name;
+                    let unitInfo = new UnitInfo(image.id, itemName, image.createdUserId);
+                            // If the base token matches something in Collection, use that information
+                            if (Constants.ALPHANUMERICTEXTMATCH.test(image.name))
+                            {
+                                const trimName = itemName.slice(0, -2);
+                                const inCollection = await db.Creatures.get({ unitName: trimName });
+                                if (inCollection)
+                                {
+                                    unitInfo.SetToModel(inCollection);
+                                }
+                            }
+                            else 
+                            {
+                                const inCollection = await db.Creatures.get({ unitName: itemName });
+                                if (inCollection)
+                                {
+                                    unitInfo.SetToModel(inCollection);
+                                }
+                            }
+                            unitInfo.SaveToDB(this.sceneId);
+                            //console.log("Added " +unitInfo.unitName+ "at sceneid " + this.sceneId);
+                });
+            }
             // Cleanup Items that were deleted from Dexie
-            if (missingIds.length > 0)
+            if (missingFromOBR.length > 0)
             {
                 await db.ActiveEncounter.bulkDelete(missingIds);
+                //console.log("Removing dexie ids " + missingIds.toString());
             }
 
             this.RefreshList();
@@ -985,6 +1020,7 @@ export class InitiativeList
                             }
                             unitInfo.isActive = 1;
                             unitInfo.SaveToDB(mainList.sceneId);
+                            //console.log("Added " +unitInfo.unitName+ "at sceneid " + mainList.sceneId);
                         }
                         else
                         {

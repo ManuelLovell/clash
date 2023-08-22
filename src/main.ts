@@ -33,11 +33,11 @@ loading!.innerHTML = `
 OBR.onReady(async () =>
 {
     sceneReady = await OBR.scene.isReady();
-    LoadScene(sceneReady);
+    await LoadScene(sceneReady);
 
     OBR.scene.onReadyChange(async (ready) =>
     {
-        LoadScene(ready);
+        await LoadScene(ready);
     });
 });
 
@@ -51,7 +51,7 @@ async function LoadScene(ready: boolean)
             await GetSceneId();
             if (!main.rendered) await main.RenderInitiativeList(document);
             main.SetupItemOnChangeHandler();
-            main.RefreshList();
+            await main.RefreshList();
         }
         else
         {
@@ -63,7 +63,10 @@ async function LoadScene(ready: boolean)
     else
     {
         // Show loading, disable onchange handler
-        main.itemOnChangeHandler();
+        if (typeof (main.itemOnChangeHandler) == 'function')
+        {
+            main.itemOnChangeHandler();
+        }
         app!.hidden = true;
         loading!.hidden = false;
     }
@@ -82,7 +85,7 @@ async function GetSceneId(): Promise<void>
         const sceneMeta: Metadata = {};
         sceneMeta[`${Constants.EXTENSIONID}/metadata_sceneid`] = { SceneId };
         await OBR.scene.setMetadata(sceneMeta);
-        
+
         main.sceneId = SceneId;
     }
 
@@ -92,5 +95,10 @@ async function GetSceneId(): Promise<void>
     {
         main.roundCounter = trackerData.round;
         main.turnCounter = trackerData.turn;
+    }
+    else
+    {
+        main.roundCounter = 1;
+        main.turnCounter = 1;
     }
 }
