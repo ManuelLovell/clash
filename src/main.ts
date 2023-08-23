@@ -34,18 +34,6 @@ loading!.innerHTML = `
 // Setup OBR functions
 OBR.onReady(async () =>
 {
-    whatsnew = localStorage.getItem("whatsnew-clash");
-    if (whatsnew === "false" || !whatsnew)
-    {
-        await OBR.modal.open({
-            id: Constants.EXTENSIONWHATSNEW,
-            url: `/submenu/whatsnew.html`,
-            height: 500,
-            width: 350,
-        });
-        localStorage.setItem("whatsnew-clash", "true");
-    }
-
     sceneReady = await OBR.scene.isReady();
     await LoadScene(sceneReady);
 
@@ -73,6 +61,18 @@ async function LoadScene(ready: boolean)
         }
         app!.hidden = false;
         loading!.hidden = true;
+        
+        whatsnew = localStorage.getItem("whatsnew-clash2");
+        if (whatsnew === "false" || !whatsnew)
+        {
+            await OBR.modal.open({
+                id: Constants.EXTENSIONWHATSNEW,
+                url: `/submenu/whatsnew.html`,
+                height: 500,
+                width: 350,
+            });
+            localStorage.setItem("whatsnew-clash2", "true");
+        }
     }
     else
     {

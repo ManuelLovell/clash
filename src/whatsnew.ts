@@ -7,7 +7,7 @@ const whatsnew = document.querySelector<HTMLDivElement>('#clash-whatsnew');
 
 whatsnew!.innerHTML = `
   <div>
-    <h1>What's New? 8/23</h1>
+    <h1>Clash! 8/23</h1>
     <div>Sorry for the confusion lately!
     Clash has grown quite a bit since I started and some of the older logic
     for handling how tokens are tracked per scene just.. couldn't cut it anymore.
