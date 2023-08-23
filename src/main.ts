@@ -10,6 +10,8 @@ import { Constants } from "./constants";
 const main = new InitiativeList();
 const sub = new PlayerList();
 let sceneReady = false;
+let whatsnew = "false";
+
 //clash-main-body-loading
 const app = document.querySelector<HTMLDivElement>('#clash-main-body-app');
 const loading = document.querySelector<HTMLDivElement>('#clash-main-body-loading');
@@ -32,6 +34,18 @@ loading!.innerHTML = `
 // Setup OBR functions
 OBR.onReady(async () =>
 {
+    const whatsnew = localStorage.getItem("whatsnew");
+    if (whatsnew === "false" || !whatsnew)
+    {
+        await OBR.modal.open({
+            id: Constants.EXTENSIONWHATSNEW,
+            url: `/submenu/whatsnew.html`,
+            height: 500,
+            width: 350,
+        });
+        localStorage.setItem("whatsnew", "true");
+    }
+
     sceneReady = await OBR.scene.isReady();
     await LoadScene(sceneReady);
 

@@ -6,7 +6,8 @@ export default {
     rollupOptions: {
       input: {
         main: path.resolve(__dirname, 'index.html'),
-        subindex: path.resolve(__dirname, 'submenu/subindex.html')
+        subindex: path.resolve(__dirname, 'submenu/subindex.html'),
+        whatsnew: path.resolve(__dirname, 'submenu/whatsnew.html')
       }
     }
   }

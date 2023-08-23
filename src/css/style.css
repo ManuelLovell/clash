@@ -43,26 +43,26 @@
 
 .unitHappy {
     color: white !important;
-    text-shadow: -1px -1px 1px black,  
-                  1px -1px 1px black,
-                  -1px 1px 1px black,
-                  1px 1px 1px black;
+    text-shadow: -1px -1px 1px black,
+        1px -1px 1px black,
+        -1px 1px 1px black,
+        1px 1px 1px black;
 }
 
 .unitHurt {
     color: yellow !important;
-    text-shadow: -1px -1px 1px black,  
-                  1px -1px 1px black,
-                  -1px 1px 1px black,
-                  1px 1px 1px black;
+    text-shadow: -1px -1px 1px black,
+        1px -1px 1px black,
+        -1px 1px 1px black,
+        1px 1px 1px black;
 }
 
 .unitHarmed {
     color: red !important;
-    text-shadow: -1px -1px 1px black,  
-                  1px -1px 1px black,
-                  -1px 1px 1px black,
-                  1px 1px 1px black;
+    text-shadow: -1px -1px 1px black,
+        1px -1px 1px black,
+        -1px 1px 1px black,
+        1px 1px 1px black;
 }
 
 .RollerButton {
@@ -95,8 +95,7 @@ tbody {
     display: none;
 }
 
-table
-{
+table {
     table-layout: fixed;
 }
 
@@ -411,7 +410,7 @@ input:checked+.slider:before {
     padding-bottom: 4px;
     padding-top: 4px;
     border: 1px solid black;
-    cursor:pointer;
+    cursor: pointer;
 }
 
 .context-menu ul li a {
@@ -421,4 +420,29 @@ input:checked+.slider:before {
 
 .context-menu ul li:hover {
     background: var(--OBR-light-blue);
+}
+
+.tooltip {
+    position: relative;
+    float: right;
+    margin-right: 20px;
+    cursor:pointer;
+}
+/*
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 120px;
+    background-color: var(--OBR-dark-blue);
+    color: var(--light-letters);
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    justify-content: left;
+
+    position: absolute;
+    z-index: 1;
+}*/
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
 }

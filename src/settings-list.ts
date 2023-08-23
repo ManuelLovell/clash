@@ -36,7 +36,11 @@ export async function RenderSettings(document: Document, list: InitiativeList): 
 
     document.querySelector<HTMLDivElement>('#clash-main-body-settings')!.innerHTML = `
         <div id="settingsContainer">
-        <h2 style="margin-top: 10px;">Settings</h2>
+        <h2 style="margin-top: 10px;">Settings
+        <div class="tooltip" id="whatsnewbutton">&#x1F6C8;
+        <span class="tooltiptext"></span>
+        </div>
+        </h2>
         <div><span id="exportAllContainer"></span>Export Collection Data </div>
         <i><small>This will save Collection data to a Text/JSON file</small></i>
         </br>
@@ -73,6 +77,17 @@ export async function RenderSettings(document: Document, list: InitiativeList): 
     SetCheckbox(document, "noLabel", list.gmDisableLabel, list);
     SetCheckbox(document, "logToGM", list.gmRumbleLog, list);
 
+    //Create Whatsnew Button
+    const whatsNewButton = document.getElementById("whatsnewbutton")!;
+    whatsNewButton.onclick = async function ()
+    {
+        await OBR.modal.open({
+            id: Constants.EXTENSIONWHATSNEW,
+            url: `/submenu/whatsnew.html`,
+            height: 500,
+            width: 350,
+        });
+    };
 
     //Create TextLabel Input
     const turnLabelTextContainer = document.getElementById("turnLabelTextContainer");
@@ -135,7 +150,7 @@ export async function RenderSettings(document: Document, list: InitiativeList): 
                 console.log(reader.error);
             };
         }
-    }
+    };
 
     importAllContainer?.appendChild(favBox);
     importAllContainer?.appendChild(document.createTextNode(`Un-Favorite  ˣ  `));
@@ -153,7 +168,7 @@ export async function RenderSettings(document: Document, list: InitiativeList): 
     exportButton.onclick = async function () 
     {
         await DownloadCollection();
-    }
+    };
     exportAllContainer?.appendChild(exportButton);
 
     //Create Reset ALL Button
@@ -187,7 +202,7 @@ export async function RenderSettings(document: Document, list: InitiativeList): 
             await db.delete();
             window.location.reload();
         }
-    }
+    };
     clearAllContainer?.appendChild(resetButton);
 
     const settingsReturnContainer = document.getElementById("settingsReturnContainer");
@@ -266,7 +281,7 @@ export async function RenderSettings(document: Document, list: InitiativeList): 
             }
         };
         container?.insertBefore(slider, container.firstChild);
-    }
+    };
 
     async function DownloadCollection()
     {

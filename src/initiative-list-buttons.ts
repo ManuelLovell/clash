@@ -180,22 +180,25 @@ export function AppendClearListButton(document: Document, list: InitiativeList):
             self.turnCounter = 1;
             self.roundCounter = 1;
             const counterHtml = document.getElementById("roundCount")!;
+            const toBeDeleted: string[] = [Constants.LABEL];
             counterHtml.innerText = `Round: ${self.roundCounter}`;
 
             await db.Tracker.clear();
             await db.Tracker.add({ id: Constants.TURNTRACKER, currentRound: 1, currentTurn: 1 });
-            await db.ActiveEncounter.where("isActive").equals(1).modify({ isActive: 0 });
 
-            await OBR.scene.items.deleteItems([Constants.LABEL]);
 
             await OBR.scene.items.updateItems((item) => item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`] != undefined
                 || item.id === Constants.LABEL, (items) =>
             {
                 for (let item of items)
                 {
+                    toBeDeleted.push(item.id + "_hpbar");
                     delete item.metadata[`${Constants.EXTENSIONID}/metadata_initiative`];
+                    delete item.metadata[`${Constants.EXTENSIONID}/metadata_hpbar`];
                 }
             });
+            await db.ActiveEncounter.where({isActive: 1, sceneId: self.sceneId}).modify({ isActive: 0 }); 
+            await OBR.scene.items.deleteItems(toBeDeleted);
             await list.Save();
         }
     }

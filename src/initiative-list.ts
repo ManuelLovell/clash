@@ -677,7 +677,9 @@ export class InitiativeList
         });
         await OBR.scene.items.addItems(updateLabels);
 
-        for (const unit of this.unitsInScene)
+        // FIlter down the units for the player update
+        const activeUnits = this.unitsInScene.filter(x => x.isActive === 1);
+        for (const unit of activeUnits)
         {
             trackedUnits.push(
                 {
