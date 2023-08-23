@@ -1,6 +1,6 @@
 import{O as e,C as o}from"./constants-d8998271.js";const s=document.querySelector("#clash-whatsnew");s.innerHTML=`
   <div>
-    <h1>What's New? 8/23</h1>
+    <h1>Clash! 8/23</h1>
     <div>Sorry for the confusion lately!
     Clash has grown quite a bit since I started and some of the older logic
     for handling how tokens are tracked per scene just.. couldn't cut it anymore.
