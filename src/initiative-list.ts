@@ -111,23 +111,23 @@ export class InitiativeList
 
         this.party = await OBR.party.getPlayers();
         playerContextMenu.appendChild(GetEmptyContextItem());
-        this.party.forEach(player =>
+        for (const player of this.party)
         {
             const listItem = document.createElement("li");
             listItem.id = player.id;
             listItem.textContent = player.name;
             listItem.style.color = player.color;
             playerContextMenu.appendChild(listItem);
-        });
+        };
 
-        OBR.party.onChange((party) =>
+        OBR.party.onChange(async (party) =>
         {
             playerContextMenu.innerHTML = "";
             playerContextMenu.appendChild(GetEmptyContextItem());
 
             this.party = party;
 
-            party.forEach(async (player) =>
+            for (const player of party)
             {
                 const listItem = document.createElement("li");
                 listItem.id = player.id;
@@ -162,7 +162,7 @@ export class InitiativeList
                         await this.UpdateTrackerForPlayers();
                     }
                 }
-            });
+            };
         });
 
         // Set theme accordingly
@@ -180,7 +180,6 @@ export class InitiativeList
             next: async (result) => 
             {
                 this.RefreshList(result);
-                //console.log("sub hit");
             },
             error: error => console.log("Error refreshing list: " + error)
         });
@@ -196,11 +195,10 @@ export class InitiativeList
         this.itemOnChangeHandler = OBR.scene.items.onChange(async (items) =>
         {
             const deleteIds: string[] = [];
-
             // This feels expensive, on change happens on every key press
-            items.forEach(async unit =>
+            for (const unit of items)
             {
-                if (unit.layer !== "CHARACTER") return;
+                if (unit.layer !== "CHARACTER") continue;
 
                 const imageUnit = unit as Image;
                 const unitName = imageUnit.text?.plainText || imageUnit.name;
@@ -228,24 +226,20 @@ export class InitiativeList
 
                         if (isActiveMonster)
                         {
-                            isActiveMonster.id = unit.id;
                             let sUnitInfo = new UnitInfo(unit.id, unitName, unit.createdUserId);
                             sUnitInfo.SetToModel(isActiveMonster);
                             sUnitInfo.unitName = unitName;
-                            sUnitInfo.tokenId = unit.id;
                             sUnitInfo.isActive = 1;
+                            this.unitsInScene.push(sUnitInfo);
                             await sUnitInfo.SaveToDB(this.sceneId);
                         }
                     }
                     else if (otherUnit)
                     {
-                        // If it's just another
-                        otherUnit.id = unit.id;
                         let unitInfo = new UnitInfo(unit.id, unitName, unit.createdUserId);
                         unitInfo.SetToModel(otherUnit);
-                        unitInfo.unitName = unitName;
-                        unitInfo.tokenId = unit.id;
                         unitInfo.isActive = 1;
+                        this.unitsInScene.push(unitInfo);
                         await unitInfo.SaveToDB(this.sceneId);
                     }
                     else if (otherScene?.sceneId === this.sceneId)
@@ -254,7 +248,7 @@ export class InitiativeList
                         deleteIds.push(unit.id);
                     }
                 }
-            });
+            };
 
             if (deleteIds.length > 0)
             {
@@ -264,7 +258,6 @@ export class InitiativeList
                     {
                         delete itm.metadata[`${Constants.EXTENSIONID}/metadata_initiative`];
                         delete itm.metadata[`${Constants.EXTENSIONID}/metadata_hpbar`];
-                        //console.log("delete from obr:" + itm.name)
                     }
                 });
             }
@@ -276,41 +269,39 @@ export class InitiativeList
 
             if (missingFromDexie.length > 0)
             {
-                missingFromDexie.forEach(async (missing) =>
+                for (const missing of missingFromDexie)
                 {
                     const image = missing as Image;
                     const itemName = image.text?.plainText || image.name;
                     let unitInfo = new UnitInfo(image.id, itemName, image.createdUserId);
-                            // If the base token matches something in Collection, use that information
-                            if (Constants.ALPHANUMERICTEXTMATCH.test(image.name))
-                            {
-                                const trimName = itemName.slice(0, -2);
-                                const inCollection = await db.Creatures.get({ unitName: trimName });
-                                if (inCollection)
-                                {
-                                    unitInfo.SetToModel(inCollection);
-                                }
-                            }
-                            else 
-                            {
-                                const inCollection = await db.Creatures.get({ unitName: itemName });
-                                if (inCollection)
-                                {
-                                    unitInfo.SetToModel(inCollection);
-                                }
-                            }
-                            unitInfo.SaveToDB(this.sceneId);
-                            //console.log("Added " +unitInfo.unitName+ "at sceneid " + this.sceneId);
-                });
+                    // If the base token matches something in Collection, use that information
+                    if (Constants.ALPHANUMERICTEXTMATCH.test(image.name))
+                    {
+                        const trimName = itemName.slice(0, -2);
+                        const inCollection = await db.Creatures.get({ unitName: trimName });
+                        if (inCollection)
+                        {
+                            unitInfo.SetToModel(inCollection);
+                        }
+                    }
+                    else 
+                    {
+                        const inCollection = await db.Creatures.get({ unitName: itemName });
+                        if (inCollection)
+                        {
+                            unitInfo.SetToModel(inCollection);
+                        }
+                    }
+                    await unitInfo.SaveToDB(this.sceneId);
+                };
             }
             // Cleanup Items that were deleted from Dexie
             if (missingFromOBR.length > 0)
             {
                 await db.ActiveEncounter.bulkDelete(missingIds);
-                //console.log("Removing dexie ids " + missingIds.toString());
             }
 
-            this.RefreshList();
+            await this.RefreshList();
         });
     }
 
@@ -616,9 +607,10 @@ export class InitiativeList
     public async Save(): Promise<void>
     {
         const unitsInOrder = document.querySelectorAll(".InitiativeInput");
-        unitsInOrder.forEach(async (unit) =>
+
+        for (let index = 0; index < unitsInOrder.length; index++)
         {
-            const unitInput = unit as HTMLInputElement;
+            const unitInput = unitsInOrder[index] as HTMLInputElement;
             const unitId = unitInput.id.substring(2);
             const initiative = unitInput.value;
 
@@ -649,7 +641,8 @@ export class InitiativeList
                         isMonster: isMonster
                     });
             }
-        });
+        }
+
         await db.Tracker.update(Constants.TURNTRACKER, { id: Constants.TURNTRACKER, currentTurn: this.turnCounter, currentRound: this.roundCounter });
         await this.RefreshList();
         await this.UpdateTrackerForPlayers();
@@ -664,7 +657,7 @@ export class InitiativeList
 
         const hpBarsToUpdate = await OBR.scene.items.getItems(((item) => item.id.endsWith("_hpbar")));
 
-        hpBarsToUpdate.forEach(hpbar =>
+        for (const hpbar of hpBarsToUpdate)
         {
             const label = hpbar as Text;
             const unit = this.unitsInScene.find(x => x.id === label.id.replace("_hpbar", ""));
@@ -674,7 +667,7 @@ export class InitiativeList
                 label.text.style.fillColor = LabelLogic.getHealthColorString(unit.currentHP, unit.maxHP);
                 updateLabels.push(label);
             }
-        });
+        };
         await OBR.scene.items.addItems(updateLabels);
 
         // FIlter down the units for the player update
@@ -845,7 +838,7 @@ export class InitiativeList
                     else
                     {
                         // Go through the list and make sure everyone is in the DB first
-                        context.items.forEach(async unit =>
+                        for (const unit of context.items)
                         {
                             const unitImage = unit as Image;
                             const uName = unitImage.text?.plainText || unitImage.name;
@@ -875,7 +868,7 @@ export class InitiativeList
                                 }
                                 await unitInfo.SaveToDB(mainList.sceneId);
                             }
-                        });
+                        };
 
                         //set up a lot of things
                         const unitIdString = context.items.map(item => item.id).toString();
@@ -993,7 +986,7 @@ export class InitiativeList
 
                 if (addToInitiative)
                 {
-                    contextImages.forEach(async item =>
+                    for (const item of contextImages)
                     {
                         const itemName = item.text?.plainText || item.name;
 
@@ -1022,14 +1015,13 @@ export class InitiativeList
                             }
                             unitInfo.isActive = 1;
                             unitInfo.SaveToDB(mainList.sceneId);
-                            //console.log("Added " +unitInfo.unitName+ "at sceneid " + mainList.sceneId);
                         }
                         else
                         {
                             //If not-active, but is in Active Encounters (menu info card) activate this unit
                             db.ActiveEncounter.update(item.id, { isActive: 1 });
                         }
-                    });
+                    };
 
                     //Add units to OBR metadata for contextmenu update
                     await OBR.scene.items.updateItems(contextImages, (items) =>
@@ -1054,10 +1046,10 @@ export class InitiativeList
                         }
                     });
 
-                    contextImages.forEach(async item =>
+                    for (const item of contextImages)
                     {
-                        db.ActiveEncounter.update(item.id, { isActive: 0 });
-                    });
+                        await db.ActiveEncounter.update(item.id, { isActive: 0 });
+                    };
                 }
             },
         });

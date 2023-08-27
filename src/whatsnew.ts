@@ -3,10 +3,34 @@ import '/src/css/new-style.css'
 import { Constants } from "./constants";
 
 
-const whatsnew = document.querySelector<HTMLDivElement>('#clash-whatsnew');
+const whatsnew = document.querySelector<HTMLDivElement>('#clash-whatsnew')!;
+const footer = document.querySelector<HTMLElement>('#clash-whatsnew-notes')!;
 
-whatsnew!.innerHTML = `
+whatsnew.innerHTML = `
   <div>
+    <h1>Clash! 8/27</h1>
+    <div> If you ever want to see these updates again/later, click the 'i' in Settings!
+    </br>
+    </br>
+    Hey there, just a few fixes today.
+    There were some duplication errors when alt-copying tokens or alt-copying a token with an incrementor.
+    </br>
+    This looks to be resolved now, though if you have a group of Goblins labeled Goblin A through Goblin D, and Goblin C
+    has unique stats.. and you went to copy Goblin C, the stats won't copy in precisely. This is in part to how
+    OBR handles copying, and me not wanting to go down a rabbit hole for an edgecase.
+    </br>
+    </br>
+    Also (this) What's New message now has a timer, so it'll autoclose after 10 seconds.
+    Apparently Chromecast devices get the message but have no way to dismiss it. Oops.
+    </br>
+    </br>
+    Some things I haven't mentioned, an earlier update added the ability for players to update
+    the information of tokens in the Initiative List for tokens THEY OWN. So if they updated it? They can edit it's list values.
+    </br>
+    You can also (As the GM) change the ownership of a token by right-clicking it in the list.
+    
+    </br>
+    </br>
     <h1>Clash! 8/23</h1>
     <div>Sorry for the confusion lately!
     Clash has grown quite a bit since I started and some of the older logic
@@ -38,9 +62,21 @@ whatsnew!.innerHTML = `
 
 OBR.onReady(async () =>
 {
-    const closebutton = document.querySelector<HTMLElement>('.close');
+    footer.innerHTML = `
+    <a href="https://discord.gg/ANZKDmWzr6" target="_blank">Join the OBR Discord!</a>
+    <div class="timer" style="--duration: 10;--size: 35;">
+    <div class="mask"></div>
+    </div>
+    <div class="close">⤬</div>`;
+
+    const closebutton = document.querySelector<HTMLElement>('.close')!;
     closebutton!.onclick = async () =>
     {
         await OBR.modal.close(Constants.EXTENSIONWHATSNEW);
     };
+
+    // Close dialogue after 10 seconds
+    setTimeout(() => {
+        closebutton.click();
+    }, 10000); // 10000 milliseconds = 10 seconds
 });

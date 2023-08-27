@@ -9,6 +9,7 @@ import { Constants } from "./constants";
 // Render main window
 const main = new InitiativeList();
 const sub = new PlayerList();
+const updateKeyVersion = "whatsnew-clash3";
 let sceneReady = false;
 let whatsnew;
 
@@ -62,7 +63,7 @@ async function LoadScene(ready: boolean)
         app!.hidden = false;
         loading!.hidden = true;
         
-        whatsnew = localStorage.getItem("whatsnew-clash2");
+        whatsnew = localStorage.getItem(updateKeyVersion);
         if (whatsnew === "false" || !whatsnew)
         {
             await OBR.modal.open({
@@ -71,7 +72,7 @@ async function LoadScene(ready: boolean)
                 height: 500,
                 width: 350,
             });
-            localStorage.setItem("whatsnew-clash2", "true");
+            localStorage.setItem(updateKeyVersion, "true");
         }
     }
     else
