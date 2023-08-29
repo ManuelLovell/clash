@@ -1,6 +1,9 @@
-import{O as t,C as o}from"./constants-d8998271.js";const s=document.querySelector("#clash-whatsnew"),a=document.querySelector("#clash-whatsnew-notes");s.innerHTML=`
+import{O as o,C as a}from"./constants-d8998271.js";const n=document.querySelector("#clash-whatsnew"),i=document.querySelector("#clash-whatsnew-notes");n.innerHTML=`
   <div>
-    <h1>Clash! 8/27</h1>
+    <h1>Clash! 8/28</h1>
+    Just a minor fix for stopping the Settings>WhatsNew window from auto-closing.
+    </br>
+    <h1>Changes 8/27</h1>
     <div> If you ever want to see these updates again/later, click the 'i' in Settings!
     </br>
     </br>
@@ -23,7 +26,7 @@ import{O as t,C as o}from"./constants-d8998271.js";const s=document.querySelecto
     
     </br>
     </br>
-    <h1>Clash! 8/23</h1>
+    <h1>Changes! 8/23</h1>
     <div>Sorry for the confusion lately!
     Clash has grown quite a bit since I started and some of the older logic
     for handling how tokens are tracked per scene just.. couldn't cut it anymore.
@@ -50,9 +53,9 @@ import{O as t,C as o}from"./constants-d8998271.js";const s=document.querySelecto
     </br>
     If for some reason this doesn't resolve your issues, hop on Discord. There's only so much testing I can do.
   </div>
-`;t.onReady(async()=>{a.innerHTML=`
+`;o.onReady(async()=>{const s=window.location.search,e=new URLSearchParams(s).get("timer");i.innerHTML=`
     <a href="https://discord.gg/ANZKDmWzr6" target="_blank">Join the OBR Discord!</a>
-    <div class="timer" style="--duration: 10;--size: 35;">
+    <div class="timer" style="--duration: ${e};--size: 34;">
     <div class="mask"></div>
     </div>
-    <div class="close">⤬</div>`;const e=document.querySelector(".close");e.onclick=async()=>{await t.modal.close(o.EXTENSIONWHATSNEW)},setTimeout(()=>{e.click()},1e4)});
+    <div class="close">⤬</div>`;const t=document.querySelector(".close");t.onclick=async()=>{await o.modal.close(a.EXTENSIONWHATSNEW)},setTimeout(()=>{t.click()},+e*1e3)});
