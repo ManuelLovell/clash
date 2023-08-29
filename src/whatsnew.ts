@@ -8,7 +8,10 @@ const footer = document.querySelector<HTMLElement>('#clash-whatsnew-notes')!;
 
 whatsnew.innerHTML = `
   <div>
-    <h1>Clash! 8/27</h1>
+    <h1>Clash! 8/28</h1>
+    Just a minor fix for stopping the Settings>WhatsNew window from auto-closing.
+    </br>
+    <h1>Changes 8/27</h1>
     <div> If you ever want to see these updates again/later, click the 'i' in Settings!
     </br>
     </br>
@@ -31,7 +34,7 @@ whatsnew.innerHTML = `
     
     </br>
     </br>
-    <h1>Clash! 8/23</h1>
+    <h1>Changes! 8/23</h1>
     <div>Sorry for the confusion lately!
     Clash has grown quite a bit since I started and some of the older logic
     for handling how tokens are tracked per scene just.. couldn't cut it anymore.
@@ -61,10 +64,14 @@ whatsnew.innerHTML = `
 `;
 
 OBR.onReady(async () =>
-{
+{        
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const timerParam = urlParams.get('timer')!;
+
     footer.innerHTML = `
     <a href="https://discord.gg/ANZKDmWzr6" target="_blank">Join the OBR Discord!</a>
-    <div class="timer" style="--duration: 10;--size: 35;">
+    <div class="timer" style="--duration: ${timerParam};--size: 34;">
     <div class="mask"></div>
     </div>
     <div class="close">⤬</div>`;
@@ -78,5 +85,5 @@ OBR.onReady(async () =>
     // Close dialogue after 10 seconds
     setTimeout(() => {
         closebutton.click();
-    }, 10000); // 10000 milliseconds = 10 seconds
+    }, +timerParam * 1000); // 10000 milliseconds = 10 seconds
 });

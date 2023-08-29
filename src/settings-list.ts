@@ -83,7 +83,7 @@ export async function RenderSettings(document: Document, list: InitiativeList): 
     {
         await OBR.modal.open({
             id: Constants.EXTENSIONWHATSNEW,
-            url: `/submenu/whatsnew.html`,
+            url: `/submenu/whatsnew.html?timer=600`,
             height: 500,
             width: 350,
         });

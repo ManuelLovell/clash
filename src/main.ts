@@ -63,12 +63,12 @@ async function LoadScene(ready: boolean)
         app!.hidden = false;
         loading!.hidden = true;
         
-        whatsnew = localStorage.getItem(updateKeyVersion);
+        whatsnew = ""//localStorage.getItem(updateKeyVersion);
         if (whatsnew === "false" || !whatsnew)
         {
             await OBR.modal.open({
                 id: Constants.EXTENSIONWHATSNEW,
-                url: `/submenu/whatsnew.html`,
+                url: `/submenu/whatsnew.html?timer=10`,
                 height: 500,
                 width: 350,
             });
