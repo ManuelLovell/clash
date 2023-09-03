@@ -313,6 +313,11 @@ export class PlayerList
             }
             else
             {
+                if (unitItem.hidden)
+                {
+                    continue;
+                }
+
                 let initCell = row.insertCell(0);
                 initCell.style.placeContent = "center";
 
@@ -399,19 +404,22 @@ export class PlayerList
             if (table.rows[this.turnCounter])
             {
                 const currentTurnRow = table.rows[this.turnCounter];
-                currentTurnRow.className = "turnOutline";
-
-                const counterHtml = document.getElementById("roundCount")!;
-                counterHtml.innerText = `Round: ${this.roundCounter}`;
-
-                let ctu: ICurrentTurnUnit = await LabelLogic.GetCTUFromRow(currentTurnRow);
-
-                if (ctu.visible)
+                if (currentTurnRow.innerHTML != '')
                 {
-                    //Move the view
-                    if (this.enableAutoFocus)
+                    currentTurnRow.className = "turnOutline";
+    
+                    const counterHtml = document.getElementById("roundCount")!;
+                    counterHtml.innerText = `Round: ${this.roundCounter}`;
+    
+                    let ctu: ICurrentTurnUnit = await LabelLogic.GetCTUFromRow(currentTurnRow);
+    
+                    if (ctu.visible)
                     {
-                        await ViewportFunctions.CenterViewportOnImage(ctu);
+                        //Move the view
+                        if (this.enableAutoFocus)
+                        {
+                            await ViewportFunctions.CenterViewportOnImage(ctu);
+                        }
                     }
                 }
             }

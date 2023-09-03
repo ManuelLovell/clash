@@ -8,6 +8,16 @@ const footer = document.querySelector<HTMLElement>('#clash-whatsnew-notes')!;
 
 whatsnew.innerHTML = `
   <div>
+    <h1>Clash! 9/3</h1>
+    Hopefully fixed an issue with IndexedDB that was stopping Clash from working on Safari.
+    Also <b>HIDDEN</b> units should no longer appear on the Player Initiative List.
+    At all.
+    </br>
+    Let them live in fear.
+    </br> (No unit in the list is highlighted when it's a hidden units turn.)
+    </br>
+    Also fixed a bug with the Rumble hook displaying rolls several times.
+    </br>
     <h1>Clash! 8/28</h1>
     Just a minor fix for stopping the Settings>WhatsNew window from auto-closing.
     </br>
@@ -64,7 +74,7 @@ whatsnew.innerHTML = `
 `;
 
 OBR.onReady(async () =>
-{        
+{
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
     const timerParam = urlParams.get('timer')!;
@@ -83,7 +93,8 @@ OBR.onReady(async () =>
     };
 
     // Close dialogue after 10 seconds
-    setTimeout(() => {
+    setTimeout(() =>
+    {
         closebutton.click();
     }, +timerParam * 1000); // 10000 milliseconds = 10 seconds
 });

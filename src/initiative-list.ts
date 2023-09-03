@@ -13,6 +13,7 @@ import * as Utilities from './utilities';
 export class InitiativeList
 {
     unitsInScene: IUnitInfo[] = [];
+    unitsHidden: string[] = [];
     // Counter per round
     roundCounter: number = 1;
     // Counter per turn
@@ -195,14 +196,17 @@ export class InitiativeList
         this.itemOnChangeHandler = OBR.scene.items.onChange(async (items) =>
         {
             const deleteIds: string[] = [];
+            this.unitsHidden = [];
             // This feels expensive, on change happens on every key press
             for (const unit of items)
             {
-                if (unit.layer !== "CHARACTER") continue;
+                if (unit.layer !== "CHARACTER" && unit.layer !== "MOUNT") continue;
 
                 const imageUnit = unit as Image;
                 const unitName = imageUnit.text?.plainText || imageUnit.name;
                 const tableUnit = this.unitsInScene.find(x => x.id === imageUnit.id);
+
+                if (!imageUnit.visible) this.unitsHidden.push(imageUnit.id);
 
                 if (tableUnit && tableUnit.unitName !== unitName)
                 {
@@ -260,8 +264,9 @@ export class InitiativeList
                         delete itm.metadata[`${Constants.EXTENSIONID}/metadata_hpbar`];
                     }
                 });
-            }
-            const characterItems = items.filter(x => x.layer === "CHARACTER");
+            } 
+
+            const characterItems = items.filter(x => x.layer === "CHARACTER" || x.layer === "MOUNT");
             const missingIds = Utilities.FindUniqueIds(this.unitsInScene.map(x => x.id), characterItems.map(y => y.id));
 
             const missingFromOBR = this.unitsInScene.filter(sceneUnit => !items.some(item => item.id === sceneUnit.id));
@@ -682,7 +687,8 @@ export class InitiativeList
                     cHp: unit.currentHP,
                     mHp: unit.maxHP,
                     aC: unit.armorClass,
-                    owner: unit.ownerId
+                    owner: unit.ownerId,
+                    hidden: this.unitsHidden.includes(unit.id)
                 }
             );
         }
@@ -775,7 +781,9 @@ export class InitiativeList
                         label: "[Clash!] View Info",
                         filter: {
                             max: 1,
-                            every: [{ key: "layer", value: "CHARACTER" }],
+                            some: [
+                                { key: "layer", value: "CHARACTER", coordinator: "||" },
+                                { key: "layer", value: "MOUNT" }],
                         },
                     },
                     {
@@ -783,7 +791,9 @@ export class InitiativeList
                         label: "[Clash!] View Info",
                         filter: {
                             min: 2,
-                            every: [{ key: "layer", value: "CHARACTER" }],
+                            some: [
+                                { key: "layer", value: "CHARACTER", coordinator: "||" },
+                                { key: "layer", value: "MOUNT" }],
                         },
                     },
                 ],
@@ -897,19 +907,25 @@ export class InitiativeList
                 label: "[Clash!] Show HP Bar",
                 filter: {
                     every: [
-                        { key: "layer", value: "CHARACTER" },
                         { key: ["metadata", `${Constants.EXTENSIONID}/metadata_hpbar`], value: undefined },
                         { key: ["metadata", `${Constants.EXTENSIONID}/metadata_initiative`], value: undefined, operator: "!=" },
-
                     ],
+                    some: [
+                        { key: "layer", value: "CHARACTER", coordinator: "||" },
+                        { key: "layer", value: "MOUNT" }],
                 },
             },
             {
                 icon: "/health-black.svg",
                 label: "[Clash!] Hide HP Bar",
                 filter: {
-                    every: [{ key: "layer", value: "CHARACTER" },
-                    { key: ["metadata", `${Constants.EXTENSIONID}/metadata_hpbar`], value: undefined, operator: "!=" },],
+                    every: [
+                        { key: "layer", value: "MOUNT" },
+                        { key: ["metadata", `${Constants.EXTENSIONID}/metadata_hpbar`], value: undefined, operator: "!=" },
+                    ],
+                    some: [
+                        { key: "layer", value: "CHARACTER", coordinator: "||" },
+                        { key: "layer", value: "MOUNT" }],
                 },
             },],
             async onClick(context)
@@ -960,17 +976,17 @@ export class InitiativeList
                     icon: "/addunit.svg",
                     label: "[Clash!] Add to Initiative",
                     filter: {
-                        every: [
-                            { key: "layer", value: "CHARACTER" },
-                            { key: ["metadata", `${Constants.EXTENSIONID}/metadata_initiative`], value: undefined },
-                        ],
+                        every: [{ key: ["metadata", `${Constants.EXTENSIONID}/metadata_initiative`], value: undefined }],
+                        some: [{ key: "layer", value: "CHARACTER", coordinator: "||" },
+                        { key: "layer", value: "MOUNT" }],
                     },
                 },
                 {
                     icon: "/removeunit.svg",
                     label: "[Clash!] Remove from Initiative",
                     filter: {
-                        every: [{ key: "layer", value: "CHARACTER" }],
+                        some: [{ key: "layer", value: "CHARACTER", coordinator: "||" },
+                        { key: "layer", value: "MOUNT" }],
                     },
                 },
             ],

@@ -3,7 +3,7 @@ import OBR, { Item, Image, Metadata } from '@owlbear-rodeo/sdk';
 import UnitInfo from './unit-info';
 import { IOpen5eMonsterListResponse } from './interfaces/api-response-open5e';
 import { DiceRoller } from './dice-roller';
-import { db } from './local-database';
+import { db, getDatabase } from './local-database';
 import * as Utilities from './utilities';
 import '/src/css/mini-style.css'
 import { IUnitInfo } from './interfaces/unit-info';
@@ -80,6 +80,8 @@ export class SubMenu
         this.ShowSubMenu(true);
         OBR.onReady(async () =>
         {
+            await getDatabase();
+            
             const roomData = await OBR.room.getMetadata();
             if (roomData[`${Constants.DISCORDID}/metadata_webhook`] != undefined)
             {

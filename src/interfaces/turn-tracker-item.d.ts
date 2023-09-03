@@ -18,6 +18,7 @@ interface IUnitTrack
     mHp?: number;
     aC?: number;
     owner?: string;
+    hidden?: boolean;
     stamp?: string;
 }
 

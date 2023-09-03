@@ -1,7 +1,7 @@
 import OBR, { Metadata } from "@owlbear-rodeo/sdk";
 import { InitiativeList } from './initiative-list';
 import { PlayerList } from "./player-initiative-list";
-import { db } from "./local-database";
+import { db, getDatabase } from "./local-database";
 import * as Utilities from './utilities';
 import '/src/css/style.css'
 import { Constants } from "./constants";
@@ -9,15 +9,14 @@ import { Constants } from "./constants";
 // Render main window
 const main = new InitiativeList();
 const sub = new PlayerList();
-const updateKeyVersion = "whatsnew-clash3";
+const updateKeyVersion = "whatsnew-clash4";
 let sceneReady = false;
 let whatsnew;
+let user = "";
 
 //clash-main-body-loading
 const app = document.querySelector<HTMLDivElement>('#clash-main-body-app');
 const loading = document.querySelector<HTMLDivElement>('#clash-main-body-loading');
-const database = db;
-database.Ready();
 
 app!.innerHTML = `
   <div>
@@ -35,6 +34,14 @@ loading!.innerHTML = `
 // Setup OBR functions
 OBR.onReady(async () =>
 {
+    user = await OBR.player.getRole();
+
+    if (user === "GM")
+    {
+        await getDatabase();
+        db.Ready();
+    }
+
     sceneReady = await OBR.scene.isReady();
     await LoadScene(sceneReady);
 
@@ -46,7 +53,6 @@ OBR.onReady(async () =>
 
 async function LoadScene(ready: boolean)
 {
-    const user = await OBR.player.getRole();
     if (ready)
     {
         if (user === "GM")
@@ -62,7 +68,7 @@ async function LoadScene(ready: boolean)
         }
         app!.hidden = false;
         loading!.hidden = true;
-        
+
         whatsnew = localStorage.getItem(updateKeyVersion);
         if (whatsnew === "false" || !whatsnew)
         {

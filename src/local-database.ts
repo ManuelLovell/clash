@@ -146,17 +146,16 @@ export interface ITracker
     currentRound: number;
 }
 
-let database: DexieDatabase;
-async function getDatabase(): Promise<DexieDatabase>
+export async function getDatabase(): Promise<DexieDatabase>
 {
-    if (database)
+    if (db)
     {
-        return database;
+        return db;
     }
     else
     {
-        database = await createDatabase();
-        return database;
+        db = await createDatabase();
+        return db;
     }
 }
 
@@ -183,4 +182,5 @@ async function createDatabase(): Promise<DexieDatabase>
         };
     });
 }
-export const db = await getDatabase();
+
+export let db: DexieDatabase;
