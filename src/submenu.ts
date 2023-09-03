@@ -15,6 +15,8 @@ export class SubMenu
     freshImport: boolean;
     favorite: boolean;
     userId: string | undefined;
+    discordHook = "";
+    sender = "Clash!";
 
     open5eApiString: string = "https://api.open5e.com/monsters/?format=json&search=";
     POPOVERSUBMENUID: string = "";
@@ -78,6 +80,13 @@ export class SubMenu
         this.ShowSubMenu(true);
         OBR.onReady(async () =>
         {
+            const roomData = await OBR.room.getMetadata();
+            if (roomData[`${Constants.DISCORDID}/metadata_webhook`] != undefined)
+            {
+                const webhookContainer = roomData[`${Constants.DISCORDID}/metadata_webhook`] as IWebhook;
+                this.discordHook = webhookContainer.url;
+            }
+
             // Set theme accordingly
             const theme = await OBR.theme.getTheme();
             Utilities.SetThemeMode(theme, document);
@@ -1242,7 +1251,28 @@ export class SubMenu
         const now = new Date().toISOString();
         const metadata: Metadata = {};
         metadata[`${Constants.EXTENSIONID}/metadata_chatlog`] = { chatlog: message, sender: "Clash!", targetId: targetId, created: now, color: "#ff9294", critical: crit };
+        this.SendtoDiscord(message);
         return await OBR.player.setMetadata(metadata);
+    }
+
+    private SendtoDiscord(message: string): void
+    {
+        // If the hook is empty, leave
+        if (!this.discordHook) return;
+
+        // Send the message to Discord
+        const request = new XMLHttpRequest();
+        request.open("POST", this.discordHook);
+
+        request.setRequestHeader('Content-type', 'application/json');
+
+        const params = {
+            username: "Rumble! : " + this.sender,
+            avatar_url: "https://battle-system.com/owlbear/rumble-docs/logo.png",
+            content: message
+        }
+
+        request.send(JSON.stringify(params));
     }
 }
 

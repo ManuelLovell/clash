@@ -20,3 +20,8 @@ interface IUnitTrack
     owner?: string;
     stamp?: string;
 }
+
+interface IWebhook
+{
+    url: string;
+}

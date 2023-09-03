@@ -1,6 +1,7 @@
 export class Constants
 {
     static EXTENSIONID = "com.battle-system.clash";
+    static DISCORDID = "com.battle-system.discord";
     static MOBILEWIDTH = 495;  //Below this use mobile sizing
     static EXTENSIONSUBMENUID = "com.battle-system.clash-submenu";
     static EXTENSIONWHATSNEW = "com.battle-system.clash-whatsnew";
