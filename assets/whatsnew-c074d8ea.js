@@ -1,5 +1,15 @@
-import{O as o,C as a}from"./constants-d8998271.js";const n=document.querySelector("#clash-whatsnew"),i=document.querySelector("#clash-whatsnew-notes");n.innerHTML=`
+import{O as o,C as a}from"./constants-80a00c5d.js";const i=document.querySelector("#clash-whatsnew"),n=document.querySelector("#clash-whatsnew-notes");i.innerHTML=`
   <div>
+    <h1>Clash! 9/3</h1>
+    Hopefully fixed an issue with IndexedDB that was stopping Clash from working on Safari.
+    Also <b>HIDDEN</b> units should no longer appear on the Player Initiative List.
+    At all.
+    </br>
+    Let them live in fear.
+    </br> (No unit in the list is highlighted when it's a hidden units turn.)
+    </br>
+    Also fixed a bug with the Rumble hook displaying rolls several times.
+    </br>
     <h1>Clash! 8/28</h1>
     Just a minor fix for stopping the Settings>WhatsNew window from auto-closing.
     </br>
@@ -53,7 +63,7 @@ import{O as o,C as a}from"./constants-d8998271.js";const n=document.querySelecto
     </br>
     If for some reason this doesn't resolve your issues, hop on Discord. There's only so much testing I can do.
   </div>
-`;o.onReady(async()=>{const s=window.location.search,e=new URLSearchParams(s).get("timer");i.innerHTML=`
+`;o.onReady(async()=>{const s=window.location.search,e=new URLSearchParams(s).get("timer");n.innerHTML=`
     <a href="https://discord.gg/ANZKDmWzr6" target="_blank">Join the OBR Discord!</a>
     <div class="timer" style="--duration: ${e};--size: 34;">
     <div class="mask"></div>
