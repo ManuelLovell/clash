@@ -761,9 +761,10 @@ export class InitiativeList
 
     private async OpenSubMenu(unitId: string): Promise<void>
     {
+        const windowWidth = await OBR.viewport.getWidth();
+        const windowHeight = await OBR.viewport.getHeight();
         const modalBuffer = 100;
-        const mobile = window.innerWidth < Constants.MOBILEWIDTH;
-        const windowHeight = window.outerHeight - 150; // Magic number to account for browser bars, can't access parent (CORS)
+        const mobile = windowWidth < Constants.MOBILEWIDTH;
         const viewableHeight = windowHeight > 800 ? 700 : windowHeight - modalBuffer; // Using 100 as a buffer to account for padding.
 
         if (mobile)
