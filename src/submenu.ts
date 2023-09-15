@@ -1064,6 +1064,8 @@ export class SubMenu
             {
                 const width = await OBR.viewport.getWidth() - 70;
 
+                // Close any existing windows before pinning something
+                await OBR.modal.close(Constants.EXTENSIONSUBMENUID);
                 await OBR.popover.close(Constants.EXTENSIONSUBMENUID);
                 await OBR.popover.open({
                     id: `POP_${self.POPOVERSUBMENUID}`,

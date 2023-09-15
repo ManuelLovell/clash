@@ -220,8 +220,9 @@ export class InitiativeList
                     if (newUnit.length === 1 && oldUnit)
                     {
                         const newSet = newUnit[0];
+                        const newSetName = newSet.text?.plainText || newSet.name;
                         // Create the new unit based on the old units stats
-                        let unitInfo = new UnitInfo(newSet.id, newSet.text.plainText, newSet.createdUserId);
+                        let unitInfo = new UnitInfo(newSet.id, newSetName, newSet.createdUserId);
                         unitInfo.SetToModel(oldUnit);
                         await unitInfo.SaveToDB(this.sceneId);
 
