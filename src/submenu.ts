@@ -24,6 +24,7 @@ export class SubMenu
     multiActive: string[] = [];
     multiIds: string[] = [];
     sceneId: string = "";
+    pinned = false;
 
     importReturnContainer: HTMLElement;
     importBarContainer: HTMLElement;
@@ -44,6 +45,7 @@ export class SubMenu
         const urlParams = new URLSearchParams(queryString);
         const idParam = urlParams.get('unitid')!;
         this.sceneId = urlParams.get('sceneid')!;
+        this.pinned = urlParams.get('pinned')! === "true";
         // If found, it means multiple sheet updates
         const multiParam = urlParams.get('multi');
         const mActiveParam = urlParams.get('unitactive');
@@ -68,6 +70,11 @@ export class SubMenu
         }
 
         this.currentUnit = new UnitInfo(this.POPOVERSUBMENUID, "Default");
+        if (this.pinned)
+        {
+            const footer = document.getElementById("footerButtonContainer")!;
+            footer.style.display = "none";
+        }
     }
 
     public async renderUnitInfo(document: Document): Promise<void>
@@ -81,7 +88,7 @@ export class SubMenu
         OBR.onReady(async () =>
         {
             await getDatabase();
-            
+
             const roomData = await OBR.room.getMetadata();
             if (roomData[`${Constants.DISCORDID}/metadata_webhook`] != undefined)
             {
@@ -278,7 +285,7 @@ export class SubMenu
                     }
                 });
             });
-
+            this.AppendWindowPinButton();
             this.AppendFavoriteButton();
             this.AppendCollectionSaveButton();
             this.AppendUnitExportButton();
@@ -1038,6 +1045,56 @@ export class SubMenu
         exportButton.width = 20;
 
         buttonContainer?.appendChild(exportButton);
+    }
+
+    private AppendWindowPinButton(): void
+    {
+        var self = this;
+        //Get Button Container
+        const buttonContainer = document.getElementById("buttonContainer");
+
+        //Create Export Button
+        const pinButton = document.createElement('input');
+        pinButton.type = "image";
+        pinButton.id = "pinButton";
+        pinButton.className = "clickable";
+        pinButton.onclick = async function () 
+        {
+            if (!self.pinned)
+            {
+                const width = await OBR.viewport.getWidth() - 70;
+
+                await OBR.popover.close(Constants.EXTENSIONSUBMENUID);
+                await OBR.popover.open({
+                    id: `POP_${self.POPOVERSUBMENUID}`,
+                    url: `/submenu/subindex.html?unitid=${self.POPOVERSUBMENUID}&sceneid=${self.sceneId}&pinned=true`,
+                    height: 300,
+                    width: 325,
+                    anchorPosition: { top: 50, left: width },
+                    anchorReference: "POSITION",
+                    anchorOrigin: {
+                        vertical: "CENTER",
+                        horizontal: "RIGHT",
+                    },
+                    transformOrigin: {
+                        vertical: "CENTER",
+                        horizontal: "RIGHT",
+                    },
+                    hidePaper: true,
+                    disableClickAway: true
+                });
+            }
+            else
+            {
+                await OBR.popover.close(`POP_${self.POPOVERSUBMENUID}`);
+            }
+        }
+        pinButton.src = this.pinned ? "/pinfill.svg" : "/pin.svg";
+        pinButton.title = "Pin to Window";
+        pinButton.height = 20;
+        pinButton.width = 20;
+
+        buttonContainer?.appendChild(pinButton);
     }
 
     private AppendAddActionButtons(): void

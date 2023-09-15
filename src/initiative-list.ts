@@ -196,6 +196,7 @@ export class InitiativeList
         this.itemOnChangeHandler = OBR.scene.items.onChange(async (items) =>
         {
             const deleteIds: string[] = [];
+            const newItems: Image[] = [];
             this.unitsHidden = [];
             // This feels expensive, on change happens on every key press
             for (const unit of items)
@@ -210,7 +211,27 @@ export class InitiativeList
 
                 if (tableUnit && tableUnit.unitName !== unitName)
                 {
-                    await db.ActiveEncounter.update(tableUnit.id, { unitName: unitName });
+                    // Find the old unit by it's ID
+                    const oldUnit = await db.ActiveEncounter.get(unit.id);
+                    // Find the new unit by it's name
+                    const newUnit = await OBR.scene.items.getItems(
+                        (item): item is Image => (item as Image).text.plainText === oldUnit?.unitName);
+
+                    if (newUnit.length === 1 && oldUnit)
+                    {
+                        const newSet = newUnit[0];
+                        // Create the new unit based on the old units stats
+                        let unitInfo = new UnitInfo(newSet.id, newSet.text.plainText, newSet.createdUserId);
+                        unitInfo.SetToModel(oldUnit);
+                        await unitInfo.SaveToDB(this.sceneId);
+
+                        // Update the item list so it isn't deleted in cleanup
+                        // Update the inscene list for the same reason
+                        newItems.push(newSet);
+                        this.unitsInScene.push(unitInfo);
+                    }
+                    tableUnit.unitName = unitName;
+                    await db.ActiveEncounter.put(tableUnit);
                 }
                 if (unit.metadata[`${Constants.EXTENSIONID}/metadata_initiative`] !== undefined && tableUnit?.isActive == 0)
                 {
@@ -264,8 +285,8 @@ export class InitiativeList
                         delete itm.metadata[`${Constants.EXTENSIONID}/metadata_hpbar`];
                     }
                 });
-            } 
-
+            }
+            items = items.concat(newItems);
             const characterItems = items.filter(x => x.layer === "CHARACTER" || x.layer === "MOUNT");
             const missingIds = Utilities.FindUniqueIds(this.unitsInScene.map(x => x.id), characterItems.map(y => y.id));
 
@@ -747,6 +768,7 @@ export class InitiativeList
 
         if (mobile)
         {
+            await OBR.popover.close(`POP_${unitId}`);
             await OBR.popover.open({
                 id: Constants.EXTENSIONSUBMENUID,
                 url: `/submenu/subindex.html?unitid=${unitId}&sceneid=${this.sceneId}`,
@@ -757,6 +779,7 @@ export class InitiativeList
         }
         else
         {
+            await OBR.popover.close(`POP_${unitId}`);
             await OBR.modal.open({
                 id: Constants.EXTENSIONSUBMENUID,
                 url: `/submenu/subindex.html?unitid=${unitId}&sceneid=${this.sceneId}`,
@@ -836,6 +859,7 @@ export class InitiativeList
                         const windowHeight = window.outerHeight - 150; // Magic number to account for browser bars, can't access parent (CORS)
                         const viewableHeight = windowHeight > 800 ? 700 : windowHeight - modalBuffer; // Using 100 as a buffer to account for padding.
 
+                        await OBR.popover.close(`POP_${unit.id}`);
                         await OBR.popover.open({
                             id: Constants.EXTENSIONSUBMENUID,
                             url: `/submenu/subindex.html?unitid=${unit.id}&sceneid=${mainList.sceneId}`,
@@ -1030,7 +1054,7 @@ export class InitiativeList
                                 }
                             }
                             unitInfo.isActive = 1;
-                            unitInfo.SaveToDB(mainList.sceneId);
+                            await unitInfo.SaveToDB(mainList.sceneId);
                         }
                         else
                         {

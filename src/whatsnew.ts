@@ -8,6 +8,19 @@ const footer = document.querySelector<HTMLElement>('#clash-whatsnew-notes')!;
 
 whatsnew.innerHTML = `
   <div>
+    <h1>Clash! 9/14</h1>
+    Fixed an issue with copying tokens that were not in initiative, but had data.
+    While incremeneting.
+    </br>
+    Also added a "PIN" button to Unit Cards. This will leave a mini-window of the card open.
+    Use it as a quick-reference, since you're allowed to click-away while it's up.
+    </br>
+    Only one can be visible at a time (because I haven't quite figured out placement issues) 
+    and the position is static.
+    </br>
+    Also fixed a minor bug with the bottom border on the Unit Cards. It always bugged me.
+    </br>
+    </br>
     <h1>Clash! 9/3</h1>
     Hopefully fixed an issue with IndexedDB that was stopping Clash from working on Safari.
     Also <b>HIDDEN</b> units should no longer appear on the Player Initiative List.
@@ -96,5 +109,5 @@ OBR.onReady(async () =>
     setTimeout(() =>
     {
         closebutton.click();
-    }, +timerParam * 1000); // 10000 milliseconds = 10 seconds
+    }, +timerParam * 2000); // 10000 milliseconds = 10 seconds
 });

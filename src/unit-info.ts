@@ -438,7 +438,7 @@ export default class UnitInfo implements IUnitInfo
     public async SaveToDB(sceneId: string): Promise<string>
     {
         this.sceneId = sceneId;
-        return await db.ActiveEncounter.add(this);
+        return await db.ActiveEncounter.put(this);
     }
 
     public async SaveToCreatureStorage(): Promise<string>
