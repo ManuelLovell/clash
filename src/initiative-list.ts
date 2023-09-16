@@ -215,7 +215,7 @@ export class InitiativeList
                     const oldUnit = await db.ActiveEncounter.get(unit.id);
                     // Find the new unit by it's name
                     const newUnit = await OBR.scene.items.getItems(
-                        (item): item is Image => (item as Image).text.plainText === oldUnit?.unitName);
+                        (item): item is Image => (item as Image).text?.plainText === oldUnit?.unitName);
 
                     if (newUnit.length === 1 && oldUnit)
                     {

@@ -8,6 +8,18 @@ const footer = document.querySelector<HTMLElement>('#clash-whatsnew-notes')!;
 
 whatsnew.innerHTML = `
   <div>
+    <h1>Clash! 9/16</h1>
+    Minor bugfix for the iteration copying.
+    </br>
+    For now, I explain some features that aren't explicitly stated.
+    </br>
+    <b>1.</b> You can adjust HP in the main window by just throwing +/- in it. So if a creature has 40HP, and you type in -15, it'll update to 25HP.
+    </br>
+    <b>2.</b> If you have a token named Goblin, and a creature in your collection named Goblin - it'll automatically get set with those stats when that token is dragged into the scene.
+    </br>
+    <b>3.</b> If you right click a token in the main window, you can change the owner to a player. (Who can then set it's Initiative/HP/AC in their own window!)
+    </br>
+    </br>
     <h1>Clash! 9/14</h1>
     Fixed an issue with copying tokens that were not in initiative, but had data.
     While incremeneting.
