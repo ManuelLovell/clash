@@ -1,5 +1,17 @@
-import{O as o,C as i}from"./constants-80a00c5d.js";const a=document.querySelector("#clash-whatsnew"),n=document.querySelector("#clash-whatsnew-notes");a.innerHTML=`
+import{O as o,C as a}from"./constants-80a00c5d.js";const n=document.querySelector("#clash-whatsnew"),s=document.querySelector("#clash-whatsnew-notes");n.innerHTML=`
   <div>
+    <h1>Clash! 9/16</h1>
+    Minor bugfix for the iteration copying.
+    </br>
+    For now, I explain some features that aren't explicitly stated.
+    </br>
+    <b>1.</b> You can adjust HP in the main window by just throwing +/- in it. So if a creature has 40HP, and you type in -15, it'll update to 25HP.
+    </br>
+    <b>2.</b> If you have a token named Goblin, and a creature in your collection named Goblin - it'll automatically get set with those stats when that token is dragged into the scene.
+    </br>
+    <b>3.</b> If you right click a token in the main window, you can change the owner to a player. (Who can then set it's Initiative/HP/AC in their own window!)
+    </br>
+    </br>
     <h1>Clash! 9/14</h1>
     Fixed an issue with copying tokens that were not in initiative, but had data.
     While incremeneting.
@@ -76,9 +88,9 @@ import{O as o,C as i}from"./constants-80a00c5d.js";const a=document.querySelecto
     </br>
     If for some reason this doesn't resolve your issues, hop on Discord. There's only so much testing I can do.
   </div>
-`;o.onReady(async()=>{const s=window.location.search,e=new URLSearchParams(s).get("timer");n.innerHTML=`
+`;o.onReady(async()=>{const i=window.location.search,e=new URLSearchParams(i).get("timer");s.innerHTML=`
     <a href="https://discord.gg/ANZKDmWzr6" target="_blank">Join the OBR Discord!</a>
     <div class="timer" style="--duration: ${e};--size: 34;">
     <div class="mask"></div>
     </div>
-    <div class="close">⤬</div>`;const t=document.querySelector(".close");t.onclick=async()=>{await o.modal.close(i.EXTENSIONWHATSNEW)},setTimeout(()=>{t.click()},+e*2e3)});
+    <div class="close">⤬</div>`;const t=document.querySelector(".close");t.onclick=async()=>{await o.modal.close(a.EXTENSIONWHATSNEW)},setTimeout(()=>{t.click()},+e*2e3)});
