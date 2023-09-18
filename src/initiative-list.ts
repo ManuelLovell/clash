@@ -945,13 +945,8 @@ export class InitiativeList
                 icon: "/health-black.svg",
                 label: "[Clash!] Hide HP Bar",
                 filter: {
-                    every: [
-                        { key: "layer", value: "MOUNT" },
-                        { key: ["metadata", `${Constants.EXTENSIONID}/metadata_hpbar`], value: undefined, operator: "!=" },
-                    ],
-                    some: [
-                        { key: "layer", value: "CHARACTER", coordinator: "||" },
-                        { key: "layer", value: "MOUNT" }],
+                    some: [{ key: "layer", value: "CHARACTER", coordinator: "||" },
+                    { key: "layer", value: "MOUNT" }],
                 },
             },],
             async onClick(context)
