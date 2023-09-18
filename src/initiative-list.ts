@@ -928,27 +928,31 @@ export class InitiativeList
         }
         OBR.contextMenu.create({
             id: `${Constants.EXTENSIONID}/context-hp-menu`,
-            icons: [{
-                icon: "/health.svg",
-                label: "[Clash!] Show HP Bar",
-                filter: {
-                    every: [
-                        { key: ["metadata", `${Constants.EXTENSIONID}/metadata_hpbar`], value: undefined },
-                        { key: ["metadata", `${Constants.EXTENSIONID}/metadata_initiative`], value: undefined, operator: "!=" },
-                    ],
-                    some: [
-                        { key: "layer", value: "CHARACTER", coordinator: "||" },
+            icons: [
+                {
+                    icon: "/health.svg",
+                    label: "[Clash!] Show HP Bar",
+                    filter: {
+                        every: [
+                            { key: ["metadata", `${Constants.EXTENSIONID}/metadata_hpbar`], value: undefined },
+                            { key: ["metadata", `${Constants.EXTENSIONID}/metadata_initiative`], value: undefined, operator: "!=" },
+                        ],
+                        some: [
+                            { key: "layer", value: "CHARACTER", coordinator: "||" },
+                            { key: "layer", value: "MOUNT" }],
+                    },
+                },
+                {
+                    icon: "/health-black.svg",
+                    label: "[Clash!] Hide HP Bar",
+                    filter: {
+                        every: [
+                            { key: ["metadata", `${Constants.EXTENSIONID}/metadata_initiative`], value: undefined, operator: "!=" },
+                        ],
+                        some: [{ key: "layer", value: "CHARACTER", coordinator: "||" },
                         { key: "layer", value: "MOUNT" }],
-                },
-            },
-            {
-                icon: "/health-black.svg",
-                label: "[Clash!] Hide HP Bar",
-                filter: {
-                    some: [{ key: "layer", value: "CHARACTER", coordinator: "||" },
-                    { key: "layer", value: "MOUNT" }],
-                },
-            },],
+                    },
+                },],
             async onClick(context)
             {
                 const showHPBars = context.items.every(
