@@ -15,6 +15,7 @@ export class PlayerList
     playerColor: string = "";
     party: Player[] = [];
     rendered = false;
+    currentSelection: string[] | undefined;
 
     /**Render the main initiatve list */
     public async Render(document: Document): Promise<void>
@@ -148,14 +149,24 @@ export class PlayerList
                     })
                 };
 
+
+                let selected = false;
+                if (this.currentSelection && this.currentSelection.length > 0)
+                {
+                    selected = this.currentSelection.includes(unitItem.id!);
+                }
                 //Setup Name Info
                 let nameCell = row.insertCell(1);
+                nameCell.id = `nT${unitItem.id}`;
                 nameCell.style.placeContent = "center";
                 nameCell.style.textOverflow = "ellipsis";
                 nameCell.style.overflow = "hidden";
                 nameCell.style.whiteSpace = "nowrap";
-                nameCell.className = "nameToggleInput";
+                nameCell.className = "nameToggleInput nameCell";
                 nameCell.style.background = `linear-gradient(200deg, transparent, ${alphaColor})`;
+                nameCell.style.fontWeight = selected ? "bolder" : "";
+                nameCell.style.fontStyle = selected ? "oblique" : "";
+                nameCell.style.fontSize = selected ? "large" : "";
 
                 //Setup Health Inputs
                 let hpCell = row.insertCell(2);
@@ -273,7 +284,7 @@ export class PlayerList
                 armorInput.onkeydown = function (e)
                 {
                     if (e.key !== "Enter") return;
-                    
+
                     const target = e.currentTarget as HTMLInputElement;
                     if (!target.value) return;
 
@@ -288,15 +299,15 @@ export class PlayerList
                 {
                     if (unitItem.cHp! <= unitItem.mHp! / 4)
                     {
-                        nameCell.className = nameCell.className + " unitHarmed";
+                        nameCell.classList.add("unitHarmed");
                     }
                     else if (unitItem.cHp! <= unitItem.mHp! / 2)
                     {
-                        nameCell.className = nameCell.className + " unitHurt";
+                        nameCell.classList.add("unitHurt");
                     }
                     else
                     {
-                        nameCell.className = nameCell.className + " unitHappy";
+                        nameCell.classList.add("unitHappy");
                     }
                 }
 
@@ -321,11 +332,21 @@ export class PlayerList
                 let initCell = row.insertCell(0);
                 initCell.style.placeContent = "center";
 
+                let selected = false;
+                if (this.currentSelection && this.currentSelection.length > 0)
+                {
+                    selected = this.currentSelection.includes(unitItem.id!);
+                }
                 let nameCell = row.insertCell(1);
+                nameCell.className = "nameCell";
+                nameCell.id = `nT${unitItem.id}`;
                 nameCell.style.placeContent = "center";
                 nameCell.style.textOverflow = "ellipsis";
                 nameCell.style.overflow = "hidden";
                 nameCell.style.whiteSpace = "nowrap";
+                nameCell.style.fontWeight = selected ? "bolder" : "";
+                nameCell.style.fontStyle = selected ? "oblique" : "";
+                nameCell.style.fontSize = selected ? "large" : "";
 
                 row.setAttribute("unit-id", unitItem.id!);
 
@@ -342,15 +363,15 @@ export class PlayerList
                 {
                     if (unitItem.cHp! <= unitItem.mHp! / 4)
                     {
-                        nameCell.className = "unitHarmed";
+                        nameCell.classList.add("unitHarmed");
                     }
                     else if (unitItem.cHp! <= unitItem.mHp! / 2)
                     {
-                        nameCell.className = "unitHurt";
+                        nameCell.classList.add("unitHurt");
                     }
                     else
                     {
-                        nameCell.className = "unitHappy";
+                        nameCell.classList.add("unitHappy");
                     }
                 }
                 initCell.appendChild(document.createTextNode(unitItem.initiative!.toString()));
@@ -407,12 +428,12 @@ export class PlayerList
                 if (currentTurnRow.innerHTML != '')
                 {
                     currentTurnRow.className = "turnOutline";
-    
+
                     const counterHtml = document.getElementById("roundCount")!;
                     counterHtml.innerText = `Round: ${this.roundCounter}`;
-    
+
                     let ctu: ICurrentTurnUnit = await LabelLogic.GetCTUFromRow(currentTurnRow);
-    
+
                     if (ctu.visible)
                     {
                         //Move the view
@@ -436,6 +457,22 @@ export class PlayerList
         OBR.player.onChange((player) =>
         {
             this.playerColor = player.color;
+            this.currentSelection = player.selection;
+            if (!this.currentSelection) this.currentSelection = [];
+
+            const nameToggles = document.querySelectorAll(".nameCell");
+
+            for (let index = 0; index < nameToggles.length; index++) 
+            {
+                const toggle = nameToggles[index] as HTMLInputElement;
+                const elementId = toggle.id;
+                const unitId = elementId.substring(2);
+                const selected = this.currentSelection.includes(unitId);
+
+                toggle.style.fontWeight = selected ? "bolder" : "";
+                toggle.style.fontStyle = selected ? "oblique" : "";
+                toggle.style.fontSize = selected ? "large" : "";
+            }
         });
         OBR.party.onChange((party) =>
         {

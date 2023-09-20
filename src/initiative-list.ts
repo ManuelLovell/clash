@@ -30,6 +30,7 @@ export class InitiativeList
     gmTurnText = "";
     rendered = false;
     sceneId = "";
+    currentSelection: string[] | undefined;
     itemOnChangeHandler!: () => void;
 
     /**Render the main initiatve form from the GM perspective */
@@ -120,6 +121,25 @@ export class InitiativeList
             listItem.style.color = player.color;
             playerContextMenu.appendChild(listItem);
         };
+        OBR.player.onChange(async (player) =>
+        {
+            this.currentSelection = player.selection;
+            if (!this.currentSelection) this.currentSelection = [];
+            
+            const nameToggles = document.querySelectorAll(".nameToggleInput");
+
+            for (let index = 0; index < nameToggles.length; index++) 
+            {
+                const toggle = nameToggles[index] as HTMLInputElement;
+                const elementId = toggle.id;
+                const unitId = elementId.substring(2);
+                const selected = this.currentSelection.includes(unitId);
+
+                toggle.style.fontWeight = selected ? "bolder" : "";
+                toggle.style.fontStyle = selected ? "oblique" : "";
+                toggle.style.fontSize = selected ? "large" : "";
+            }
+        });
 
         OBR.party.onChange(async (party) =>
         {
@@ -411,6 +431,11 @@ export class InitiativeList
             rollerButton.height = 20;
             rollerButton.width = 20;
 
+            let selected = false;
+            if (this.currentSelection && this.currentSelection.length > 0)
+            {
+                selected = this.currentSelection.includes(unit.id);
+            }
             const nameToggle = document.createElement('input');
             nameToggle.type = "button";
             nameToggle.value = unit.isMonster ? `ʳ ${unit.unitName} ʴ` : unit.unitName;
@@ -419,6 +444,9 @@ export class InitiativeList
             nameToggle.style.width = "100%";
             nameToggle.style.textOverflow = "ellipsis";
             nameToggle.style.overflow = "hidden";
+            nameToggle.style.fontWeight = selected ? "bolder" : "";
+            nameToggle.style.fontStyle = selected ? "oblique" : "";
+            nameToggle.style.fontSize = selected ? "large" : "";
             if (alphaColor)
             {
                 nameToggle.style.background = `linear-gradient(200deg, transparent, ${alphaColor})`;

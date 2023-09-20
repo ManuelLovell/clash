@@ -8,6 +8,12 @@ const footer = document.querySelector<HTMLElement>('#clash-whatsnew-notes')!;
 
 whatsnew.innerHTML = `
   <div>
+    <h1>Clash! 9/19</h1>
+    Selecting a token now 'highlights' it in the list.
+    </br>
+    Should work from both GM and Player end. SHOULD.
+    </br>
+    </br>
     <h1>Clash! 9/16</h1>
     Minor bugfix for the iteration copying.
     </br>
