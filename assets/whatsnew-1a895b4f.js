@@ -1,5 +1,9 @@
 import{O as o,C as a}from"./constants-80a00c5d.js";const n=document.querySelector("#clash-whatsnew"),s=document.querySelector("#clash-whatsnew-notes");n.innerHTML=`
   <div>
+    <h1>Clash! 9/20</h1>
+    Small fix to improve how saving works.
+    </br>
+    </br>
     <h1>Clash! 9/19</h1>
     Selecting a token now 'highlights' it in the list.
     </br>
