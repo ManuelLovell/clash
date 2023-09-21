@@ -125,7 +125,7 @@ export class InitiativeList
         {
             this.currentSelection = player.selection;
             if (!this.currentSelection) this.currentSelection = [];
-            
+
             const nameToggles = document.querySelectorAll(".nameToggleInput");
 
             for (let index = 0; index < nameToggles.length; index++) 
@@ -441,6 +441,7 @@ export class InitiativeList
             nameToggle.value = unit.isMonster ? `ʳ ${unit.unitName} ʴ` : unit.unitName;
             nameToggle.title = "Change between Player and Monster groups";
             nameToggle.id = `nT${unit.id}`;
+            nameToggle.classList.add("nameToggleInput");
             nameToggle.style.width = "100%";
             nameToggle.style.textOverflow = "ellipsis";
             nameToggle.style.overflow = "hidden";
@@ -451,19 +452,21 @@ export class InitiativeList
             {
                 nameToggle.style.background = `linear-gradient(200deg, transparent, ${alphaColor})`;
             }
-
-            nameToggle.className = unit.isMonster ? "isMonster nameToggleInput" : "nameToggleInput";
+            if (unit.isMonster)
+            {
+                nameToggle.classList.add("isMonster");
+            }
             nameToggle.onclick = async function ()
             {
-                if (nameToggle.className == "isMonster nameToggleInput")
+                if (nameToggle.classList.contains("isMonster"))
                 {
                     nameToggle.value = unit.unitName;
-                    nameToggle.className = "nameToggleInput";
+                    nameToggle.classList.remove("isMonster");
                 }
                 else
                 {
                     nameToggle.value = `ʳ ${unit.unitName} ʴ`;
-                    nameToggle.className = "isMonster nameToggleInput";
+                    nameToggle.classList.add("isMonster");
                 }
             };
             nameToggle.oncontextmenu = async function (e)
@@ -514,7 +517,7 @@ export class InitiativeList
             heartInputMin.value = unit.currentHP!.toString();
             heartInputMin.size = 4;
             heartInputMin.maxLength = 4;
-            heartInputMin.onblur = function (e)
+            heartInputMin.onblur = async function (e)
             {
                 const target = e.currentTarget as HTMLInputElement;
                 const value = target.value;
@@ -532,9 +535,9 @@ export class InitiativeList
                     heartInputMin.title = heartInputMin.value;
                     e.preventDefault();
                 }
-                self.Save();
+                await self.Save();
             };
-            heartInputMin.onkeydown = function (e)
+            heartInputMin.onkeydown = async function (e)
             {
                 if (e.key !== "Enter") return;
                 const target = e.currentTarget as HTMLInputElement;
@@ -553,7 +556,7 @@ export class InitiativeList
                     heartInputMin.title = heartInputMin.value;
                     e.preventDefault();
                 }
-                self.Save();
+                await self.Save();
             }
 
             const heartInputMax = document.createElement('input');
@@ -662,6 +665,7 @@ export class InitiativeList
     public async Save(): Promise<void>
     {
         const unitsInOrder = document.querySelectorAll(".InitiativeInput");
+        let unitsToUpdate = [];
 
         for (let index = 0; index < unitsInOrder.length; index++)
         {
@@ -679,24 +683,23 @@ export class InitiativeList
             const armorClass = acElement.value ? acElement.value : "10";
 
             const nameElement = document.querySelector(`#nT${unitId}`) as HTMLInputElement;
-            const isMonster = (nameElement.className == "isMonster nameToggleInput");
-
+            const isMonster = nameElement.classList.contains("isMonster");
+            
             if (!unitId || !initiative) return;
 
+            // Batch the updates to avoid hitting the onchange handler
             let updateMe = this.unitsInScene?.find(x => x.id == unitId);
             if (updateMe)
             {
-                await db.ActiveEncounter.update(
-                    updateMe.id,
-                    {
-                        initiative: parseFloat(initiative),
-                        currentHP: parseFloat(currentHp),
-                        maxHP: parseFloat(maxHp),
-                        armorClass: parseFloat(armorClass),
-                        isMonster: isMonster
-                    });
+                updateMe.initiative = parseFloat(initiative);
+                updateMe.currentHP = parseFloat(currentHp);
+                updateMe.maxHP = parseFloat(maxHp);
+                updateMe.armorClass = parseFloat(armorClass);
+                updateMe.isMonster = isMonster ? 1 : 0;
+                unitsToUpdate.push(updateMe);
             }
         }
+        await db.ActiveEncounter.bulkPut(unitsToUpdate);
 
         await db.Tracker.update(Constants.TURNTRACKER, { id: Constants.TURNTRACKER, currentTurn: this.turnCounter, currentRound: this.roundCounter });
         await this.RefreshList();
