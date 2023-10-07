@@ -8,6 +8,12 @@ const footer = document.querySelector<HTMLElement>('#clash-whatsnew-notes')!;
 
 whatsnew.innerHTML = `
   <div>
+    <h1>Clash! 10/7</h1>
+    Fix for adding items as groups (non-characters/mounts were able to sneak in.)
+    </br>
+    Sorry for the absence, got married on 10/1! Regular updates again after the end of the month when I'm back home.
+    </br>
+    </br>
     <h1>Clash! 9/20</h1>
     Small fix to improve how saving works.
     </br>
