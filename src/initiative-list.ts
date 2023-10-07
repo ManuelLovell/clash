@@ -492,9 +492,9 @@ export class InitiativeList
                 const onClickOutside = () =>
                 {
                     contextMenu.style.display = "none";
-                    document.removeEventListener("click", onClickOutside);
+                    window.removeEventListener("click", onClickOutside);
                 };
-                document.addEventListener("click", onClickOutside);
+                window.addEventListener("click", onClickOutside);
 
 
                 if (contextMenu.style.display == "block")
@@ -1032,8 +1032,8 @@ export class InitiativeList
                     icon: "/addunit.svg",
                     label: "[Clash!] Add to Initiative",
                     filter: {
-                        every: [{ key: ["metadata", `${Constants.EXTENSIONID}/metadata_initiative`], value: undefined }],
-                        some: [{ key: "layer", value: "CHARACTER", coordinator: "||" },
+                        every: [{ key: ["metadata", `${Constants.EXTENSIONID}/metadata_initiative`], value: undefined, coordinator: "&&" },
+                        { key: "layer", value: "CHARACTER", coordinator: "||" },
                         { key: "layer", value: "MOUNT" }],
                     },
                 },
@@ -1041,7 +1041,7 @@ export class InitiativeList
                     icon: "/removeunit.svg",
                     label: "[Clash!] Remove from Initiative",
                     filter: {
-                        some: [{ key: "layer", value: "CHARACTER", coordinator: "||" },
+                        every: [{ key: "layer", value: "CHARACTER", coordinator: "||" },
                         { key: "layer", value: "MOUNT" }],
                     },
                 },
