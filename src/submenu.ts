@@ -114,7 +114,7 @@ export class SubMenu
             //Text formatters
             //Unit Alignment, Type, Size
             let unitTypeHtml = "";
-            unitTypeHtml = '<div class="description">';
+            unitTypeHtml = '<div class="typeDescription">';
             unitTypeHtml += `<span id="formUnitSize" contentEditable="true">${this.currentUnit.unitSize}</span> `;
             unitTypeHtml += `<span id="formAlignment" contentEditable="true">${this.currentUnit.alignment}</span> `;
             unitTypeHtml += `<span id="formUnitType" contentEditable="true">${this.currentUnit.unitType}</span>`;
@@ -388,6 +388,89 @@ export class SubMenu
                     }
                     return null;
                 });
+            });
+
+            const container = document.getElementById('submenu')!;
+            let descriptionSelected: any = null;
+            const self = this;
+            container.addEventListener('click', function (event)
+            {
+                const targetElement = event.target as HTMLElement;
+                if (targetElement.classList.contains('description')
+                 && (targetElement === descriptionSelected || descriptionSelected === null))
+                {
+                    descriptionSelected = targetElement;
+                }
+                else if (descriptionSelected)
+                {
+                    // Description was selected, but is no longer.
+                    const blurredDescription = descriptionSelected as HTMLElement;
+                    blurredDescription.innerHTML = self.SetClassOnRollable(descriptionSelected.innerHTML);
+
+                    const dmgRollables = blurredDescription.querySelectorAll('.clickableRollerDmg');
+                    dmgRollables.forEach(roller =>
+                    {
+                        roller.addEventListener('click', async (e: Event) =>
+                        {
+                            const element = roller as HTMLElement;
+                            let attack = element?.parentElement?.previousElementSibling?.textContent;
+                            attack = attack ? attack : "<Nameless>";
+                            if (e && e.currentTarget)
+                            {
+                                e.preventDefault();
+                                const value = e.currentTarget as Element;
+                                value.parentElement?.blur();
+
+                                const message = `${self.currentUnit.unitName} used ${attack} and rolled ${value.textContent} for ... ${DiceRoller.RollString(value.textContent!)}!`;
+                                self.SendtoChatLog(message)
+                                return await OBR.notification.show(message);
+                            }
+                            return null;
+                        });
+                    });
+
+                    const atkRollables = blurredDescription.querySelectorAll('.clickableRollerAtk');
+                    atkRollables.forEach(roller =>
+                    {
+                        roller.addEventListener('click', async (e: Event) =>
+                        {
+                            const element = roller as HTMLElement;
+                            let attack = element?.parentElement?.previousElementSibling?.textContent;
+                            attack = attack ? attack : "<Nameless>";
+                            if (e && e.currentTarget)
+                            {
+                                e.preventDefault();
+                                const value = e.currentTarget as Element;
+                                value.parentElement?.blur();
+
+                                let hitValue = value.textContent?.replace(/[()]/g, '');
+
+                                const bonus = Number(hitValue?.substring(1));
+                                const roll = bonus == 0 ? `(1d20)` : `(1d20 + ${bonus})`;
+                                const result = DiceRoller.RollString(roll!);
+
+                                const message = `${self.currentUnit.unitName} used ${attack} and rolled ${value.textContent} for ... ${result} to hit!`;
+                                const critical = (result - bonus) == 20 ? true : false;
+                                self.SendtoChatLog(message, critical);
+                                return await OBR.notification.show(message);
+                            }
+                            return null;
+                        });
+                    });
+
+                    if (targetElement.classList.contains('description'))
+                    {
+                        descriptionSelected = targetElement;
+                    }
+                    else
+                    {
+                        descriptionSelected = null;
+                    }
+                }
+                else
+                {
+                    descriptionSelected = null;
+                }
             });
         });
     }
@@ -1298,9 +1381,16 @@ export class SubMenu
 
     private SetClassOnRollable(desc: string): string
     {
+        desc = desc.replace(/\s+/g, ' ');
+        console.log(desc);
+        // Cleanse all tags before setting the lines refresh
+        desc = desc.split('<span class="clickableRollerDmg" contenteditable="false">').join("");
+        desc = desc.split('<span class="clickableRollerAtk" contenteditable="false">').join("");
+        desc = desc.split('</span>').join("");
+
         let string = "";
-        string = desc.replaceAll(Constants.PARENTHESESMATCH, "<span class='clickableRollerDmg' contenteditable='false'>($1)</span>");
-        string = string.replaceAll(Constants.PLUSMATCH, "<span class='clickableRollerAtk' contenteditable='false'> $1 </span>");
+        string = desc.replaceAll(Constants.PARENTHESESMATCH, "<span class='clickableRollerDmg' contenteditable='false'> ($1) </span>");
+        string = string.replaceAll(Constants.PLUSMATCH, " <span class='clickableRollerAtk' contenteditable='false'> $1 </span> ");
         return string;
     }
 
@@ -1311,7 +1401,7 @@ export class SubMenu
 
         const now = new Date().toISOString();
         const metadata: Metadata = {};
-        metadata[`${Constants.EXTENSIONID}/metadata_chatlog`] = { chatlog: message, sender: "Clash!", targetId: targetId, created: now, color: "#ff9294", critical: crit };
+        metadata[`${Constants.EXTENSIONID}/metadata_chatlog`] = { chatlog: message, sender: "Clash!", senderId: "Clash0000", targetId: targetId, created: now, color: "#ff9294", critical: crit };
         this.SendtoDiscord(message);
         return await OBR.player.setMetadata(metadata);
     }

@@ -8,6 +8,12 @@ const footer = document.querySelector<HTMLElement>('#clash-whatsnew-notes')!;
 
 whatsnew.innerHTML = `
   <div>
+    <h1>Clash! 10/26</h1>
+    Updated time stamps to fall in line with Rumble's new logic. Should resolve some issues with player changes not showing on the GM list.
+    </br>
+    Also updated the Rollables on the StatBlock. You shouldn't need to refresh the sheet anymore to see changes, the button should appear once the control loses focus. (Meaning, you click a different element.)
+    </br>
+    </br>
     <h1>Clash! 10/7</h1>
     Fix for adding items as groups (non-characters/mounts were able to sneak in.)
     </br>
@@ -137,5 +143,5 @@ OBR.onReady(async () =>
     setTimeout(() =>
     {
         closebutton.click();
-    }, +timerParam * 2000); // 10000 milliseconds = 10 seconds
+    }, +timerParam * 1000); // 10000 milliseconds = 10 seconds
 });

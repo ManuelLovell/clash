@@ -259,6 +259,7 @@ ul li:after {
     color: var(--OBR-offset-fore);
 }
 
+.typeDescription,
 .description {
     font-style: italic;
 }

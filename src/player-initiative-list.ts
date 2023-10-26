@@ -483,6 +483,8 @@ export class PlayerList
     private async SendUpdate(PlayerUpdate: IUnitTrack): Promise<void>
     {
         PlayerUpdate.stamp = new Date().toISOString();
+        PlayerUpdate.owner = this.playerId;
+        
         const playerUpdateMeta: Metadata = {};
         playerUpdateMeta[`${Constants.EXTENSIONID}/metadata_playerItem`] = { PlayerUpdate };
         await OBR.player.setMetadata(playerUpdateMeta);

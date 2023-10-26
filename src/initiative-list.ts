@@ -12,6 +12,7 @@ import * as Utilities from './utilities';
 
 export class InitiativeList
 {
+    messageCounter: { [key: string]: string } = {};
     unitsInScene: IUnitInfo[] = [];
     unitsHidden: string[] = [];
     // Counter per round
@@ -161,7 +162,7 @@ export class InitiativeList
                 {
                     const updateContainer = metadata[`${Constants.EXTENSIONID}/metadata_playerItem`] as any;
                     const update: IUnitTrack = updateContainer.PlayerUpdate;
-                    if (!Utilities.IsThisOld(update.stamp!))
+                    if (!this.IsThisOld(update.stamp!, update.id!))
                     {
                         // Do stuff
                         if (update.initiative)
@@ -684,7 +685,7 @@ export class InitiativeList
 
             const nameElement = document.querySelector(`#nT${unitId}`) as HTMLInputElement;
             const isMonster = nameElement.classList.contains("isMonster");
-            
+
             if (!unitId || !initiative) return;
 
             // Batch the updates to avoid hitting the onchange handler
@@ -1125,6 +1126,27 @@ export class InitiativeList
                 }
             },
         });
+    }
+
+    public IsThisOld(timeStamp: string, processId: string): boolean
+    {
+        const processCategory = `${processId}_UNITTRACK}`;
+        const logKey = this.messageCounter[processCategory];
+        if (logKey)
+        {
+            if (logKey !== timeStamp)
+            {
+                this.messageCounter[processCategory] = timeStamp;
+                return false;
+            }
+            else
+                return true;
+        }
+        else
+        {
+            this.messageCounter[processCategory] = timeStamp;
+            return false;
+        }
     }
 }
 

@@ -38,18 +38,6 @@ export function FindUniqueIds(array1: string[], array2: string[]): string[]
     return uniqueIds;
 }
 
-export function IsThisOld(created: string): boolean
-{
-    const TWO_SECONDS = 2 * 1000; // Mins - seconds - milliseconds
-
-    const currentTime: any = new Date();
-    const messageTime: any = new Date(created);
-    //Don't repeat messages older than 5 seconds (on refresh/reloads/dayslater)..
-    const pastDue = (currentTime - messageTime) > TWO_SECONDS;
-
-    return pastDue;
-}
-
 export function HexToRgba(hex: string, alpha: number): string
 {
     const r = parseInt(hex.substring(1, 3), 16);
