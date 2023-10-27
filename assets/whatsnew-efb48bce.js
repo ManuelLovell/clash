@@ -1,9 +1,11 @@
-import{O as o,C as i}from"./constants-80a00c5d.js";const n=document.querySelector("#clash-whatsnew"),s=document.querySelector("#clash-whatsnew-notes");n.innerHTML=`
+import{O as o,C as a}from"./constants-80a00c5d.js";const n=document.querySelector("#clash-whatsnew"),s=document.querySelector("#clash-whatsnew-notes");n.innerHTML=`
   <div>
     <h1>Clash! 10/26</h1>
     Updated time stamps to fall in line with Rumble's new logic. Should resolve some issues with player changes not showing on the GM list.
     </br>
     Also updated the Rollables on the StatBlock. You shouldn't need to refresh the sheet anymore to see changes, the button should appear once the control loses focus. (Meaning, you click a different element.)
+    </br>
+    Also in 'Search Monster Data' if you type 'Collection' it'll now return your whole collection. Easier pruning.
     </br>
     </br>
     <h1>Clash! 10/7</h1>
@@ -110,9 +112,9 @@ import{O as o,C as i}from"./constants-80a00c5d.js";const n=document.querySelecto
     </br>
     If for some reason this doesn't resolve your issues, hop on Discord. There's only so much testing I can do.
   </div>
-`;o.onReady(async()=>{const a=window.location.search,e=new URLSearchParams(a).get("timer");s.innerHTML=`
+`;o.onReady(async()=>{const i=window.location.search,e=new URLSearchParams(i).get("timer");s.innerHTML=`
     <a href="https://discord.gg/ANZKDmWzr6" target="_blank">Join the OBR Discord!</a>
     <div class="timer" style="--duration: ${e};--size: 34;">
     <div class="mask"></div>
     </div>
-    <div class="close">⤬</div>`;const t=document.querySelector(".close");t.onclick=async()=>{await o.modal.close(i.EXTENSIONWHATSNEW)},setTimeout(()=>{t.click()},+e*1e3)});
+    <div class="close">⤬</div>`;const t=document.querySelector(".close");t.onclick=async()=>{await o.modal.close(a.EXTENSIONWHATSNEW)},setTimeout(()=>{t.click()},+e*1e3)});
