@@ -545,11 +545,14 @@ export class SubMenu
         async function DoASearch()
         {
             const list = document.querySelector<HTMLDivElement>('#monsterList')!;
+            const collectionSearch = searchButton.value.toUpperCase() === "COLLECTION";
 
             list.innerHTML = `<div class="superCenter">Searching...</div>`;
             let monsterInformationHtml = "";
 
-            await fetch(`${self.open5eApiString}${searchButton.value}`)
+            if (!collectionSearch)
+            {
+                await fetch(`${self.open5eApiString}${searchButton.value}`)
                 .then(function (response)
                 {
                     return response.json();
@@ -570,8 +573,11 @@ export class SubMenu
                         });
                     }
                 });
-
-            const dexieSearch = await db.Creatures.filter(unit => unit.unitName.toLowerCase().includes(searchButton.value.toLocaleLowerCase())).toArray();
+            }
+            
+            const dexieSearch = collectionSearch ? await db.Creatures.toArray()
+            : await db.Creatures.filter(unit => unit.unitName.toLowerCase().includes(searchButton.value.toLocaleLowerCase())).toArray();
+            
             if (dexieSearch.length > 0)
             {
                 dexieSearch.forEach((monster) =>
@@ -840,6 +846,7 @@ export class SubMenu
         searchValueButton.id = "searchValue";
         searchValueButton.className = "textInput";
         searchValueButton.title = "Type a value to filter monsters by";
+        searchValueButton.placeholder = "'Collection' shows Saved"
 
         //Create Search Confirm Button
         const searchConfirmButton = document.createElement('input');

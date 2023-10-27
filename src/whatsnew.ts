@@ -13,6 +13,8 @@ whatsnew.innerHTML = `
     </br>
     Also updated the Rollables on the StatBlock. You shouldn't need to refresh the sheet anymore to see changes, the button should appear once the control loses focus. (Meaning, you click a different element.)
     </br>
+    Also in 'Search Monster Data' if you type 'Collection' it'll now return your whole collection. Easier pruning.
+    </br>
     </br>
     <h1>Clash! 10/7</h1>
     Fix for adding items as groups (non-characters/mounts were able to sneak in.)
