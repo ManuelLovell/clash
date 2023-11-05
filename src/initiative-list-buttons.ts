@@ -98,8 +98,8 @@ export function AppendTurnButtons(document: Document, list: InitiativeList): voi
                     }
                 }
             }
-            await self.FocusOnCurrentTurnUnit(table);
             await self.Save();
+            await self.FocusOnCurrentTurnUnit(table);
         }
     }
 
@@ -126,8 +126,8 @@ export function AppendTurnButtons(document: Document, list: InitiativeList): voi
                     }
                 }
             }
-            await self.FocusOnCurrentTurnUnit(table);
             await self.Save();
+            await self.FocusOnCurrentTurnUnit(table);
         }
     }
 

@@ -8,6 +8,12 @@ const footer = document.querySelector<HTMLElement>('#clash-whatsnew-notes')!;
 
 whatsnew.innerHTML = `
   <div>
+    <h1>Clash! 11/05</h1>
+    Minor update to fix the units not updating correctly on Firefox when clicking Next/Previous and not Saving beforehand.
+    </br>
+    In other news, work on Chronicle! (character sheets extension) is going well. Hopefully broader release by year end. 
+    </br>
+    </br>
     <h1>Clash! 10/26</h1>
     Updated time stamps to fall in line with Rumble's new logic. Should resolve some issues with player changes not showing on the GM list.
     </br>
