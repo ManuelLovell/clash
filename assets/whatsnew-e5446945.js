@@ -1,5 +1,12 @@
-import{O as o,C as i}from"./constants-80a00c5d.js";const a=document.querySelector("#clash-whatsnew"),s=document.querySelector("#clash-whatsnew-notes");a.innerHTML=`
+import{O as o,C as n}from"./constants-1426dfe5.js";const a=document.querySelector("#clash-whatsnew"),s=document.querySelector("#clash-whatsnew-notes");a.innerHTML=`
   <div>
+    <h1>Clash! 11/15</h1>
+    </br>
+    Just updating for the new OBR SDK.  Also fixed a minor submenu width issue related to mobile view.
+    </br>
+    Oh.. also added a roll log for Clash, so you don't HAVE to use Rumble to keep track of rolls. 
+    </br>
+    </br>
     <h1>Clash! 11/05</h1>
     Minor update to fix the units not updating correctly on Firefox when clicking Next/Previous and not Saving beforehand.
     </br>
@@ -118,9 +125,9 @@ import{O as o,C as i}from"./constants-80a00c5d.js";const a=document.querySelecto
     </br>
     If for some reason this doesn't resolve your issues, hop on Discord. There's only so much testing I can do.
   </div>
-`;o.onReady(async()=>{const n=window.location.search,e=new URLSearchParams(n).get("timer");s.innerHTML=`
+`;o.onReady(async()=>{const i=window.location.search,e=new URLSearchParams(i).get("timer");s.innerHTML=`
     <a href="https://discord.gg/ANZKDmWzr6" target="_blank">Join the OBR Discord!</a>
     <div class="timer" style="--duration: ${e};--size: 34;">
     <div class="mask"></div>
     </div>
-    <div class="close">⤬</div>`;const t=document.querySelector(".close");t.onclick=async()=>{await o.modal.close(i.EXTENSIONWHATSNEW)},setTimeout(()=>{t.click()},+e*1e3)});
+    <div class="close">⤬</div>`;const t=document.querySelector(".close");t.onclick=async()=>{await o.modal.close(n.EXTENSIONWHATSNEW)},setTimeout(()=>{t.click()},+e*1e3)});
