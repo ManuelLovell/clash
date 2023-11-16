@@ -9,7 +9,7 @@ import { Constants } from "./constants";
 // Render main window
 const main = new InitiativeList();
 const sub = new PlayerList();
-const updateKeyVersion = "whatsnew-clash-11";
+const updateKeyVersion = "whatsnew-clash-12";
 let sceneReady = false;
 let whatsnew;
 let user = "";

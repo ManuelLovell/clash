@@ -9,9 +9,11 @@ import { liveQuery } from "dexie";
 import * as Buttons from "./initiative-list-buttons";
 import UnitInfo from "./unit-info";
 import * as Utilities from './utilities';
+import { IChatLog } from "./interfaces/chatlog";
 
 export class InitiativeList
 {
+    mobile = false;
     messageCounter: { [key: string]: string } = {};
     unitsInScene: IUnitInfo[] = [];
     unitsHidden: string[] = [];
@@ -60,9 +62,18 @@ export class InitiativeList
         </thead>
         <tbody id="unit-list"></tbody>
         </table>
+        <div id="logContainer" hidden>
+            <section id="chatContainer" class="chatContainer">
+            <ul id="chatLog">
+            </ul>
+        </section>
+        </div>
         <footer>
+        <div id="logButtonContainer" hidden></div>
+        <div id="initListFooterButtons">
         <div id="roundCounter" class="bottom"><span id="prevContainer"></span><span id="roundCount" class="centerish">Round: ${this.roundCounter}</span><span id="nextContainer"></span></div>
         <div id="bombContainer" class="bombBottom"><span id="resetContainer" class=""></span></div>
+        </div>
         </footer>
         `;
         if (db.inMemory)
@@ -79,6 +90,8 @@ export class InitiativeList
         Buttons.AppendTurnButtons(document, this);
         Buttons.AppendClearListButton(document, this);
         Buttons.AppendRollerButton(document);
+        Buttons.AppendShowLogButton(document);
+        Buttons.AppendLeaveLogButton(document);
 
         // Initialize Settings if none exists
         const settingData = await db.Settings.get(Constants.SETTINGSID);
@@ -96,6 +109,9 @@ export class InitiativeList
         {
             await db.Settings.add({ id: Constants.SETTINGSID, gmHideHp: false, gmHideAll: false, gmDisableLabel: false, gmTurnText: "", gmReverseList: false, gmRumbleLog: false, disableFocus: false });
         }
+
+        const windowWidth = await OBR.viewport.getWidth();
+        this.mobile = windowWidth < Constants.MOBILEWIDTH;
 
         // Initialize base turn order if none exists
         const trackerExists = await db.Tracker.get(Constants.TURNTRACKER);
@@ -122,6 +138,7 @@ export class InitiativeList
             listItem.style.color = player.color;
             playerContextMenu.appendChild(listItem);
         };
+
         OBR.player.onChange(async (player) =>
         {
             this.currentSelection = player.selection;
@@ -140,6 +157,8 @@ export class InitiativeList
                 toggle.style.fontStyle = selected ? "oblique" : "";
                 toggle.style.fontSize = selected ? "large" : "";
             }
+            
+            await this.HandleMessage(player.metadata);
         });
 
         OBR.party.onChange(async (party) =>
@@ -216,6 +235,7 @@ export class InitiativeList
         // Subscribe to on-change to detect if a token was deleted
         this.itemOnChangeHandler = OBR.scene.items.onChange(async (items) =>
         {
+            console.log("CHANGE!");
             const deleteIds: string[] = [];
             const newItems: Image[] = [];
             this.unitsHidden = [];
@@ -794,13 +814,11 @@ export class InitiativeList
 
     private async OpenSubMenu(unitId: string): Promise<void>
     {
-        const windowWidth = await OBR.viewport.getWidth();
         const windowHeight = await OBR.viewport.getHeight();
         const modalBuffer = 100;
-        const mobile = windowWidth < Constants.MOBILEWIDTH;
         const viewableHeight = windowHeight > 800 ? 700 : windowHeight - modalBuffer; // Using 100 as a buffer to account for padding.
 
-        if (mobile)
+        if (this.mobile)
         {
             await OBR.popover.close(`POP_${unitId}`);
             await OBR.popover.open({
@@ -898,7 +916,7 @@ export class InitiativeList
                             id: Constants.EXTENSIONSUBMENUID,
                             url: `/submenu/subindex.html?unitid=${unit.id}&sceneid=${mainList.sceneId}`,
                             height: viewableHeight,
-                            width: 325,
+                            width: mainList.mobile ? 325 : 350,
                             anchorElementId: elementId,
                             hidePaper: true
                         });
@@ -950,7 +968,7 @@ export class InitiativeList
                             id: Constants.EXTENSIONSUBMENUID,
                             url: `/submenu/subindex.html?unitid=${unitIdString}&unitactive=${unitActiveStatus}&multi=true&sceneid=${mainList.sceneId}`,
                             height: viewableHeight,
-                            width: 325,
+                            width: mainList.mobile ? 325 : 350,
                             anchorElementId: elementId,
                             hidePaper: true
                         });
@@ -1128,9 +1146,9 @@ export class InitiativeList
         });
     }
 
-    public IsThisOld(timeStamp: string, processId: string): boolean
+    public IsThisOld(timeStamp: string, processId: string, category = "UNITTRACK"): boolean
     {
-        const processCategory = `${processId}_UNITTRACK}`;
+        const processCategory = `${processId}_${category}}`;
         const logKey = this.messageCounter[processCategory];
         if (logKey)
         {
@@ -1146,6 +1164,36 @@ export class InitiativeList
         {
             this.messageCounter[processCategory] = timeStamp;
             return false;
+        }
+    }
+
+    public async HandleMessage(metadata: Metadata)
+    {
+        const chatLog = document.querySelector<HTMLDivElement>('#chatLog')!;
+        const TIME_STAMP = new Date().toLocaleTimeString();
+    
+        // Checks for own logs passing through
+        if (metadata[`${Constants.EXTENSIONID}/metadata_rolllog`] != undefined)
+        {
+            const messageContainer = metadata[`${Constants.EXTENSIONID}/metadata_rolllog`] as IChatLog;
+    
+            if (!this.IsThisOld(messageContainer.created, "CLASH", "DICE"))
+            {
+                const message = messageContainer.chatlog;
+    
+                // Flag to see if you're the sender
+                const author = document.createElement('li');
+                const log = document.createElement('li');
+    
+                author.className = "clashAuthor";
+                author.style.color = messageContainer.color;
+                author.innerText = `[${TIME_STAMP}] - ${messageContainer.sender}`;
+    
+                log.className = messageContainer.critical ? "clashLog glow" : "clashLog";
+                log.innerText = "..." + message.replace(messageContainer.sender!, "").trim() as string;
+                chatLog.append(author);
+                chatLog.append(log);
+            }
         }
     }
 }

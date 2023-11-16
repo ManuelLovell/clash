@@ -339,6 +339,7 @@ export class SubMenu
 
                         const message = `${this.currentUnit.unitName} used ${attack} and rolled ${value.textContent} for ... ${result} to hit!`;
                         const critical = (result - bonus) == 20 ? true : false;
+                        
                         this.SendtoChatLog(message, critical);
                         return await OBR.notification.show(message);
                     }
@@ -361,7 +362,7 @@ export class SubMenu
                         e.preventDefault();
 
                         const message = `${this.currentUnit.unitName} rolled ${attribute} ${toRoll} for ... ${DiceRoller.RollString(toRoll)}!`;
-                        this.SendtoChatLog(message)
+                        this.SendtoChatLog(message);
                         return await OBR.notification.show(message);
                     }
                     return null;
@@ -451,6 +452,7 @@ export class SubMenu
 
                                 const message = `${self.currentUnit.unitName} used ${attack} and rolled ${value.textContent} for ... ${result} to hit!`;
                                 const critical = (result - bonus) == 20 ? true : false;
+                                
                                 self.SendtoChatLog(message, critical);
                                 return await OBR.notification.show(message);
                             }
@@ -1389,7 +1391,7 @@ export class SubMenu
     private SetClassOnRollable(desc: string): string
     {
         desc = desc.replace(/\s+/g, ' ');
-        console.log(desc);
+        
         // Cleanse all tags before setting the lines refresh
         desc = desc.split('<span class="clickableRollerDmg" contenteditable="false">').join("");
         desc = desc.split('<span class="clickableRollerAtk" contenteditable="false">').join("");
@@ -1408,7 +1410,9 @@ export class SubMenu
 
         const now = new Date().toISOString();
         const metadata: Metadata = {};
+        
         metadata[`${Constants.EXTENSIONID}/metadata_chatlog`] = { chatlog: message, sender: "Clash!", senderId: "Clash0000", targetId: targetId, created: now, color: "#ff9294", critical: crit };
+        metadata[`${Constants.EXTENSIONID}/metadata_rolllog`] = { chatlog: message, sender: this.currentUnit.unitName, created: now, color: "#ff9294", critical: crit };
         this.SendtoDiscord(message);
         return await OBR.player.setMetadata(metadata);
     }

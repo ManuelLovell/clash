@@ -8,6 +8,13 @@ const footer = document.querySelector<HTMLElement>('#clash-whatsnew-notes')!;
 
 whatsnew.innerHTML = `
   <div>
+    <h1>Clash! 11/15</h1>
+    </br>
+    Just updating for the new OBR SDK.  Also fixed a minor submenu width issue related to mobile view.
+    </br>
+    Oh.. also added a roll log for Clash, so you don't HAVE to use Rumble to keep track of rolls. 
+    </br>
+    </br>
     <h1>Clash! 11/05</h1>
     Minor update to fix the units not updating correctly on Firefox when clicking Next/Previous and not Saving beforehand.
     </br>

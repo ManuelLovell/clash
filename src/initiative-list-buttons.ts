@@ -135,6 +135,60 @@ export function AppendTurnButtons(document: Document, list: InitiativeList): voi
     nextContainer?.appendChild(nextButton);
 }
 
+export function AppendShowLogButton(document: Document): void
+{
+    const resetContainer = document.getElementById("resetContainer")!;
+    
+    const showLogButton = document.createElement('input');
+    showLogButton.type = "button";
+    showLogButton.id = "showLogButton";
+    showLogButton.value = "Show Roll Log"
+    showLogButton.title = "Show Roll Log"
+    showLogButton.className = "tinyType";
+    showLogButton.onclick = async function () 
+    {
+        const initiativeListContainer = document.getElementById("initiative-list")!;
+        initiativeListContainer.hidden = true;
+        
+        const logContainer = document.getElementById("logContainer")!;
+        logContainer.hidden = false;
+
+        const initListFooterContainer = document.getElementById("initListFooterButtons")!;
+        initListFooterContainer.hidden = true;
+        
+        const leaveLogContainer = document.getElementById("logButtonContainer")!;
+        leaveLogContainer.hidden = false;
+    }
+    resetContainer.appendChild(showLogButton);
+}
+
+export function AppendLeaveLogButton(document: Document): void
+{
+    const leaveLogContainer = document.getElementById("logButtonContainer")!;
+
+    const leaveLogButton = document.createElement('input');
+    leaveLogButton.type = "button";
+    leaveLogButton.id = "showLogButton";
+    leaveLogButton.value = "Show Initiative List"
+    leaveLogButton.title = "Show Initiative List"
+    leaveLogButton.className = "chalkBorder";
+    leaveLogButton.onclick = async function () 
+    {
+        const initiativeListContainer = document.getElementById("initiative-list")!;
+        initiativeListContainer.hidden = false;
+        
+        const logContainer = document.getElementById("logContainer")!;
+        logContainer.hidden = true;
+
+        const initListFooterContainer = document.getElementById("initListFooterButtons")!;
+        initListFooterContainer.hidden = false;
+        
+        const leaveLogContainer = document.getElementById("logButtonContainer")!;
+        leaveLogContainer.hidden = true;
+    }
+    leaveLogContainer.appendChild(leaveLogButton);
+}
+
 /**Add Clear List Button */
 export function AppendClearListButton(document: Document, list: InitiativeList): void
 {
