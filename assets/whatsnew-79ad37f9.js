@@ -1,5 +1,10 @@
 import{O as o,C as n}from"./constants-1426dfe5.js";const a=document.querySelector("#clash-whatsnew"),s=document.querySelector("#clash-whatsnew-notes");a.innerHTML=`
   <div>
+    <h1>Clash! 11/17</h1>
+    </br>
+    Minor update for roll log sizing on mobile. Should be good now.
+    </br>
+    </br>
     <h1>Clash! 11/15</h1>
     </br>
     Just updating for the new OBR SDK.  Also fixed a minor submenu width issue related to mobile view.
