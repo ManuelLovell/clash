@@ -30,7 +30,7 @@ export function AppendSaveOrderButton(document: Document, list: InitiativeList):
 }
 
 /** Add RollAll Button */
-export function AppendRollerButton(document: Document): void
+export function AppendRollerButton(document: Document, _list: InitiativeList): void
 {
     //Get Button Container
     const rollerContainer = document.getElementById("rollAllContainer")!;
@@ -135,14 +135,14 @@ export function AppendTurnButtons(document: Document, list: InitiativeList): voi
     nextContainer?.appendChild(nextButton);
 }
 
-export function AppendShowLogButton(document: Document): void
+export function AppendShowLogButton(document: Document, list: InitiativeList): void
 {
     const resetContainer = document.getElementById("resetContainer")!;
     
     const showLogButton = document.createElement('input');
     showLogButton.type = "button";
     showLogButton.id = "showLogButton";
-    showLogButton.value = "Show Roll Log"
+    showLogButton.value = list.mobile ? "Log": "Show Roll Log"
     showLogButton.title = "Show Roll Log"
     showLogButton.className = "tinyType";
     showLogButton.onclick = async function () 
@@ -153,6 +153,10 @@ export function AppendShowLogButton(document: Document): void
         const logContainer = document.getElementById("logContainer")!;
         logContainer.hidden = false;
 
+        const chatContainer = document.getElementById("chatContainer")!;
+        chatContainer.hidden = false;
+        chatContainer.style.display = "flex";
+
         const initListFooterContainer = document.getElementById("initListFooterButtons")!;
         initListFooterContainer.hidden = true;
         
@@ -162,7 +166,7 @@ export function AppendShowLogButton(document: Document): void
     resetContainer.appendChild(showLogButton);
 }
 
-export function AppendLeaveLogButton(document: Document): void
+export function AppendLeaveLogButton(document: Document, _list: InitiativeList): void
 {
     const leaveLogContainer = document.getElementById("logButtonContainer")!;
 
@@ -179,6 +183,10 @@ export function AppendLeaveLogButton(document: Document): void
         
         const logContainer = document.getElementById("logContainer")!;
         logContainer.hidden = true;
+
+        const chatContainer = document.getElementById("chatContainer")!;
+        chatContainer.hidden = true; 
+        chatContainer.style.display = "none";
 
         const initListFooterContainer = document.getElementById("initListFooterButtons")!;
         initListFooterContainer.hidden = false;
@@ -201,7 +209,7 @@ export function AppendClearListButton(document: Document, list: InitiativeList):
     const resetTurnButton = document.createElement('input');
     resetTurnButton.type = "button";
     resetTurnButton.id = "resetTurnButton";
-    resetTurnButton.value = "Reset Round"
+    resetTurnButton.value = list.mobile ? "Reset": "Reset Round"
     resetTurnButton.title = "Reset Round"
     resetTurnButton.className = "tinyType";
     resetTurnButton.onclick = async function () 
@@ -219,12 +227,12 @@ export function AppendClearListButton(document: Document, list: InitiativeList):
         await list.Save();
     }
     resetContainer.appendChild(resetTurnButton);
-
+    
     //Create Soft Reset Button
     const clearButton = document.createElement('input');
     clearButton.type = "button";
     clearButton.id = "clearButton";
-    clearButton.value = "CLEAR LIST"
+    clearButton.value = list.mobile ? "Clear": "CLEAR LIST"
     clearButton.title = "Clear List"
     clearButton.className = "tinyType";
     clearButton.onclick = async function () 

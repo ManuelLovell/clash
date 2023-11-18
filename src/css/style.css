@@ -281,7 +281,7 @@ h1 {
     left: 35%;
     margin-top: 10px;
 }
-
+#clash-main-body-app,
 #clash-main-body-settings {
     height: calc(100% - 40px);
 }
@@ -453,7 +453,11 @@ input:checked+.slider:before {
 .tooltip:hover .tooltiptext {
     visibility: visible;
 }
-
+#logContainer
+{
+    display: contents;
+    width: 100%;
+}
 .chatContainer {
     overflow-y: scroll;
     overflow-x: hidden;
@@ -463,7 +467,7 @@ input:checked+.slider:before {
     padding: 5px;
     border-radius: 16px;
     width: 95%;
-    height: 520px;
+    height: calc(100% - 20px);
     background-color: var(--OBR-dark-blue-trans);
 }
 

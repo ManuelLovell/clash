@@ -63,7 +63,7 @@ export class InitiativeList
         <tbody id="unit-list"></tbody>
         </table>
         <div id="logContainer" hidden>
-            <section id="chatContainer" class="chatContainer">
+            <section id="chatContainer" class="chatContainer" style="display:none;">
             <ul id="chatLog">
             </ul>
         </section>
@@ -84,14 +84,17 @@ export class InitiativeList
             mainContainer.prepend(warning);
         }
 
+        const windowWidth = await OBR.viewport.getWidth();
+        this.mobile = windowWidth < Constants.MOBILEWIDTH;
+
         // Append basic form buttons
         //this.AppendSaveOrderButton();
         Buttons.AppendSaveOrderButton(document, this);
         Buttons.AppendTurnButtons(document, this);
         Buttons.AppendClearListButton(document, this);
-        Buttons.AppendRollerButton(document);
-        Buttons.AppendShowLogButton(document);
-        Buttons.AppendLeaveLogButton(document);
+        Buttons.AppendRollerButton(document, this);
+        Buttons.AppendShowLogButton(document, this);
+        Buttons.AppendLeaveLogButton(document, this);
 
         // Initialize Settings if none exists
         const settingData = await db.Settings.get(Constants.SETTINGSID);
@@ -109,9 +112,6 @@ export class InitiativeList
         {
             await db.Settings.add({ id: Constants.SETTINGSID, gmHideHp: false, gmHideAll: false, gmDisableLabel: false, gmTurnText: "", gmReverseList: false, gmRumbleLog: false, disableFocus: false });
         }
-
-        const windowWidth = await OBR.viewport.getWidth();
-        this.mobile = windowWidth < Constants.MOBILEWIDTH;
 
         // Initialize base turn order if none exists
         const trackerExists = await db.Tracker.get(Constants.TURNTRACKER);
@@ -157,7 +157,7 @@ export class InitiativeList
                 toggle.style.fontStyle = selected ? "oblique" : "";
                 toggle.style.fontSize = selected ? "large" : "";
             }
-            
+
             await this.HandleMessage(player.metadata);
         });
 
@@ -1171,24 +1171,24 @@ export class InitiativeList
     {
         const chatLog = document.querySelector<HTMLDivElement>('#chatLog')!;
         const TIME_STAMP = new Date().toLocaleTimeString();
-    
+
         // Checks for own logs passing through
         if (metadata[`${Constants.EXTENSIONID}/metadata_rolllog`] != undefined)
         {
             const messageContainer = metadata[`${Constants.EXTENSIONID}/metadata_rolllog`] as IChatLog;
-    
+
             if (!this.IsThisOld(messageContainer.created, "CLASH", "DICE"))
             {
                 const message = messageContainer.chatlog;
-    
+
                 // Flag to see if you're the sender
                 const author = document.createElement('li');
                 const log = document.createElement('li');
-    
+
                 author.className = "clashAuthor";
                 author.style.color = messageContainer.color;
                 author.innerText = `[${TIME_STAMP}] - ${messageContainer.sender}`;
-    
+
                 log.className = messageContainer.critical ? "clashLog glow" : "clashLog";
                 log.innerText = "..." + message.replace(messageContainer.sender!, "").trim() as string;
                 chatLog.append(author);
