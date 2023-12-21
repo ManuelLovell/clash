@@ -128,70 +128,93 @@ class BSCache
 
     public SetupHandlers()
     {
-        if (this.caches.includes(BSCache.SCENEMETA))
+
+        if (this.sceneMetadataHandler === undefined)
         {
-            this.sceneMetadataHandler = OBR.scene.onMetadataChange(async (metadata) =>
+            if (this.caches.includes(BSCache.SCENEMETA))
             {
-                this.sceneMetadata = metadata;
-                await this.OnSceneMetadataChanges(metadata);
-            });
+                this.sceneMetadataHandler = OBR.scene.onMetadataChange(async (metadata) =>
+                {
+                    this.sceneMetadata = metadata;
+                    await this.OnSceneMetadataChanges(metadata);
+                });
+            }
         }
 
-        if (this.caches.includes(BSCache.SCENEITEMS))
+        if (this.sceneItemsHandler === undefined)
         {
-            this.sceneItemsHandler = OBR.scene.items.onChange(async (items) =>
+            if (this.caches.includes(BSCache.SCENEITEMS))
             {
-                this.sceneItems = items;
-                await this.OnSceneItemsChange(items);
-            });
+                this.sceneItemsHandler = OBR.scene.items.onChange(async (items) =>
+                {
+                    this.sceneItems = items;
+                    await this.OnSceneItemsChange(items);
+                });
+            }
         }
 
-        if (this.caches.includes(BSCache.SCENEGRID))
+        if (this.sceneGridHandler === undefined)
         {
-            this.sceneGridHandler = OBR.scene.grid.onChange(async (grid) =>
+            if (this.caches.includes(BSCache.SCENEGRID))
             {
-                this.gridDpi = grid.dpi;
-                this.gridScale = parseInt(grid.scale);
-                await this.OnSceneGridChange(grid);
-            });
+                this.sceneGridHandler = OBR.scene.grid.onChange(async (grid) =>
+                {
+                    this.gridDpi = grid.dpi;
+                    this.gridScale = parseInt(grid.scale);
+                    await this.OnSceneGridChange(grid);
+                });
+            }
         }
 
-        if (this.caches.includes(BSCache.PLAYER))
+        if (this.playerHandler === undefined)
         {
-            this.playerHandler = OBR.player.onChange(async (player) =>
+            if (this.caches.includes(BSCache.PLAYER))
             {
-                this.playerName = player.name;
-                this.playerColor = player.color;
-                this.playerId = player.id;
-                this.playerRole = player.role;
-                this.playerMetadata = player.metadata;
-                await this.OnPlayerChange(player);
-            });
+                this.playerHandler = OBR.player.onChange(async (player) =>
+                {
+                    this.playerName = player.name;
+                    this.playerColor = player.color;
+                    this.playerId = player.id;
+                    this.playerRole = player.role;
+                    this.playerMetadata = player.metadata;
+                    await this.OnPlayerChange(player);
+                });
+            }
         }
 
-        if (this.caches.includes(BSCache.PARTY))
+        if (this.partyHandler === undefined)
         {
-            this.partyHandler = OBR.party.onChange(async (party) =>
+            if (this.caches.includes(BSCache.PARTY))
             {
-                this.party = party;
-                await this.OnPartyChange(party);
-            });
+                this.partyHandler = OBR.party.onChange(async (party) =>
+                {
+                    this.party = party;
+                    await this.OnPartyChange(party);
+                });
+            }
         }
 
-        if (this.caches.includes(BSCache.ROOMMETA))
+        if (this.roomHandler === undefined)
         {
-            this.roomHandler = OBR.room.onMetadataChange(async (metadata) =>
+            if (this.caches.includes(BSCache.ROOMMETA))
             {
-                this.roomMetadata = metadata;
-                await this.OnRoomMetadataChange(metadata);
-            });
+                this.roomHandler = OBR.room.onMetadataChange(async (metadata) =>
+                {
+                    this.roomMetadata = metadata;
+                    await this.OnRoomMetadataChange(metadata);
+                });
+            }
         }
 
-        this.themeHandler = OBR.theme.onChange(async (theme) =>
+
+        if (this.themeHandler === undefined)
         {
-            this.theme = theme.mode;
-            await this.OnThemeChange(theme);
-        });
+            this.themeHandler = OBR.theme.onChange(async (theme) =>
+            {
+                this.theme = theme.mode;
+                await this.OnThemeChange(theme);
+            });
+        }
 
         // Only setup if we don't have one, never kill
         if (this.sceneReadyHandler === undefined)

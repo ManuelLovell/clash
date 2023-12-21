@@ -62,6 +62,19 @@ class GMView
             warning.className = "noDatabase";
             Constants.MAINAPP.prepend(warning);
         }
+        
+        BSCACHE.SetupHandlers(); // Incase the first didn't
+
+        this.roundCounter = Seta(SettingsConstants.ROUNDCOUNT);
+        this.turnCounter = Seta(SettingsConstants.TURNCOUNT);
+        RenderSettings();
+        RenderRollLog();
+
+        const table = document.getElementById('clashGMViewBody');
+        if (table)
+        {
+            table.addEventListener('dblclick', (event) => ViewportFunctions.FocusUnit(event));
+        }
 
         // Setup Player Owner Context Menu
         const playerContextMenu = document.getElementById("playerListing")!;
@@ -75,18 +88,6 @@ class GMView
             listItem.style.color = player.color;
             playerContextMenu.appendChild(listItem);
         };
-
-        this.roundCounter = Seta(SettingsConstants.ROUNDCOUNT);
-        this.turnCounter = Seta(SettingsConstants.TURNCOUNT);
-        RenderSettings();
-        RenderRollLog();
-
-        const table = document.getElementById('clashGMViewBody');
-        if (table)
-        {
-            table.addEventListener('dblclick', (event) => ViewportFunctions.FocusUnit(event));
-        }
-
         await this.RefreshList();
     }
 

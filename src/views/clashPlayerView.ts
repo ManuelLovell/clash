@@ -44,6 +44,8 @@ class PlayerView
         this.viewFooter = document.querySelector("#clashPLViewButtons") as HTMLDivElement;
         this.viewCounter = document.querySelector("#roundCounterContainer") as HTMLDivElement;
 
+        BSCACHE.SetupHandlers(); // Incase the first didn't
+        
         this.roundCounter = Seta(SettingsConstants.ROUNDCOUNT);
         this.turnCounter = Seta(SettingsConstants.TURNCOUNT);
 
