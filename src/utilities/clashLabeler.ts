@@ -17,6 +17,8 @@ export class Labeler
         const currentUnit = BSCACHE.playerRole === "GM" ? GMVIEW.currentTurnUnit : PLVIEW.currentTurnUnit;
         const labelItemExists = await OBR.scene.local.getItems([Constants.LABEL]);
 
+        if (currentUnit === undefined) return;
+
         if (disableLabel)
         {
             if (labelItemExists)

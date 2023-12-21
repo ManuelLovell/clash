@@ -6,6 +6,7 @@ import { BSCACHE } from "../utilities/bsSceneCache";
 import { GetACHeader, GetArmorInput, GetHPHeader, GetInitativeHeader, GetInitiativeInput, GetMinHPInput, GetMoveHeader, GetNameHeader, GetNameInput, GetRollInput, GetRollerHeader, GetStatInput, GetTempHPHeader, GetWhatsNewHeader, GetMaxHPInput, GetTempHPInput, GetMoveInput, ConfigureViewFooterButtons, RenderRollLog } from '../buttons/clashListButtons';
 import { RenderSettings } from "./clashSettingsView";
 import { ViewportFunctions } from "../utilities/bsViewport";
+import { Labeler } from "../utilities/clashLabeler";
 
 class GMView
 {
@@ -62,7 +63,7 @@ class GMView
             warning.className = "noDatabase";
             Constants.MAINAPP.prepend(warning);
         }
-        
+
         BSCACHE.SetupHandlers(); // Incase the first didn't
 
         this.roundCounter = Seta(SettingsConstants.ROUNDCOUNT);
@@ -313,13 +314,14 @@ class GMView
         }
     }
 
-    public FocusOnCurrentTurnUnit(): void
+    public async FocusOnCurrentTurnUnit(): Promise<void>
     {
         if (BSCACHE.playerRole === "GM"
             && BSCACHE.roomMetadata[SettingsConstants.DISABLEFOCUS] !== true
             && this.currentTurnUnit)
         {
-            ViewportFunctions.CenterViewportOnImage(this.currentTurnUnit);
+            await ViewportFunctions.CenterViewportOnImage(this.currentTurnUnit);
+            await Labeler.UpdateLabel();
         }
     }
 
