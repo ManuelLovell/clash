@@ -12,7 +12,7 @@ export class Labeler
     static async UpdateLabel(): Promise<void>
     {
         const settingText = Reta(SettingsConstants.TURNTEXT) as string;
-        const labelText = settingText.trim().length === 0 ? "💡" : settingText;
+        const labelText = settingText?.trim().length === 0 ? "💡" : settingText;
         const disableLabel = Reta(SettingsConstants.DISABLELABEL) ? true : false;
         const currentUnit = BSCACHE.playerRole === "GM" ? GMVIEW.currentTurnUnit : PLVIEW.currentTurnUnit;
         const labelItemExists = await OBR.scene.local.getItems([Constants.LABEL]);
