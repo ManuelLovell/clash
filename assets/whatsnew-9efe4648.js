@@ -1,5 +1,21 @@
-import{O as o,C as n}from"./constants-1426dfe5.js";const a=document.querySelector("#clash-whatsnew"),s=document.querySelector("#clash-whatsnew-notes");a.innerHTML=`
-  <div>
+import{O as o,C as n}from"./clashConstants-4a61437d.js";const i=document.querySelector("#clash-whatsnew"),s=document.querySelector("#clash-whatsnew-notes");i.innerHTML=`
+  <div id="newsContainer">
+    <h1>Clash 2.0! 12/21</h1>
+    So you may have noticed things changed. That's good.
+    </br>
+    Full change log is over at my <a class="patreon" href="https://www.patreon.com/battlesystem">Patreon</a>. I'd appreciate if users would at least join as a free member. It's nice to see the support.
+    </br>
+    Some flow changes..
+    </br>
+    - When editting an attribute score/save on the stat block, RIGHT CLICK and select Edit. (It was a pain to click before.)
+    </br>
+    - There are a ton of new settings. Go there first.
+    </br>
+    - Removed reliance on localdata for everything but the Collection. You should be able to prep on other machines now. (Pack that scene data full!)
+    </br>
+    Have fun!
+    </br>
+    </br>
     <h1>Clash! 11/17</h1>
     </br>
     Minor update for roll log sizing on mobile. Should be good now.
@@ -130,7 +146,7 @@ import{O as o,C as n}from"./constants-1426dfe5.js";const a=document.querySelecto
     </br>
     If for some reason this doesn't resolve your issues, hop on Discord. There's only so much testing I can do.
   </div>
-`;o.onReady(async()=>{const i=window.location.search,e=new URLSearchParams(i).get("timer");s.innerHTML=`
+`;o.onReady(async()=>{const a=window.location.search,e=new URLSearchParams(a).get("timer");s.innerHTML=`
     <a href="https://discord.gg/ANZKDmWzr6" target="_blank">Join the OBR Discord!</a>
     <div class="timer" style="--duration: ${e};--size: 34;">
     <div class="mask"></div>
