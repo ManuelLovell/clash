@@ -129,7 +129,7 @@ class BSCache
     public SetupHandlers()
     {
 
-        if (this.sceneMetadataHandler === undefined)
+        if (this.sceneMetadataHandler === undefined || this.sceneMetadataHandler.length === 0)
         {
             if (this.caches.includes(BSCache.SCENEMETA))
             {
@@ -141,7 +141,7 @@ class BSCache
             }
         }
 
-        if (this.sceneItemsHandler === undefined)
+        if (this.sceneItemsHandler === undefined || this.sceneItemsHandler.length === 0)
         {
             if (this.caches.includes(BSCache.SCENEITEMS))
             {
@@ -153,7 +153,7 @@ class BSCache
             }
         }
 
-        if (this.sceneGridHandler === undefined)
+        if (this.sceneGridHandler === undefined || this.sceneGridHandler.length === 0)
         {
             if (this.caches.includes(BSCache.SCENEGRID))
             {
@@ -166,7 +166,7 @@ class BSCache
             }
         }
 
-        if (this.playerHandler === undefined)
+        if (this.playerHandler === undefined || this.playerHandler.length === 0)
         {
             if (this.caches.includes(BSCache.PLAYER))
             {
@@ -182,7 +182,7 @@ class BSCache
             }
         }
 
-        if (this.partyHandler === undefined)
+        if (this.partyHandler === undefined || this.partyHandler.length === 0)
         {
             if (this.caches.includes(BSCache.PARTY))
             {
@@ -194,7 +194,7 @@ class BSCache
             }
         }
 
-        if (this.roomHandler === undefined)
+        if (this.roomHandler === undefined || this.roomHandler.length === 0)
         {
             if (this.caches.includes(BSCache.ROOMMETA))
             {
