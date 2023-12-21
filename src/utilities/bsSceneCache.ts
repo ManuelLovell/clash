@@ -278,6 +278,7 @@ class BSCache
         console.log(ready)
         if (ready)
         {
+            this.SetupHandlers();
             this.playerRole === "GM" ? await GMVIEW.Render() : await PLVIEW.Render();
             this.playerRole === "GM" ? await GMVIEW.RefreshList() : await PLVIEW.RefreshList();
         }
