@@ -10,6 +10,7 @@ export interface IOpen5eMonsterResponse {
     name: string;
     size: string;
     type: string;
+    environments: string[];
     subtype: string;
     group: string;
     alignment: string;
@@ -74,6 +75,7 @@ export interface IOpen5eMonsterResponse {
     desc?: string;
     attack_bonus?: number;
     damage_dice?: string;
+    damage_bonus?: number;
   }
 
   export interface IOpen5eSpellResponse {

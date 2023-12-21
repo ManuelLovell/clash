@@ -1,13 +1,29 @@
 import OBR from "@owlbear-rodeo/sdk";
 import '/src/css/new-style.css'
-import { Constants } from "./constants";
+import { Constants } from "./../clashConstants";
 
 
 const whatsnew = document.querySelector<HTMLDivElement>('#clash-whatsnew')!;
 const footer = document.querySelector<HTMLElement>('#clash-whatsnew-notes')!;
 
 whatsnew.innerHTML = `
-  <div>
+  <div id="newsContainer">
+    <h1>Clash 2.0! 12/21</h1>
+    So you may have noticed things changed. That's good.
+    </br>
+    Full change log is over at my <a class="patreon" href="https://www.patreon.com/battlesystem">Patreon</a>. I'd appreciate if users would at least join as a free member. It's nice to see the support.
+    </br>
+    Some flow changes..
+    </br>
+    - When editting an attribute score/save on the stat block, RIGHT CLICK and select Edit. (It was a pain to click before.)
+    </br>
+    - There are a ton of new settings. Go there first.
+    </br>
+    - Removed reliance on localdata for everything but the Collection. You should be able to prep on other machines now. (Pack that scene data full!)
+    </br>
+    Have fun!
+    </br>
+    </br>
     <h1>Clash! 11/17</h1>
     </br>
     Minor update for roll log sizing on mobile. Should be good now.

@@ -1,6 +1,8 @@
-import { IActionsEntity, IOpen5eMonsterResponse, IOpen5eSpellResponse } from './interfaces/api-response-open5e';
-import { IUnitInfo } from './interfaces/unit-info';
-import { db } from './local-database';
+import { Item, Metadata } from '@owlbear-rodeo/sdk';
+import { IActionsEntity, IOpen5eMonsterResponse, IOpen5eSpellResponse } from './../interfaces/api-response-open5e';
+import { IUnitInfo } from './../interfaces/unit-info';
+import { db } from './../local-database';
+import { UnitConstants } from '../clashConstants';
 
 export default class UnitInfo implements IUnitInfo
 {
@@ -136,6 +138,118 @@ export default class UnitInfo implements IUnitInfo
         // If pulling from the database, it's an insystem load
         // transfer isActive status
         this.isActive = dbUnit.isActive;
+    }
+
+    /** Set the Metadata from the given object to this model */
+    public SetMetadata(item: Item)
+    {
+        const metadata = item.metadata;
+        this.id = metadata[UnitConstants.ID] as any;
+        this.initiative = metadata[UnitConstants.INITIATIVE] as any;
+        this.maxHP = metadata[UnitConstants.CURRENTHP] as any;
+        this.maxHP = metadata[UnitConstants.MAXHP] as any;
+        this.isMonster = metadata[UnitConstants.ISMONSTER] as any;
+        this.unitName = metadata[UnitConstants.UNITNAME] as any;
+        this.armorClass = metadata[UnitConstants.ARMORCLASS] as any;
+        this.unitType = metadata[UnitConstants.UNITTYPE] as any;
+        this.unitSize = metadata[UnitConstants.UNITSIZE] as any;
+        this.strScore = metadata[UnitConstants.STRSCORE] as any;
+        this.strSave = metadata[UnitConstants.STRSAVE] as any;
+        this.dexScore = metadata[UnitConstants.DEXSCORE] as any;
+        this.dexSave = metadata[UnitConstants.DEXSAVE] as any;
+        this.conScore = metadata[UnitConstants.CONSCORE] as any;
+        this.conSave = metadata[UnitConstants.CONSAVE] as any;
+        this.intScore = metadata[UnitConstants.INTSCORE] as any;
+        this.intSave = metadata[UnitConstants.INTSAVE] as any;
+        this.wisScore = metadata[UnitConstants.WISSCORE] as any;
+        this.wisSave = metadata[UnitConstants.WISSAVE] as any;
+        this.chaScore = metadata[UnitConstants.CHASCORE] as any;
+        this.chaSave = metadata[UnitConstants.CHASAVE] as any;
+        this.damageVulnerabilities = metadata[UnitConstants.DAMAGEVULNERABILITIES] as any;
+        this.damageImmunities = metadata[UnitConstants.DAMAGEIMMUNITIES] as any;
+        this.damageResistances = metadata[UnitConstants.DAMAGERESISTANCES] as any;
+        this.conditionImmunities = metadata[UnitConstants.CONDITIONIMMUNITIES] as any;
+        this.challengeRating = metadata[UnitConstants.CHALLENGERATING] as any;
+        this.experiencePoints = metadata[UnitConstants.EXPERIENCEPOINTS] as any;
+        this.alignment = metadata[UnitConstants.ALIGNMENT] as any;
+        this.standardActions = metadata[UnitConstants.STANDARDACTIONS] as any;
+        this.legendaryActions = metadata[UnitConstants.LEGENDARYACTIONS] as any;
+        this.specialAbilities = metadata[UnitConstants.SPECIALABILITIES] as any;
+        this.spellActions = metadata[UnitConstants.SPELLACTIONS] as any;
+        this.reactions = metadata[UnitConstants.REACTIONS] as any;
+        this.spellList = metadata[UnitConstants.SPELLLIST] as any;
+        this.senses = metadata[UnitConstants.SENSES] as any;
+        this.languages = metadata[UnitConstants.LANGUAGES] as any;
+        this.speedWalk = metadata[UnitConstants.SPEEDWALK] as any;
+        this.speedFly = metadata[UnitConstants.SPEEDFLY] as any;
+        this.speedClimb = metadata[UnitConstants.SPEEDCLIMB] as any;
+        this.speedBurrow = metadata[UnitConstants.SPEEDBURROW] as any;
+        this.speedSwim = metadata[UnitConstants.SPEEDSWIM] as any;
+        this.ownerId = metadata[UnitConstants.OWNERID] as any;
+    }
+    
+    /** Gets the Metadata for THIS Unit and returns a Metadata Object */
+    public GetMetadata(): Metadata
+    {
+        const metadata: Metadata = {};
+
+        metadata[UnitConstants.ID] = this.id;
+        metadata[UnitConstants.INITIATIVE] = this.initiative;
+        metadata[UnitConstants.CURRENTHP] = this.maxHP;
+        metadata[UnitConstants.MAXHP] = this.maxHP;
+
+        metadata[UnitConstants.ISMONSTER] = this.isMonster;
+
+        metadata[UnitConstants.UNITNAME] = this.unitName;
+        metadata[UnitConstants.ARMORCLASS] = this.armorClass;
+        metadata[UnitConstants.UNITTYPE] = this.unitType;
+        metadata[UnitConstants.UNITSIZE] = this.unitSize;
+
+        metadata[UnitConstants.STRSCORE] = this.strScore;
+        metadata[UnitConstants.STRSAVE] = this.strSave;
+
+        metadata[UnitConstants.DEXSCORE] = this.dexScore;
+        metadata[UnitConstants.DEXSAVE] = this.dexSave;
+
+        metadata[UnitConstants.CONSCORE] = this.conScore;
+        metadata[UnitConstants.CONSAVE] = this.conSave;
+
+        metadata[UnitConstants.INTSCORE] = this.intScore;
+        metadata[UnitConstants.INTSAVE] = this.intSave;
+
+        metadata[UnitConstants.WISSCORE] = this.wisScore;
+        metadata[UnitConstants.WISSAVE] = this.wisSave;
+
+        metadata[UnitConstants.CHASCORE] = this.chaScore;
+        metadata[UnitConstants.CHASAVE] = this.chaSave;
+
+        metadata[UnitConstants.DAMAGEVULNERABILITIES] = this.damageVulnerabilities;
+        metadata[UnitConstants.DAMAGEIMMUNITIES] = this.damageImmunities;
+        metadata[UnitConstants.DAMAGERESISTANCES] = this.damageResistances;
+        metadata[UnitConstants.CONDITIONIMMUNITIES] = this.conditionImmunities;
+
+        metadata[UnitConstants.CHALLENGERATING] = this.challengeRating;
+        metadata[UnitConstants.EXPERIENCEPOINTS] = this.experiencePoints;
+        metadata[UnitConstants.ALIGNMENT] = this.alignment;
+
+        metadata[UnitConstants.STANDARDACTIONS] = this.standardActions;
+        metadata[UnitConstants.LEGENDARYACTIONS] = this.legendaryActions;
+        metadata[UnitConstants.SPECIALABILITIES] = this.specialAbilities;
+        metadata[UnitConstants.SPELLACTIONS] = this.spellActions;
+        metadata[UnitConstants.REACTIONS] = this.reactions;
+
+        metadata[UnitConstants.SPELLLIST] = this.spellList;
+        metadata[UnitConstants.SENSES] = this.senses;
+        metadata[UnitConstants.LANGUAGES] = this.languages;
+
+        metadata[UnitConstants.SPEEDWALK] = this.speedWalk;
+        metadata[UnitConstants.SPEEDFLY] = this.speedFly;
+        metadata[UnitConstants.SPEEDCLIMB] = this.speedClimb;
+        metadata[UnitConstants.SPEEDBURROW] = this.speedBurrow;
+        metadata[UnitConstants.SPEEDSWIM] = this.speedSwim;
+        metadata[UnitConstants.OWNERID] = this.ownerId;
+
+        return metadata;
     }
 
     public SetToModel(unit: IUnitInfo, favorite?: boolean): void

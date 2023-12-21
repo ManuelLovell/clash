@@ -1,7 +1,7 @@
 import Dexie, { DexieOptions } from "dexie";
 import * as FakeDB from "fake-indexeddb";
 import { IUnitInfo } from "./interfaces/unit-info";
-import UnitInfo from "./unit-info";
+import UnitInfo from "./unitinfo/clashUnitInfo";
 
 export default class DexieDatabase extends Dexie
 {
@@ -168,7 +168,6 @@ async function createDatabase(): Promise<DexieDatabase>
 
         testDBRequest.onsuccess = async function ()
         {
-            console.log("DB for Clash running - Clearing local cache will remove stored data");
             testDBRequest.result.close();
             window.indexedDB.deleteDatabase("__test");
             resolve(new DexieDatabase(false));
@@ -176,7 +175,7 @@ async function createDatabase(): Promise<DexieDatabase>
         // If indexedDB is disabled create an in memory database
         testDBRequest.onerror = async function ()
         {
-            console.warn("IndexDB is disabled, no state will be saved");
+            console.warn("IndexDB is disabled, no Collection Items will be saved");
             window.indexedDB.deleteDatabase("__test");
             resolve(new DexieDatabase(true, { indexedDB: FakeDB.indexedDB, IDBKeyRange: FakeDB.IDBKeyRange }));
         };

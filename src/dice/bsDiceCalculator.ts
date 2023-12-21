@@ -1,4 +1,4 @@
-import { Constants } from "./constants";
+import { Constants } from "../clashConstants";
 
 export class DiceRoller
 {
