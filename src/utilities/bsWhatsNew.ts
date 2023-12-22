@@ -8,6 +8,15 @@ const footer = document.querySelector<HTMLElement>('#clash-whatsnew-notes')!;
 
 whatsnew.innerHTML = `
   <div id="newsContainer">
+    <h1>Clash! 12/22</h1>
+    Minor bug fixes.
+    </br> - Units showing multiple times on the Initiative List when adding many at once.
+    </br> - HealthBar placement for tokens with various scalings.
+    </br> - Scrollbars showing up odd in settings.
+    </br> - Long initiative lists clipping under the footer buttons.
+    </br> - The "/" missing for HP on the Player List (For their own tokens) when you were hiding enemy information.
+    </br>
+    </br>
     <h1>Clash 2.0! 12/21</h1>
     So you may have noticed things changed. That's good.
     </br>
@@ -163,6 +172,7 @@ OBR.onReady(async () =>
     const timerParam = urlParams.get('timer')!;
 
     footer.innerHTML = `
+    <a href="https://www.patreon.com/battlesystem" target="_blank">Patreon!</a>
     <a href="https://discord.gg/ANZKDmWzr6" target="_blank">Join the OBR Discord!</a>
     <div class="timer" style="--duration: ${timerParam};--size: 34;">
     <div class="mask"></div>

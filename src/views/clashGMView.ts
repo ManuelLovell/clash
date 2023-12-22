@@ -64,8 +64,6 @@ class GMView
             Constants.MAINAPP.prepend(warning);
         }
 
-        BSCACHE.SetupHandlers(); // Incase the first didn't
-
         this.roundCounter = Seta(SettingsConstants.ROUNDCOUNT);
         this.turnCounter = Seta(SettingsConstants.TURNCOUNT);
         RenderSettings();
@@ -121,14 +119,8 @@ class GMView
         }
 
         //Clear the table
-        while (this.viewHeader!.rows.length > 0)
-        {
-            this.viewHeader!.deleteRow(0);
-        }
-        while (this.viewBody!?.rows.length > 0)
-        {
-            this.viewBody!.deleteRow(0);
-        }
+        this.viewHeader!.innerHTML = "";
+        this.viewBody!.innerHTML = ""; 
 
         // Add the Table Header
         const row = this.viewHeader!.insertRow(-1);
@@ -229,6 +221,7 @@ class GMView
             const nameCell = row.insertCell(cellNumber);
             const nameToggle = GetNameInput(unit);
             nameCell.appendChild(nameToggle);
+            nameCell.classList.add("name-cell");
             cellNumber++;
 
             // HP

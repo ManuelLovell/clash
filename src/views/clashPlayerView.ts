@@ -44,8 +44,6 @@ class PlayerView
         this.viewFooter = document.querySelector("#clashPLViewButtons") as HTMLDivElement;
         this.viewCounter = document.querySelector("#roundCounterContainer") as HTMLDivElement;
 
-        BSCACHE.SetupHandlers(); // Incase the first didn't
-        
         this.roundCounter = Seta(SettingsConstants.ROUNDCOUNT);
         this.turnCounter = Seta(SettingsConstants.TURNCOUNT);
 
@@ -215,19 +213,20 @@ class PlayerView
                 const maxHp = Meta(unit, UnitConstants.MAXHP);
                 if (currentHp <= maxHp / 4)
                 {
-                    nameToggle.classList.add("unitHarmed");
+                    nameToggle.classList.add("unit-harmed");
                 }
                 else if (currentHp <= maxHp / 2)
                 {
-                    nameToggle.classList.add("unitHurt");
+                    nameToggle.classList.add("unit-hurt");
                 }
                 else
                 {
-                    nameToggle.classList.add("unitHappy");
+                    nameToggle.classList.add("unit-happy");
                 }
             }
             this.Disable(nameToggle, myUnit);
             nameCell.appendChild(nameToggle);
+            nameCell.classList.add("name-cell");
             cellNumber++;
 
             // HP
@@ -241,7 +240,7 @@ class PlayerView
                 const maxHpInput = GetMaxHPInput(unit);
                 this.Disable(maxHpInput, myUnit);
                 hpCell.appendChild(minHpInput);
-                if (!Reta(SettingsConstants.HIDEENEMYINFO))
+                if (!Reta(SettingsConstants.HIDEENEMYINFO) || myUnit)
                 {
                     hpCell.appendChild(document.createTextNode(`/`));
                 }

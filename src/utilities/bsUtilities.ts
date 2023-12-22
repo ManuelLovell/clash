@@ -1,4 +1,4 @@
-import { Item, Theme } from "@owlbear-rodeo/sdk";
+import { Item, Image, Theme } from "@owlbear-rodeo/sdk";
 import { BSCACHE } from "./bsSceneCache";
 
 export function GetGUID(): string
@@ -245,6 +245,21 @@ export function SetThemeMode(theme: Theme, document: Document): void
             }
         }
     }
+}
+
+export function GetImageBounds(item: Image, dpi: any)
+{
+    const dpiScale = dpi / item.grid.dpi;
+    const width = item.image.width * dpiScale * item.scale.x;
+    const height = item.image.height * dpiScale * item.scale.y;
+    const offsetX = (item.grid.offset.x / item.image.width) * width;
+    const offsetY = (item.grid.offset.y / item.image.height) * height;
+    const min = {
+        x: item.position.x - offsetX,
+        y: item.position.y - offsetY,
+    };
+    const max = { x: min.x + width, y: min.y + height };
+    return { min, max };
 }
 
 export function Meta(unit: Item, key: string): any

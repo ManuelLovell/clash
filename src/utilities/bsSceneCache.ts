@@ -16,6 +16,9 @@ class BSCache
     static SCENEGRID = "SCENEGRID";
     static ROOMMETA = "ROOMMETADATA";
 
+    private debouncedOnSceneItemsChange: (items: Item[]) => void;
+    private debouncedOnSceneMetadataChange: (items: Metadata) => void;
+
     playerId: string;
     playerColor: string;
     playerName: string;
@@ -66,6 +69,10 @@ class BSCache
         this.roomMetadata = {};
 
         this.caches = caches;
+
+        // Large singular updates to sceneItems can cause the resulting onItemsChange to proc multiple times, at the same time
+        this.debouncedOnSceneItemsChange = Utilities.Debounce(this.OnSceneItemsChange.bind(this) as any, 100);
+        this.debouncedOnSceneMetadataChange = Utilities.Debounce(this.OnSceneMetadataChanges.bind(this) as any, 100);
     }
 
     public async InitializeCache()
@@ -136,7 +143,7 @@ class BSCache
                 this.sceneMetadataHandler = OBR.scene.onMetadataChange(async (metadata) =>
                 {
                     this.sceneMetadata = metadata;
-                    await this.OnSceneMetadataChanges(metadata);
+                    this.debouncedOnSceneMetadataChange(metadata);
                 });
             }
         }
@@ -148,7 +155,7 @@ class BSCache
                 this.sceneItemsHandler = OBR.scene.items.onChange(async (items) =>
                 {
                     this.sceneItems = items;
-                    await this.OnSceneItemsChange(items);
+                    this.debouncedOnSceneItemsChange(items);
                 });
             }
         }
@@ -240,6 +247,7 @@ class BSCache
         if (this.playerRole === "GM")
         {
             GMVIEW.ShowTurnSelection();
+            GMVIEW.FocusOnCurrentTurnUnit();
         }
         else
         {
@@ -275,7 +283,7 @@ class BSCache
     public async OnSceneReadyChange(ready: boolean)
     {
         this.playerRole === "GM" ? GMVIEW.RenderWaiting(!ready) : PLVIEW.RenderWaiting(!ready);
-        console.log(ready)
+        
         if (ready)
         {
             this.SetupHandlers();
@@ -359,4 +367,4 @@ class BSCache
 };
 
 // Set the handlers needed for this Extension
-export const BSCACHE = new BSCache([BSCache.ROOMMETA, BSCache.SCENEMETA, BSCache.SCENEITEMS, BSCache.PLAYER, BSCache.PARTY]);
+export const BSCACHE = new BSCache([BSCache.ROOMMETA, BSCache.SCENEGRID, BSCache.SCENEMETA, BSCache.SCENEITEMS, BSCache.PLAYER, BSCache.PARTY]);

@@ -47,7 +47,7 @@
 }
 
 html {
-    height: 98%;
+    height: 100%;
 }
 
 body {
@@ -55,7 +55,6 @@ body {
     padding: 5px;
     display: flex;
     height: 98%;
-    margin-bottom: 50px;
     flex-direction: column;
 }
 
@@ -93,10 +92,12 @@ footer {
     bottom: 0;
     height: 40px;
     width: calc(100% - 10px);
-    padding: 0 4px 0 4px;
+    padding-left: 4px;
+    margin-bottom: 4px;
 }
-#ClashPLViewFooter{
-    height: 60px !important;
+
+#ClashPLViewFooter {
+    height: 40px !important;
 }
 
 #footerTable {
@@ -125,6 +126,7 @@ footer {
 #footerTable td {
     width: 16.666%;
 }
+
 #loadingScreenHeader,
 #clash-main-body-loading,
 #roundCounter {
@@ -140,7 +142,7 @@ footer {
 }
 
 .player-footer-row td {
-    padding: 0 20px 0 20px;
+    padding: 0 10px 0 10px;
     text-align: center;
 }
 
@@ -155,6 +157,24 @@ footer {
 /* Initiative List */
 .view-header {
     height: 26px;
+}
+
+/* This appears to be a hack to get the name input to truncate correctly within bounds*/
+.name-cell {
+    max-width: 1px;
+}
+
+#clash-main-body-app {
+    height: calc(100% - 44px);
+    overflow-y: scroll;
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+}
+
+#clash-main-body-app::-webkit-scrollbar {
+    display: none;
 }
 
 table,
@@ -181,7 +201,7 @@ td {
     overflow: hidden;
     white-space: nowrap;
     border-color: red;
-    color: rgb(255, 143, 143);
+    color: rgb(255, 143, 143) !important;
 }
 
 #logContainer,
@@ -261,7 +281,7 @@ td {
 
 /* Unit HP Tags */
 .unit-happy {
-    color: white !important;
+    color: white;
     text-shadow: -1px -1px 1px black,
         1px -1px 1px black,
         -1px 1px 1px black,
@@ -269,7 +289,7 @@ td {
 }
 
 .unit-hurt {
-    color: yellow !important;
+    color: yellow;
     text-shadow: -1px -1px 1px black,
         1px -1px 1px black,
         -1px 1px 1px black,
@@ -277,7 +297,7 @@ td {
 }
 
 .unit-harmed {
-    color: red !important;
+    color: red;
     text-shadow: -1px -1px 1px black,
         1px -1px 1px black,
         -1px 1px 1px black,
@@ -490,7 +510,7 @@ input:checked+.slider:before {
     }
 
     50% {
-        box-shadow: 0 0 5px 2px red;
+        box-shadow: 0 0 8px 4px red;
     }
 
     100% {
@@ -534,24 +554,4 @@ input:checked+.slider:before {
     border-radius: 4px;
     white-space: pre-line;
     z-index: 1;
-}
-
-.unitHappy {
-    color: white !important;
-}
-
-.unitHurt {
-    color: yellow !important;
-    text-shadow: -1px -1px 1px black,
-        1px -1px 1px black,
-        -1px 1px 1px black,
-        1px 1px 1px black;
-}
-
-.unitHarmed {
-    color: red !important;
-    text-shadow: -1px -1px 1px black,
-        1px -1px 1px black,
-        -1px 1px 1px black,
-        1px 1px 1px black;
 }

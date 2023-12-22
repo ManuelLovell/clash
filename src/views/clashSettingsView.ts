@@ -293,7 +293,18 @@ export async function RenderSettings(): Promise<void>
         const counterHtml = document.getElementById("roundCounter")!;
         counterHtml.innerText = `Round: ${GMVIEW.roundCounter}`;
 
-        //await OBR.scene.items.deleteItems([Constants.LABEL]);
+        await OBR.scene.items.updateItems(BSCACHE.sceneItems.filter(item => Utilities.Meta(item, UnitConstants.ONLIST) === true).map(item => item.id), (items) =>
+        {
+            for (let item of items)
+            {
+                item.metadata[UnitConstants.INITIATIVE] = 1;
+            }
+        });
+        await OBR.scene.setMetadata({
+            [SettingsConstants.TURNCOUNT]: GMVIEW.turnCounter,
+            [SettingsConstants.ROUNDCOUNT]: GMVIEW.roundCounter
+        });
+
         GMVIEW.ShowTurnSelection();
     }
     resetClearContainer?.appendChild(resetTurnButton);
@@ -353,7 +364,7 @@ export async function RenderSettings(): Promise<void>
             {
                 case "HIDEHP":
                     await OBR.room.setMetadata({ [SettingsConstants.HIDEHP]: target.checked });
-                    break; 
+                    break;
                 case "HIDEALL":
                     await OBR.room.setMetadata({ [SettingsConstants.HIDEALL]: target.checked });
                     break;

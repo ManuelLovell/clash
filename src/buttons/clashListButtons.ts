@@ -645,7 +645,6 @@ function GetPreviousButton(): HTMLInputElement
                 [SettingsConstants.TURNCOUNT]: GMVIEW.turnCounter,
                 [SettingsConstants.ROUNDCOUNT]: GMVIEW.roundCounter
             });
-            await GMVIEW.FocusOnCurrentTurnUnit();
         }
     }
 
@@ -680,7 +679,6 @@ function GetNextButton(): HTMLInputElement
                 [SettingsConstants.TURNCOUNT]: GMVIEW.turnCounter,
                 [SettingsConstants.ROUNDCOUNT]: GMVIEW.roundCounter
             });
-            await GMVIEW.FocusOnCurrentTurnUnit();
         }
     }
 
@@ -692,8 +690,8 @@ function GetShowRollLogButton(): HTMLInputElement
     const element = document.createElement('input');
     element.type = "button";
     element.id = "showLogButton";
-    element.value = "Show Roll Log"
-    element.title = "Show Roll Log"
+    element.value = "Show Log"
+    element.title = "Show Log"
     element.classList.add("footer-button");
     element.onclick = async function () 
     {

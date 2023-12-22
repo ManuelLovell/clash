@@ -1,7 +1,7 @@
 import OBR, { Text, Item, Image, Label, buildLabel, buildText } from "@owlbear-rodeo/sdk";
 import { Constants, SettingsConstants, UnitConstants } from "./../clashConstants";
 import { ICurrentTurnUnit } from "./../interfaces/current-turn-unit";
-import { Meta, Reta } from "./bsUtilities";
+import { Meta, Reta, GetImageBounds } from './bsUtilities';
 import { BSCACHE } from "./bsSceneCache";
 import { GMVIEW } from "../views/clashGMView";
 import { PLVIEW } from "../views/clashPlayerView";
@@ -91,19 +91,28 @@ export class Labeler
     }
     static GetHPBar(unit: Item): Text
     {
+        const unitImage = unit as Image;
+        const bounds = GetImageBounds(unitImage, BSCACHE.gridDpi);
+
         const unitHealth = this.GetHealthInformation(unit);
         let label;
         if (Reta(SettingsConstants.HPBARNUMBERS) === true)
         {
             // Using NUMBERS
-            label = buildText().plainText(unitHealth.health).fontWeight(900).fillOpacity(.85).fillColor(unitHealth.color).strokeWidth(2).strokeColor("black").strokeOpacity(1).build();
-            label.position = { x: unit.position.x - 85, y: unit.position.y + 25 };
+            label = buildText().plainText(unitHealth.health).fontWeight(900).fillOpacity(.95).fillColor(unitHealth.color).strokeWidth(2).strokeColor("black").strokeOpacity(1).build();
+            label.position = {
+                x: bounds.max.x - ((bounds.max.x - bounds.min.x) / 2) - 30,
+                y: bounds.max.y - 55
+            };
             label.text.style.fontSize = 36;
         }
         else
         {
-            label = buildText().plainText(unitHealth.health).fontWeight(800).fillOpacity(.75).fillColor(unitHealth.color).strokeWidth(1).strokeColor("black").strokeOpacity(1).build();
-            label.position = { x: unit.position.x - 85, y: unit.position.y + 25 };
+            label = buildText().plainText(unitHealth.health).fontWeight(800).fillOpacity(.85).fillColor(unitHealth.color).strokeWidth(1).strokeColor("black").strokeOpacity(1).build();
+            label.position = {
+                x: bounds.max.x - ((bounds.max.x - bounds.min.x) / 2) - 85,
+                y: bounds.max.y - 40
+            };
             label.text.style.fontSize = 24;
         }
         label.id = "LBL" + unit.id.slice(3);

@@ -20,7 +20,7 @@ export class Constants
     static PLUSMATCH = /\s(\+\d+)\s/g;
     static ALPHANUMERICTEXTMATCH = /\s[\da-zA-Z]$/;
 
-    static VERSION = "whatsnew-clash-20";
+    static VERSION = "whatsnew-clash-201";
 
     static MAINAPP = document.querySelector<HTMLDivElement>('#clash-main-body-app') as HTMLDivElement;
     static MAINLOAD = document.querySelector<HTMLDivElement>('#clash-main-body-loading') as HTMLDivElement;
@@ -65,11 +65,9 @@ export class Constants
     <footer id="ClashPLViewFooter">
         <div id="clashPLViewButtons">
             <table id="footerTable" class="no-line-height">
-                <tr>
-                    <td colspan="2" id="roundCounter"></td>
-                </tr>
                 <tr class="player-footer-row">
                     <td id="showLogContainer"></td>
+                    <td id="roundCounter"></td>
                     <td id="disableAutoFocus">
                         <label class="switch" id="settingnoFocusContainer">
                             <span class="slider round"></span>
