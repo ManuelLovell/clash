@@ -1,5 +1,14 @@
-import{O as o,C as n}from"./clashConstants-4a61437d.js";const i=document.querySelector("#clash-whatsnew"),s=document.querySelector("#clash-whatsnew-notes");i.innerHTML=`
+import{O as o,C as a}from"./clashConstants-08a70be2.js";const i=document.querySelector("#clash-whatsnew"),s=document.querySelector("#clash-whatsnew-notes");i.innerHTML=`
   <div id="newsContainer">
+    <h1>Clash! 12/22</h1>
+    Minor bug fixes.
+    </br> - Units showing multiple times on the Initiative List when adding many at once.
+    </br> - HealthBar placement for tokens with various scalings.
+    </br> - Scrollbars showing up odd in settings.
+    </br> - Long initiative lists clipping under the footer buttons.
+    </br> - The "/" missing for HP on the Player List (For their own tokens) when you were hiding enemy information.
+    </br>
+    </br>
     <h1>Clash 2.0! 12/21</h1>
     So you may have noticed things changed. That's good.
     </br>
@@ -146,9 +155,10 @@ import{O as o,C as n}from"./clashConstants-4a61437d.js";const i=document.querySe
     </br>
     If for some reason this doesn't resolve your issues, hop on Discord. There's only so much testing I can do.
   </div>
-`;o.onReady(async()=>{const a=window.location.search,e=new URLSearchParams(a).get("timer");s.innerHTML=`
+`;o.onReady(async()=>{const n=window.location.search,e=new URLSearchParams(n).get("timer");s.innerHTML=`
+    <a href="https://www.patreon.com/battlesystem" target="_blank">Patreon!</a>
     <a href="https://discord.gg/ANZKDmWzr6" target="_blank">Join the OBR Discord!</a>
     <div class="timer" style="--duration: ${e};--size: 34;">
     <div class="mask"></div>
     </div>
-    <div class="close">⤬</div>`;const t=document.querySelector(".close");t.onclick=async()=>{await o.modal.close(n.EXTENSIONWHATSNEW)},setTimeout(()=>{t.click()},+e*1e3)});
+    <div class="close">⤬</div>`;const t=document.querySelector(".close");t.onclick=async()=>{await o.modal.close(a.EXTENSIONWHATSNEW)},setTimeout(()=>{t.click()},+e*1e3)});
