@@ -20,7 +20,7 @@ export class Constants
     static PLUSMATCH = /\s(\+\d+)\s/g;
     static ALPHANUMERICTEXTMATCH = /\s[\da-zA-Z]$/;
 
-    static VERSION = "whatsnew-clash-201";
+    static VERSION = "whatsnew-clash-202";
 
     static MAINAPP = document.querySelector<HTMLDivElement>('#clash-main-body-app') as HTMLDivElement;
     static MAINLOAD = document.querySelector<HTMLDivElement>('#clash-main-body-loading') as HTMLDivElement;

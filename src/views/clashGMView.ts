@@ -64,8 +64,8 @@ class GMView
             Constants.MAINAPP.prepend(warning);
         }
 
-        this.roundCounter = Seta(SettingsConstants.ROUNDCOUNT);
-        this.turnCounter = Seta(SettingsConstants.TURNCOUNT);
+        this.roundCounter = Seta(SettingsConstants.ROUNDCOUNT) ?? 1;
+        this.turnCounter = Seta(SettingsConstants.TURNCOUNT) ?? 0;
         RenderSettings();
         RenderRollLog();
 
@@ -97,7 +97,7 @@ class GMView
 
         // Always Include Initiative and Name - Add the rest based on Settings
         const useColumns = ["INIT"];
-        if (BSCACHE.roomMetadata[SettingsConstants.ROLLERROW]) useColumns.push("ROLL");
+        if (BSCACHE.roomMetadata[SettingsConstants.ROLLERROW] ?? true) useColumns.push("ROLL");
         useColumns.push("NAME");
         if (BSCACHE.roomMetadata[SettingsConstants.HPROW] ?? true) useColumns.push("HP");
         if (BSCACHE.roomMetadata[SettingsConstants.TEMPHPROW]) useColumns.push("TEMPHP");
@@ -220,6 +220,7 @@ class GMView
             // Always have Name
             const nameCell = row.insertCell(cellNumber);
             const nameToggle = GetNameInput(unit);
+            if (unit.visible === false) nameToggle.value = "(Hidden) " + nameToggle.value;
             nameCell.appendChild(nameToggle);
             nameCell.classList.add("name-cell");
             cellNumber++;

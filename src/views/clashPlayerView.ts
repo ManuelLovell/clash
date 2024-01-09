@@ -44,8 +44,8 @@ class PlayerView
         this.viewFooter = document.querySelector("#clashPLViewButtons") as HTMLDivElement;
         this.viewCounter = document.querySelector("#roundCounterContainer") as HTMLDivElement;
 
-        this.roundCounter = Seta(SettingsConstants.ROUNDCOUNT);
-        this.turnCounter = Seta(SettingsConstants.TURNCOUNT);
+        this.roundCounter = Seta(SettingsConstants.ROUNDCOUNT) ?? 1;
+        this.turnCounter = Seta(SettingsConstants.TURNCOUNT) ?? 0;
 
         this.DISABLEMYFOCUS = `${Constants.EXTENSIONID}/setting_disablefocus_${BSCACHE.playerId}`;
 
@@ -69,7 +69,7 @@ class PlayerView
 
         // Always Include Initiative and Name - Add the rest based on Settings
         const useColumns = ["INIT"];
-        if (BSCACHE.roomMetadata[SettingsConstants.ROLLERROW]) useColumns.push("ROLL");
+        if (BSCACHE.roomMetadata[SettingsConstants.ROLLERROW] ?? true) useColumns.push("ROLL");
         useColumns.push("NAME");
         if (BSCACHE.roomMetadata[SettingsConstants.HPROW] ?? true) useColumns.push("HP");
         if (BSCACHE.roomMetadata[SettingsConstants.TEMPHPROW]) useColumns.push("TEMPHP");

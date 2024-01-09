@@ -8,6 +8,14 @@ const footer = document.querySelector<HTMLElement>('#clash-whatsnew-notes')!;
 
 whatsnew.innerHTML = `
   <div id="newsContainer">
+    <h1>Clash! 1/8</h1>
+    Minor change.
+    </br> - Hidden units will now say "(Hidden)" in the Initiative List for the GM.
+    </br>
+    More bug fixes.
+    </br> - When loading into a fresh room, some settings weren't initializing correctly. Turn/Round counter - which wouldn't increment until you refreshed. The Roller column, which you would need to toggle off/on. Label-Text, which.. would just throw an error. Oops.  This was all corrected.
+    </br>
+    </br>
     <h1>Clash! 12/22</h1>
     Minor bug fixes.
     </br> - Units showing multiple times on the Initiative List when adding many at once.
