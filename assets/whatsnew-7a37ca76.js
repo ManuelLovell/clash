@@ -1,5 +1,13 @@
-import{O as o,C as a}from"./clashConstants-08a70be2.js";const i=document.querySelector("#clash-whatsnew"),s=document.querySelector("#clash-whatsnew-notes");i.innerHTML=`
+import{O as o,C as i}from"./clashConstants-70e708b2.js";const a=document.querySelector("#clash-whatsnew"),s=document.querySelector("#clash-whatsnew-notes");a.innerHTML=`
   <div id="newsContainer">
+    <h1>Clash! 1/8</h1>
+    Minor change.
+    </br> - Hidden units will now say "(Hidden)" in the Initiative List for the GM.
+    </br>
+    More bug fixes.
+    </br> - When loading into a fresh room, some settings weren't initializing correctly. Turn/Round counter - which wouldn't increment until you refreshed. The Roller column, which you would need to toggle off/on. Label-Text, which.. would just throw an error. Oops.  This was all corrected.
+    </br>
+    </br>
     <h1>Clash! 12/22</h1>
     Minor bug fixes.
     </br> - Units showing multiple times on the Initiative List when adding many at once.
@@ -161,4 +169,4 @@ import{O as o,C as a}from"./clashConstants-08a70be2.js";const i=document.querySe
     <div class="timer" style="--duration: ${e};--size: 34;">
     <div class="mask"></div>
     </div>
-    <div class="close">⤬</div>`;const t=document.querySelector(".close");t.onclick=async()=>{await o.modal.close(a.EXTENSIONWHATSNEW)},setTimeout(()=>{t.click()},+e*1e3)});
+    <div class="close">⤬</div>`;const t=document.querySelector(".close");t.onclick=async()=>{await o.modal.close(i.EXTENSIONWHATSNEW)},setTimeout(()=>{t.click()},+e*1e3)});
