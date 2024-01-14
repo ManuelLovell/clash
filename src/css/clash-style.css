@@ -13,7 +13,7 @@
     -webkit-text-size-adjust: 100%;
 
     --OBR-font: white;
-    --OBR-font-transparent: rgba(255, 255, 255, 0.493)e;
+    --OBR-font-transparent: rgba(255, 255, 255, 0.493);
     --OBR-offset-foreground: rgb(230, 230, 238);
     --OBR-offset-background: rgb(49, 49, 65);
     --OBR-light-blue: rgb(60, 62, 75);
@@ -204,7 +204,6 @@ td {
     color: rgb(255, 143, 143) !important;
 }
 
-#logContainer,
 .chalk-border {
     border-color: #ffffff;
     border-radius: 5px;
@@ -316,23 +315,26 @@ td {
     max-height: 100%;
 }
 
-/* Roll Log */
 #logContainer {
+    height: calc(100% - 50px);
+    width: calc(100% - 12px);
     border: 1px solid var(--OBR-font);
     border-radius: 6px;
-    height: calc(100% - 50px);
+    background-color: var(--OBR-dark-blue-transparent);
+    margin:5px;
 }
 
 .roll-log {
+    flex-direction: column-reverse;
+    font-size: .85em;
     overflow-y: scroll;
     overflow-x: hidden;
     display: flex;
-    flex-direction: column-reverse;
-    margin: 5px;
-    padding: 5px;
-    border-radius: 16px;
-    width: 95%;
-    background-color: var(--OBR-dark-blue-trans);
+    height: 100%;
+    width: 100%;
+    color: var(--OBR-font);
+    background-color: var(--OBR-dark-blue-transparent);
+    border-radius: 6px;
 }
 
 .roll-log::-webkit-scrollbar {

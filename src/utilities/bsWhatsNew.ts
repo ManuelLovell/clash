@@ -8,6 +8,10 @@ const footer = document.querySelector<HTMLElement>('#clash-whatsnew-notes')!;
 
 whatsnew.innerHTML = `
   <div id="newsContainer">
+    <h1>Clash! 1/13</h1>
+    Minor bug fix.
+    </br> - The stylings on the roll log were all wrong, causing it to look funky when there was a lot of information.
+    </br>
     <h1>Clash! 1/8</h1>
     Minor change.
     </br> - Hidden units will now say "(Hidden)" in the Initiative List for the GM.

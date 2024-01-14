@@ -1,5 +1,6 @@
 export class Constants
 {
+    static VERSION = "whatsnew-clash-203";
     static EXTENSIONID = "com.battle-system.clash";
     static DISCORDID = "com.battle-system.discord";
     static DICEWINDOW = "com.battle-system.dicewindow";
@@ -20,7 +21,6 @@ export class Constants
     static PLUSMATCH = /\s(\+\d+)\s/g;
     static ALPHANUMERICTEXTMATCH = /\s[\da-zA-Z]$/;
 
-    static VERSION = "whatsnew-clash-202";
 
     static MAINAPP = document.querySelector<HTMLDivElement>('#clash-main-body-app') as HTMLDivElement;
     static MAINLOAD = document.querySelector<HTMLDivElement>('#clash-main-body-loading') as HTMLDivElement;
