@@ -1,5 +1,14 @@
-import{O as o,C as i}from"./clashConstants-007e0ed7.js";const a=document.querySelector("#clash-whatsnew"),s=document.querySelector("#clash-whatsnew-notes");a.innerHTML=`
+import{O as o,C as i}from"./clashConstants-bee93a06.js";const a=document.querySelector("#clash-whatsnew"),s=document.querySelector("#clash-whatsnew-notes");a.innerHTML=`
   <div id="newsContainer">
+    <h1>Clash! 1/14</h1>
+    Minor bug fixes.
+    </br> - The current unit wasn't being reset when changing scenes, resulting in your camera going off to look for it when swapping scenes. This was fixed.
+    </br> - Also the initiative list turn tracker wasn't displaying correctly if you loaded into a scene with only one unit. Also fixed.
+    </br>
+    </br>
+    Okay now back to 'taking a break' and 'not updating things' like I said for this week.
+    </br>
+    </br>
     <h1>Clash! 1/13</h1>
     Minor bug fix.
     </br> - The stylings on the roll log were all wrong, causing it to look funky when there was a lot of information.
