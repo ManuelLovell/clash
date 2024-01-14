@@ -229,6 +229,8 @@ class BSCache
             this.sceneReadyHandler = OBR.scene.onReadyChange(async (ready) =>
             {
                 this.sceneReady = ready;
+                if (this.playerRole === "GM") GMVIEW.currentTurnUnit = undefined;
+                else PLVIEW.currentTurnUnit = undefined;
 
                 if (ready)
                 {

@@ -280,7 +280,7 @@ class GMView
     public ShowTurnSelection(): void
     {
         const table = <HTMLTableElement>document.getElementById("clashGMViewBody");
-        if (table && table.rows?.length > 1)
+        if (table && table.rows?.length > 0)
         {
             for (var i = 0, row; row = table.rows[i]; i++)
             {
