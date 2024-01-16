@@ -1,5 +1,10 @@
-import{O as o,C as i}from"./clashConstants-bee93a06.js";const a=document.querySelector("#clash-whatsnew"),s=document.querySelector("#clash-whatsnew-notes");a.innerHTML=`
+import{O as o,C as i}from"./clashConstants-74e65b6c.js";const a=document.querySelector("#clash-whatsnew"),s=document.querySelector("#clash-whatsnew-notes");a.innerHTML=`
   <div id="newsContainer">
+    <h1>Clash! 1/16</h1>
+    Minor bug fixes.
+    </br> - Group adding tokens to initiative wasn't filtering out non character/mounts properly.
+    </br>
+    </br>
     <h1>Clash! 1/14</h1>
     Minor bug fixes.
     </br> - The current unit wasn't being reset when changing scenes, resulting in your camera going off to look for it when swapping scenes. This was fixed.
