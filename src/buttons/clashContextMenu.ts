@@ -32,17 +32,19 @@ export function SetupContextMenu()
         ],
         async onClick(context)
         {
-            const removeFromInitiative = context.items.every(
+            const filteredItems = context.items.filter(item => item.layer === "CHARACTER" || item.layer === "MOUNT");
+
+            const removeFromInitiative = filteredItems.every(
                 (item) => item.metadata[UnitConstants.ONLIST] === true
             );
-            const contextImages = context.items.filter(item => isImage(item)) as Image[];
+            const contextImages = filteredItems.filter(item => isImage(item)) as Image[];
 
             if (removeFromInitiative)
             {
-                const deleteBars = context.items.map(x => x.id + "_hpbar");
+                const deleteBars = filteredItems.map(x => x.id + "_hpbar");
                 await OBR.scene.items.deleteItems(deleteBars);
 
-                await OBR.scene.items.updateItems(context.items, (items) =>
+                await OBR.scene.items.updateItems(filteredItems, (items) =>
                 {
                     for (let item of items)
                     {
@@ -135,10 +137,11 @@ export function SetupContextMenu()
         ],
         async onClick(context, elementId: string)
         {
-            if (context.items.length == 1)
+            const filteredItems = context.items.filter(item => item.layer === "CHARACTER" || item.layer === "MOUNT");
+            if (filteredItems.length == 1)
             {
                 const metadataPack: Metadata[] = [];
-                const unit = context.items[0] as Image;
+                const unit = filteredItems[0] as Image;
                 const uName = unit.text?.plainText || unit.name;
 
                 // If there's no ID, make a blank stat block
@@ -187,7 +190,7 @@ export function SetupContextMenu()
             {
                 const metadataPack: Metadata[] = [];
                 // Go through the list and make sure everyone is in the DB first
-                for (const item of context.items)
+                for (const item of filteredItems)
                 {
                     const unit = item as Image;
                     const uName = unit.text?.plainText || unit.name;
@@ -221,7 +224,7 @@ export function SetupContextMenu()
                     }
                 };
 
-                await OBR.scene.items.updateItems(context.items, (items) =>
+                await OBR.scene.items.updateItems(filteredItems, (items) =>
                 {
                     for (let item of items)
                     {
@@ -239,7 +242,7 @@ export function SetupContextMenu()
 
                 await OBR.popover.open({
                     id: Constants.EXTENSIONSUBMENUID,
-                    url: `/submenu/subindex.html?unitid=${context.items.map(item => item.id)}&multi=true`,
+                    url: `/submenu/subindex.html?unitid=${filteredItems.map(item => item.id)}&multi=true`,
                     height: viewableHeight,
                     width: 350,
                     anchorElementId: elementId,

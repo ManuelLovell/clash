@@ -8,6 +8,11 @@ const footer = document.querySelector<HTMLElement>('#clash-whatsnew-notes')!;
 
 whatsnew.innerHTML = `
   <div id="newsContainer">
+    <h1>Clash! 1/16</h1>
+    Minor bug fixes.
+    </br> - Group adding tokens to initiative wasn't filtering out non character/mounts properly.
+    </br>
+    </br>
     <h1>Clash! 1/14</h1>
     Minor bug fixes.
     </br> - The current unit wasn't being reset when changing scenes, resulting in your camera going off to look for it when swapping scenes. This was fixed.
