@@ -1,5 +1,24 @@
-import{O as o,C as i}from"./clashConstants-74e65b6c.js";const a=document.querySelector("#clash-whatsnew"),s=document.querySelector("#clash-whatsnew-notes");a.innerHTML=`
+import{O as e,C as o}from"./clashConstants-aaa6175c.js";const n=document.querySelector("#clash-whatsnew"),i=document.querySelector("#clash-whatsnew-notes");n.innerHTML=`
   <div id="newsContainer">
+    <h1>Clash! 1/20</h1>
+    GameJam was a bust. Life consumed too much free time, so we'll try again next month.
+    </br>
+    Changes!
+    <li> I fixed the instant-refresh on roller text. So you should not have to save/refresh to see the results for adding rolls to statblocks. Instant (Just click off the element)!
+    <li> Removed some of the strictness on toHit-rolls. So '+9' should format for a roll just fine, and not just ' +9 '.
+    <li> Added a ChatGPT Template button to the 'Import Custom JSON' button.
+    </br> This will copy a template to your clipboard that you can paste into ChatGPT, and just swap the word '<BLANK>' with whatever you want. And it'll give you some Clash JSON.
+    </br> I've been using this for awhile, so it seemed smart to share as it's pretty simple and speeds up prep work by alot.  I've used this for custom creatures by saying, "Give me a ROBOT NINJA" and I've used it for converting stat blocks from Lamenting Lighthouse.
+    <li> Added Discord logging directly to Clash. You no longer need to do this through Rumble! (In case you don't want to use Rumble!) Find it in Settings.
+    </br>
+    </br>
+    Minor bug fixes.
+    <li> Fixed the double-render of the list on the player-end. No more duplicate entries.
+    <li> Fixed the turn-marker just not showing. Oops.
+    <li> Fixed the HP Bar/Numbers staying after a token was deleted. This was dependent on who-deleted it before.. so just added better garbage collection.
+    <li> Fixed the turn indication on the list not showing if the list only had one unit.
+    </br>
+    </br>
     <h1>Clash! 1/16</h1>
     Minor bug fixes.
     </br> - Group adding tokens to initiative wasn't filtering out non character/mounts properly.
@@ -181,10 +200,7 @@ import{O as o,C as i}from"./clashConstants-74e65b6c.js";const a=document.querySe
     </br>
     If for some reason this doesn't resolve your issues, hop on Discord. There's only so much testing I can do.
   </div>
-`;o.onReady(async()=>{const n=window.location.search,e=new URLSearchParams(n).get("timer");s.innerHTML=`
+`;e.onReady(async()=>{i.innerHTML=`
     <a href="https://www.patreon.com/battlesystem" target="_blank">Patreon!</a>
     <a href="https://discord.gg/ANZKDmWzr6" target="_blank">Join the OBR Discord!</a>
-    <div class="timer" style="--duration: ${e};--size: 34;">
-    <div class="mask"></div>
-    </div>
-    <div class="close">⤬</div>`;const t=document.querySelector(".close");t.onclick=async()=>{await o.modal.close(i.EXTENSIONWHATSNEW)},setTimeout(()=>{t.click()},+e*1e3)});
+    <div class="close"><img style="height:40px; width:40px;" src="/close-button.svg"</div>`;const t=document.querySelector(".close");t.onclick=async()=>{await e.modal.close(o.EXTENSIONWHATSNEW)}});
