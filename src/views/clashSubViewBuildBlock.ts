@@ -228,7 +228,6 @@ export function BuildUnitStatBlock(clashUnit: UnitInfo)
         SetupDamageRollables(targetElement);
 
         SetupAttackRollables(targetElement);
-        console.log(blurredDescription);
     };
 
     AppendAddActionButtons();
