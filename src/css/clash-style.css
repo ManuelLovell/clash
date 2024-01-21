@@ -234,6 +234,15 @@ td {
     filter: var(--invert);
 }
 
+.discord {
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
+    padding-top: 6px;
+    padding-left: 15px;
+    display: none;
+}
+
 .no-line-height {
     line-height: 1;
 }
@@ -321,7 +330,7 @@ td {
     border: 1px solid var(--OBR-font);
     border-radius: 6px;
     background-color: var(--OBR-dark-blue-transparent);
-    margin:5px;
+    margin: 5px;
 }
 
 .roll-log {
@@ -556,4 +565,42 @@ input:checked+.slider:before {
     border-radius: 4px;
     white-space: pre-line;
     z-index: 1;
+}
+
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    25%,
+    75% {
+        transform: translateX(-5px);
+    }
+
+    50% {
+        transform: translateX(5px);
+    }
+}
+
+.shake-input {
+    animation: shake 0.5s ease-in-out;
+    border-color: red;
+}
+
+@keyframes flash {
+
+    0%,
+    100% {
+        border-color: inherit;
+    }
+
+    50% {
+        border-color: green;
+    }
+}
+
+.flash-input {
+    animation: flash 1s ease;
 }

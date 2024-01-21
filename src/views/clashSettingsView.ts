@@ -125,6 +125,11 @@ export async function RenderSettings(): Promise<void>
                 ${CreateSlider("DICEEVERYONE")}
                 Enable Showing Text Results to All
             </div>
+            <div title="This sends the results of all rolls to the specified Discord channel/hook.">
+                ${CreateSlider("DISCORDHOOK")}
+                Enable Discord Logging
+            </div>
+                <span style="display:flex;">Discord Hook <div id="discordHookContainer" style="padding-left: 6px;"></div><embed id="discordIcon" class="discord" src="/discord2.svg" /></span>
             <footer>
                 <span id="settingsReturnContainer"></span>
             </footer>
@@ -143,6 +148,7 @@ export async function RenderSettings(): Promise<void>
     SetCheckbox("VISUALDICE", Reta(SettingsConstants.VISUALDICE) ? true : false);
     SetCheckbox("DICENOTIFICATION", Reta(SettingsConstants.DICENOTIFICATION) ? true : false);
     SetCheckbox("DICEEVERYONE", Reta(SettingsConstants.DICEEVERYONE) ? true : false);
+    SetCheckbox("DISCORDHOOK", Reta(SettingsConstants.DISCORDHOOK) ?? false);
 
     SetCheckbox("HPROW", Reta(SettingsConstants.HPROW) ?? true);
     SetCheckbox("TEMPHPROW", Reta(SettingsConstants.TEMPHPROW) ? true : false);
@@ -167,6 +173,56 @@ export async function RenderSettings(): Promise<void>
         await OBR.room.setMetadata({ [SettingsConstants.TURNTEXT]: target.value });
     };
     turnLabelTextContainer?.appendChild(textLabelButton);
+
+    //Create Discord Hook Input
+    const discordIcon = document.getElementById('discordIcon')!;
+    if (Reta(SettingsConstants.DISCORDURL)) discordIcon.style.display = "block";
+
+    const discordHookContainer = document.getElementById("discordHookContainer");
+    const discordHookInput = document.createElement('input');
+    discordHookInput.type = "text";
+    discordHookInput.id = "discordHookInput";
+    discordHookInput.title = "Add your Discord Webhook"
+    discordHookInput.placeholder = "Add your channel hook..";
+    discordHookInput.maxLength = 200;
+    discordHookInput.value = BSCACHE.roomMetadata[SettingsConstants.DISCORDURL] as string ?? "";
+    discordHookInput.size = 18;
+    discordHookInput.onblur = async (event: Event) =>
+    {
+        const target = event.currentTarget as HTMLInputElement;
+
+        if (target.value
+            && (target.value.startsWith('https://discord.com/api/webhook')
+                || target.value.startsWith('https://discordapp.com/api/webhook')))
+        {
+            // Valid
+            target.classList.add('flash-input');
+            await OBR.room.setMetadata({ [SettingsConstants.DISCORDURL]: target.value });
+            setTimeout(() =>
+            {
+                target.classList.remove('flash-input');
+                discordIcon.style.display = "block";
+            }, 1000);
+        }
+        else
+        {
+            // Invalid
+            target.classList.add('shake-input');
+            target.value = "Invalid/Clearing URL";
+            if (Reta(SettingsConstants.DISCORDURL))
+            {
+                await OBR.room.setMetadata({ [SettingsConstants.DISCORDURL]: undefined });
+            }
+
+            setTimeout(() =>
+            {
+                target.classList.remove('shake-input');
+                target.value = "";
+                discordIcon.style.display = "none";
+            }, 1000);
+        }
+    };
+    discordHookContainer?.appendChild(discordHookInput);
 
     //Create Import ALL Button
     const importAllContainer = document.getElementById("importAllContainer");
@@ -397,6 +453,9 @@ export async function RenderSettings(): Promise<void>
                     break;
                 case "DICEEVERYONE":
                     await OBR.room.setMetadata({ [SettingsConstants.DICEEVERYONE]: target.checked });
+                    break;
+                case "DISCORDHOOK":
+                    await OBR.room.setMetadata({ [SettingsConstants.DISCORDHOOK]: target.checked });
                     break;
                 case "HPROW":
                     await OBR.room.setMetadata({ [SettingsConstants.HPROW]: target.checked });

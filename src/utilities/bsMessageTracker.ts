@@ -32,7 +32,7 @@ export class MessageTracker
             return false;
         }
     }
-    
+
     public async HandleMessage(metadata: Metadata)
     {
         const chatLog = document.querySelector<HTMLDivElement>('#rollLog')!;

@@ -4,6 +4,7 @@ import { BSCACHE } from "../utilities/bsSceneCache";
 import { ConfigureViewFooterPlayerButtons, GetACHeader, GetArmorInput, GetHPHeader, GetInitativeHeader, GetInitiativeInput, GetMaxHPInput, GetMinHPInput, GetMoveHeader, GetMoveInput, GetNameHeader, GetNameInput, GetRollInput, GetRollerHeader, GetTempHPHeader, GetTempHPInput, GetWhatsNewHeader, RenderRollLog } from "../buttons/clashListButtons";
 import { Meta, Reta, Seta, HexToRgba } from "../utilities/bsUtilities";
 import { ViewportFunctions } from "../utilities/bsViewport";
+import { Labeler } from "../utilities/clashLabeler";
 
 class PlayerView
 {
@@ -90,14 +91,8 @@ class PlayerView
         }
 
         //Clear the table
-        while (this.viewHeader!.rows.length > 0)
-        {
-            this.viewHeader!.deleteRow(0);
-        }
-        while (this.viewBody!?.rows.length > 0)
-        {
-            this.viewBody!.deleteRow(0);
-        }
+        this.viewHeader!.innerHTML = "";
+        this.viewBody!.innerHTML = ""; 
 
         // Add the Table Header
         const row = this.viewHeader!.insertRow(-1);
@@ -289,7 +284,7 @@ class PlayerView
     public ShowTurnSelection(): void
     {
         const table = this.viewBody;
-        if (table && table.rows?.length > 1)
+        if (table && table.rows?.length > 0)
         {
             for (var i = 0, row; row = table.rows[i]; i++)
             {
@@ -315,14 +310,20 @@ class PlayerView
                 counterHtml.innerText = `Round: ${this.roundCounter}`;
             }
         }
+        else
+        {
+            // There's no one on the list
+            this.currentTurnUnit = undefined;
+        }
     }
 
-    public FocusOnCurrentTurnUnit(): void
+    public async FocusOnCurrentTurnUnit(): Promise<void>
     {
         if (BSCACHE.roomMetadata[this.DISABLEMYFOCUS] === true && this.currentTurnUnit)
         {
-            ViewportFunctions.CenterViewportOnImage(this.currentTurnUnit);
+            await ViewportFunctions.CenterViewportOnImage(this.currentTurnUnit);
         }
+        await Labeler.UpdateLabel();
     }
 
     public Disable(input: HTMLInputElement, myUnit: boolean): void

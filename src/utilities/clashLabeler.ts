@@ -17,9 +17,9 @@ export class Labeler
         const currentUnit = BSCACHE.playerRole === "GM" ? GMVIEW.currentTurnUnit : PLVIEW.currentTurnUnit;
         const labelItemExists = await OBR.scene.local.getItems([Constants.LABEL]);
 
-        if (currentUnit === undefined) return;
+        await Labeler.CleanupHPBars();
 
-        if (disableLabel)
+        if (disableLabel || currentUnit === undefined)
         {
             if (labelItemExists)
             {
@@ -60,6 +60,28 @@ export class Labeler
                         }
                     }
                 );
+            }
+        }
+    }
+
+    public static async CleanupHPBars(): Promise<void>
+    {
+        const existingBars = await OBR.scene.local.getItems(x => x.metadata[UnitConstants.HPBAR] === true);
+        if (existingBars.length > 0)
+        {
+            const deleteThese: string[] = [];
+            for (const bar of existingBars)
+            {
+                const parentStillExists = BSCACHE.sceneItems.some(item => item.id === bar.attachedTo);
+
+                if (!parentStillExists)
+                {
+                    deleteThese.push(bar.id);
+                }
+            }
+            if (deleteThese.length > 0)
+            {
+                await OBR.scene.local.deleteItems(deleteThese);
             }
         }
     }

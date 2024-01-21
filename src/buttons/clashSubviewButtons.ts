@@ -192,6 +192,9 @@ export function AppendUnitSaveButton(): void
                     };
                 });
         }
+        // Test
+        SUBVIEW.SUBMAINCARD.innerHTML = "";
+        SUBVIEW.RenderUnitInfo()
     }
     saveButton.src = "/save.svg";
     saveButton.title = "Save Changes";
@@ -394,7 +397,7 @@ export function AppendAddActionButtons(): void
         //Add a blank action
         const legendCollection = <HTMLElement>document.getElementById("formLegendaryCollection");
         const baseLegendHtml = `<div id="formLegendaryContainer" class="Legendary"><span id="formLegendaryName" class="legendaryname" contentEditable="true">Legend-Name.</span>.
-                <span id="formLegendaryDesc" class="description" contentEditable="true">Legend-Desc</span></div>`;
+                <span id="formLegendaryDesc" class="description" onblur="handleBlur(event)" contentEditable="true">Legend-Desc</span></div>`;
         legendCollection.insertAdjacentHTML('beforeend', baseLegendHtml);
     }
     addLegendaryButton.src = "/add.svg";
@@ -416,7 +419,7 @@ export function AppendAddActionButtons(): void
         //Add a blank action
         const reactCollection = <HTMLElement>document.getElementById("formReactionCollection");
         const baseReactHtml = `<div id="formReactionContainer" class="Reaction"><span id="formReactionName" class="reactionname" contentEditable="true">React-Name.</span>.
-                <span id="formReactionDesc" class="description" contentEditable="true">React-Desc</span></div>`;
+                <span id="formReactionDesc" class="description" onblur="handleBlur(event)" contentEditable="true">React-Desc</span></div>`;
         reactCollection.insertAdjacentHTML('beforeend', baseReactHtml);
     }
     addReactionButton.src = "/add.svg";
@@ -438,7 +441,7 @@ export function AppendAddActionButtons(): void
         //Add a blank action
         const attackCollection = <HTMLElement>document.getElementById("formAttackCollection");
         const baseAttackHtml = `<div id="formAttackContainer" class="attack"><span id="formAttackName" class="attackname" contentEditable="true">Atk-Name.</span>.
-                <span id="formAttackDesc" class="description" contentEditable="true">Atk-Desc</span></div>`;
+                <span id="formAttackDesc" class="description" onblur="handleBlur(event)" contentEditable="true">Atk-Desc</span></div>`;
         attackCollection.insertAdjacentHTML('beforeend', baseAttackHtml);
     }
     addAttackButton.src = "/add.svg";
@@ -461,7 +464,7 @@ export function AppendAddActionButtons(): void
         //Add a blank ability
         const abilityCollection = <HTMLElement>document.getElementById("formAbilityCollection");
         const baseabilityHtml = `<div id="formAbilityContainer" class="ability"><span id="formAbilityName" class="abilityname" contentEditable="true">Act-Name.</span>.
-                <span id="formAbilityDesc" class="description" contentEditable="true">Act-Desc</span></div>`;
+                <span id="formAbilityDesc" class="description" onblur="handleBlur(event)" contentEditable="true">Act-Desc</span></div>`;
         abilityCollection.insertAdjacentHTML('beforeend', baseabilityHtml);
     }
     addAbilityButton.src = "/add.svg";
@@ -483,7 +486,7 @@ export function AppendAddActionButtons(): void
         //Add a blank SPELL
         const abilityCollection = <HTMLElement>document.getElementById("formSpellCollection");
         const baseabilityHtml = `<div id="formSpellContainer" class="spell"><span id="formSpellName" class="spellname" contentEditable="true">Spell-Name.</span>.
-                <span id="formSpellDesc" class="description" contentEditable="true">Spell-Desc</span></div>`;
+                <span id="formSpellDesc" class="description" onblur="handleBlur(event)" contentEditable="true">Spell-Desc</span></div>`;
         abilityCollection.insertAdjacentHTML('beforeend', baseabilityHtml);
     }
     addSpellButton.src = "/add.svg";

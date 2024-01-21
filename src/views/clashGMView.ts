@@ -120,7 +120,7 @@ class GMView
 
         //Clear the table
         this.viewHeader!.innerHTML = "";
-        this.viewBody!.innerHTML = ""; 
+        this.viewBody!.innerHTML = "";
 
         // Add the Table Header
         const row = this.viewHeader!.insertRow(-1);
@@ -306,15 +306,21 @@ class GMView
                 counterHtml.innerText = `Round: ${this.roundCounter}`;
             }
         }
+        else
+        {
+            // There's no one on the list
+            this.currentTurnUnit = undefined;
+        }
     }
 
     public async FocusOnCurrentTurnUnit(): Promise<void>
     {
-        if (BSCACHE.playerRole === "GM"
-            && BSCACHE.roomMetadata[SettingsConstants.DISABLEFOCUS] !== true
-            && this.currentTurnUnit)
+        if (BSCACHE.playerRole === "GM")
         {
-            await ViewportFunctions.CenterViewportOnImage(this.currentTurnUnit);
+            if (this.currentTurnUnit && BSCACHE.roomMetadata[SettingsConstants.DISABLEFOCUS] !== true)
+            {
+                await ViewportFunctions.CenterViewportOnImage(this.currentTurnUnit);
+            }
             await Labeler.UpdateLabel();
         }
     }

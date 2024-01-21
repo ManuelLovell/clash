@@ -68,7 +68,7 @@ export function BuildUnitStatBlock(clashUnit: UnitInfo)
         {
             unitAbilitiesHtml += `<div id="formAbilityContainer" class="Ability">`;
             unitAbilitiesHtml += `<span id="formAbilityName" class="ability-name" contentEditable="true">${action.name}</span>.  `;
-            unitAbilitiesHtml += `<span id="formAbilityDesc" class="description" contentEditable="true">${SetClassOnRollable(action.desc!)}</span>`;
+            unitAbilitiesHtml += `<span id="formAbilityDesc" class="description" onblur="handleBlur(event)" contentEditable="true">${SetClassOnRollable(action.desc!)}</span>`;
             unitAbilitiesHtml += `</div>`;
         }
     }
@@ -82,7 +82,7 @@ export function BuildUnitStatBlock(clashUnit: UnitInfo)
         {
             unitActionsHtml += `<div id="formAttackContainer" class="attack">`;
             unitActionsHtml += `<span id="formAttackName" class="attack-name" contentEditable="true">${action.name}</span>.  `;
-            unitActionsHtml += `<span id="formAttackDesc" class="description" contentEditable="true">${SetClassOnRollable(action.desc!)}</span>`;
+            unitActionsHtml += `<span id="formAttackDesc" class="description" onblur="handleBlur(event)" contentEditable="true">${SetClassOnRollable(action.desc!)}</span>`;
             unitActionsHtml += `</div>`;
         }
     }
@@ -96,7 +96,7 @@ export function BuildUnitStatBlock(clashUnit: UnitInfo)
         {
             unitReactionsHtml += `<div id="formReactionContainer" class="Reaction">`;
             unitReactionsHtml += `<span id="formReactionName" class="reaction-name" contentEditable="true">${action.name}</span>.  `;
-            unitReactionsHtml += `<span id="formReactionDesc" class="description" contentEditable="true">${SetClassOnRollable(action.desc!)}</span>`;
+            unitReactionsHtml += `<span id="formReactionDesc" class="description" onblur="handleBlur(event)" contentEditable="true">${SetClassOnRollable(action.desc!)}</span>`;
             unitReactionsHtml += `</div>`;
         }
     }
@@ -110,7 +110,7 @@ export function BuildUnitStatBlock(clashUnit: UnitInfo)
         {
             unitLegendaryHtml += `<div id="formLegendaryContainer" class="Legendary">`;
             unitLegendaryHtml += `<span id="formLegendaryName" class="legendary-name" contentEditable="true">${action.name}</span>.  `;
-            unitLegendaryHtml += `<span id="formLegendaryDesc" class="description" contentEditable="true">${SetClassOnRollable(action.desc!)}</span>`;
+            unitLegendaryHtml += `<span id="formLegendaryDesc" class="description" onblur="handleBlur(event)" contentEditable="true">${SetClassOnRollable(action.desc!)}</span>`;
             unitLegendaryHtml += `</div>`;
         }
     }
@@ -124,7 +124,7 @@ export function BuildUnitStatBlock(clashUnit: UnitInfo)
         {
             unitSpellsHtml += `<div id="formSpellContainer" class="attack">`;
             unitSpellsHtml += `<span id="formSpellName" class="attack-name" contentEditable="true">${action.name}</span>.  `;
-            unitSpellsHtml += `<span id="formSpellDesc" class="description" contentEditable="true">${SetClassOnRollable(action.desc!)}</span>`;
+            unitSpellsHtml += `<span id="formSpellDesc" class="description" onblur="handleBlur(event)" contentEditable="true">${SetClassOnRollable(action.desc!)}</span>`;
             unitSpellsHtml += `</div>`;
         }
     }
@@ -219,22 +219,17 @@ export function BuildUnitStatBlock(clashUnit: UnitInfo)
         };
     });
 
-    // Wont work with new items added in, probably best to just refresh form.
-    // SUBVIEW.SUBMAINCARD.onblur = (event) =>
-    // {
-    //     const targetElement = event.target as HTMLDivElement;
+    (window as any).handleBlur = (event: any) =>
+    {
+        const targetElement = event.target as HTMLDivElement;
+        const blurredDescription = targetElement.innerText;
+        targetElement.innerHTML = SetClassOnRollable(blurredDescription);
 
-    //     if (targetElement.classList.contains('description'))
-    //     {
-    //         // Description was selected, but is no longer.
-    //         const blurredDescription = targetElement.innerText;
-    //         targetElement.innerHTML = SetClassOnRollable(blurredDescription);
+        SetupDamageRollables(targetElement);
 
-    //         SetupDamageRollables(targetElement);
-
-    //         SetupAttackRollables(targetElement);
-    //     }
-    // };
+        SetupAttackRollables(targetElement);
+        console.log(blurredDescription);
+    };
 
     AppendAddActionButtons();
     AppendWindowPinButton();

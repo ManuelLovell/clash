@@ -1,6 +1,6 @@
 export class Constants
 {
-    static VERSION = "whatsnew-clash-205";
+    static VERSION = "whatsnew-clash-210";
     static EXTENSIONID = "com.battle-system.clash";
     static DISCORDID = "com.battle-system.discord";
     static DICEWINDOW = "com.battle-system.dicewindow";
@@ -18,7 +18,7 @@ export class Constants
     static DICENOTATION = /(\d+)[dD](\d+)(.*)$/i;
     static DICEMODIFIER = /([+-])(\d+)/;
     static PARENTHESESMATCH = /\((\d*d\d+\s*([+-]\s*\d+)?)\)/g;
-    static PLUSMATCH = /\s(\+\d+)\s/g;
+    static PLUSMATCH = /\s?(\+\d+)\s?/g;
     static ALPHANUMERICTEXTMATCH = /\s[\da-zA-Z]$/;
 
 
@@ -106,6 +106,8 @@ export class SettingsConstants
     static VISUALDICE = `${Constants.EXTENSIONID}/setting_visualdice`;
     static DICENOTIFICATION = `${Constants.EXTENSIONID}/setting_dicenotification`;
     static DICEEVERYONE = `${Constants.EXTENSIONID}/setting_dicetoall`;
+    static DISCORDHOOK = `${Constants.EXTENSIONID}/setting_discordhook`;
+    static DISCORDURL = `${Constants.EXTENSIONID}/setting_discordurl`;
     static TURNTEXT = `${Constants.EXTENSIONID}/setting_turntext`;
 
     static HPROW = `${Constants.EXTENSIONID}/setting_hpcol`;

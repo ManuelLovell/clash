@@ -18,6 +18,7 @@ class BSCache
 
     private debouncedOnSceneItemsChange: (items: Item[]) => void;
     private debouncedOnSceneMetadataChange: (items: Metadata) => void;
+    private debouncedOnRoomMetadataChange: (items: Metadata) => void;
 
     playerId: string;
     playerColor: string;
@@ -73,6 +74,7 @@ class BSCache
         // Large singular updates to sceneItems can cause the resulting onItemsChange to proc multiple times, at the same time
         this.debouncedOnSceneItemsChange = Utilities.Debounce(this.OnSceneItemsChange.bind(this) as any, 100);
         this.debouncedOnSceneMetadataChange = Utilities.Debounce(this.OnSceneMetadataChanges.bind(this) as any, 100);
+        this.debouncedOnRoomMetadataChange = Utilities.Debounce(this.OnRoomMetadataChange.bind(this) as any, 100);
     }
 
     public async InitializeCache()
@@ -208,7 +210,7 @@ class BSCache
                 this.roomHandler = OBR.room.onMetadataChange(async (metadata) =>
                 {
                     this.roomMetadata = metadata;
-                    await this.OnRoomMetadataChange(metadata);
+                    this.debouncedOnRoomMetadataChange(metadata);
                 });
             }
         }
@@ -340,14 +342,15 @@ class BSCache
         }
     }
 
-    public async OnRoomMetadataChange(metadata: Metadata)
+    public async OnRoomMetadataChange(_metadata: Metadata)
     {
         await Labeler.UpdateHealthBars();
         await Labeler.UpdateLabel();
         if (this.playerRole === "PLAYER")
         {
             await PLVIEW.RefreshList();
-            if (metadata[SettingsConstants.HIDEALL] === true)
+            const hideAll = Utilities.Reta(SettingsConstants.HIDEALL);
+            if (hideAll === true)
             {
                 Constants.MAINDISABLED.style.display = "block";
                 Constants.MAINAPP.style.display = "none";
