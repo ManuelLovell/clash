@@ -14,7 +14,6 @@ whatsnew.innerHTML = `
     Changes!
     <li> I fixed the instant-refresh on roller text. So you should not have to save/refresh to see the results for adding rolls to statblocks. Instant (Just click off the element)!
     <li> Removed some of the strictness on toHit-rolls. So '+9' should format for a roll just fine, and not just ' +9 '.
-    <li> Group adding tokens to initiative wasn't filtering out non character/mounts properly.
     <li> Added a ChatGPT Template button to the 'Import Custom JSON' button.
     </br> This will copy a template to your clipboard that you can paste into ChatGPT, and just swap the word '<BLANK>' with whatever you want. And it'll give you some Clash JSON.
     </br> I've been using this for awhile, so it seemed smart to share as it's pretty simple and speeds up prep work by alot.  I've used this for custom creatures by saying, "Give me a ROBOT NINJA" and I've used it for converting stat blocks from Lamenting Lighthouse.
@@ -213,10 +212,6 @@ whatsnew.innerHTML = `
 
 OBR.onReady(async () =>
 {
-    const queryString = window.location.search;
-    const urlParams = new URLSearchParams(queryString);
-    const timerParam = urlParams.get('timer')!;
-
     footer.innerHTML = `
     <a href="https://www.patreon.com/battlesystem" target="_blank">Patreon!</a>
     <a href="https://discord.gg/ANZKDmWzr6" target="_blank">Join the OBR Discord!</a>
