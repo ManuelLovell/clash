@@ -255,10 +255,6 @@ export function GetNameInput(unit: Item): HTMLInputElement
         element.style.borderColor = alphaColor;
         element.style.borderWidth = "2px";
     }
-    if (Meta(unit, UnitConstants.ISMONSTER))
-    {
-        element.classList.add("isMonster");
-    }
     element.onclick = async function ()
     {
         if (element.classList.contains("isMonster"))

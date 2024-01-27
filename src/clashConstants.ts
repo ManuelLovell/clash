@@ -4,6 +4,8 @@ export class Constants
     static EXTENSIONID = "com.battle-system.clash";
     static DISCORDID = "com.battle-system.discord";
     static DICEWINDOW = "com.battle-system.dicewindow";
+    
+    static BONESID = "com.battle-system.bones";
     static EXTENSIONSUBMENUID = "com.battle-system.clash-submenu";
     static EXTENSIONWHATSNEW = "com.battle-system.clash-whatsnew";
     static EXTENSIONSCENEID = "com.battle-system.clash-scene";

@@ -7,6 +7,23 @@ import { SendtoChatLog } from "../utilities/bsRumbleHelper";
 /** This is handled in SUBVIEW context and has access to it's properties */
 export async function HandleDiceRoll(roll: string, playername: string, playercolor: string, unitname: string, unitaction: string, bonus?: number, advantage?: boolean)
 {
+    // if (SUBVIEW.ROOMSETTINGS![SettingsConstants.BONESDICE] === true)
+    // {
+    // BONES ROLLER
+    // const metadata: Metadata = {};
+    // const now = new Date().toISOString();
+    // metadata[`${Constants.BONESID}/metadata_bonesroll`] // metadata[`com.battle-system.bones/metadata_bonesroll`]
+    //     = {
+    //         notation: "2d20kh1", // "2d20kh1"
+    //         created: now, // new Date().toISOString()
+    //         senderName: "Test", // Name to display for Roll
+    //         senderId: "0000", // PlayerId | Self-Tracking-Number
+    //         viewers: "ALL" // "ALL" | "GM" | "SELF"
+    //     } as IBonesRoll;
+
+    // await OBR.player.setMetadata(metadata);
+    // }
+
     // Check if 3d Dice or Not
     //// Then check if sending results to rumble or not
     if (SUBVIEW.ROOMSETTINGS![SettingsConstants.VISUALDICE] === true)
@@ -39,7 +56,7 @@ export async function HandleDiceRoll(roll: string, playername: string, playercol
     else
     {
         let critical = false;
-        
+
         let result = DiceRoller.RollString(roll);
         let advantageText = "";
         // True = Advantage. False = Disadvantage. Null = Normal Roll.
