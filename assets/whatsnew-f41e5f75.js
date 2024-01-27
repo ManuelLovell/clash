@@ -1,4 +1,4 @@
-import{O as e,C as o}from"./clashConstants-aaa6175c.js";const n=document.querySelector("#clash-whatsnew"),i=document.querySelector("#clash-whatsnew-notes");n.innerHTML=`
+import{O as e,C as o}from"./clashConstants-e048fe55.js";const n=document.querySelector("#clash-whatsnew"),i=document.querySelector("#clash-whatsnew-notes");n.innerHTML=`
   <div id="newsContainer">
     <h1>Clash! 1/20</h1>
     GameJam was a bust. Life consumed too much free time, so we'll try again next month.
