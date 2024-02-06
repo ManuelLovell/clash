@@ -8,6 +8,13 @@ const footer = document.querySelector<HTMLElement>('#clash-whatsnew-notes')!;
 
 whatsnew.innerHTML = `
   <div id="newsContainer">
+    <h1>Clash! 2/5</h1>
+    I was informed the duplicating behavior was busted. Meaning, if you copied a token - it was no longer being appended with an indexer like A, B C..1, 2 3..
+    </br> Which, turns out it was busted for awhile. A lot of the new logic didn't allow for this to work the way it did before, so I clearly scrapped it and forgot.
+    </br> Luckily, I've been wanting to change this behavior for awhile to not indicate to players how many creatures there are.
+    <img class="news-image" src="/goblins.png" alt="Goblins!">
+    </br> So now it should randomly choose from a list of adjectives and slap that on there. I cleaned it up a bit to make sure nothing made your creatures seem TOO strong, but it should allow for some fun.
+    </br> You should see this behavior when duplicating tokens and they have the same name, or doing group edits.
     <h1>Clash! 1/20</h1>
     GameJam was a bust. Life consumed too much free time, so we'll try again next month.
     </br>

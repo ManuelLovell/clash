@@ -79,13 +79,14 @@ export class SubMenu
             this.multiIds = idParam.split(",");
 
             document.documentElement.style.borderColor = "deeppink"; // Full pink border
+            document.getElementById("groupEdit")!.style.display = "block";
             this.SUBMAIN.style.height = "90%";
             this.SUBSEARCH.style.height = "90%";
             this.SUBIMPORT.style.height = "90%";
         }
         else
         {
-            document.getElementById("groupEdit")!.hidden = true;
+            document.getElementById("groupEdit")!.style.display = "none";
             this.POPOVERSUBMENUID = idParam;
         }
 
@@ -97,7 +98,7 @@ export class SubMenu
         }
     }
 
-    public async RenderUnitInfo(): Promise<void>
+    public async RenderUnitInfo(renderButtons = true): Promise<void>
     {
         // If there's no ID, just give up.
         if (this.POPOVERSUBMENUID == undefined) return;
@@ -142,9 +143,12 @@ export class SubMenu
 
         // Assemble Stat Card
         BuildUnitStatBlock(this.currentUnit);
-        AppendSubMainFooterButtons();
-        AppendSearchButtons();
-        AppendImportButtons()
+        if (renderButtons)
+        {
+            AppendSubMainFooterButtons();
+            AppendSearchButtons();
+            AppendImportButtons()
+        }
     }
 
     public ShowSubMenu(): void

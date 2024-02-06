@@ -158,7 +158,7 @@ export function AppendUnitSaveButton(): void
             {
                 SUBVIEW.currentUnit.id = id;
                 SUBVIEW.currentUnit.tokenId = id;
-                SUBVIEW.currentUnit.unitName = baseName + ` ${String.fromCharCode('A'.charCodeAt(0) + i)}`;
+                SUBVIEW.currentUnit.unitName = Utilities.AddOrReplaceAdjective(baseName);
 
                 const newData = SUBVIEW.currentUnit.GetMetadata();
                 metadataPack.push(newData);
@@ -194,7 +194,7 @@ export function AppendUnitSaveButton(): void
         }
         // Test
         SUBVIEW.SUBMAINCARD.innerHTML = "";
-        SUBVIEW.RenderUnitInfo()
+        SUBVIEW.RenderUnitInfo(false)
     }
     saveButton.src = "/save.svg";
     saveButton.title = "Save Changes";

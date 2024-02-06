@@ -1,5 +1,6 @@
 import { Item, Image, Theme } from "@owlbear-rodeo/sdk";
 import { BSCACHE } from "./bsSceneCache";
+import { Constants } from "../clashConstants";
 
 export function GetGUID(): string
 {
@@ -47,17 +48,50 @@ export function HexToRgba(hex: string, alpha: number): string
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-export function Debounce(func: () => any, delay: number): () => void
+export function ContainsAdjective(str: string): boolean
+{
+    return Constants.ADJECTIVES.some(adjective => str.includes(adjective));
+}
+
+export function AddOrReplaceAdjective(str: string): string
+{
+    for (const adjective of Constants.ADJECTIVES)
+    {
+        if (str.includes(adjective))
+        {
+            // Replace the existing adjective with a new one
+            const newAdjective = Constants.ADJECTIVES[Math.floor(Math.random() * Constants.ADJECTIVES.length)];
+            return str.replace(adjective, newAdjective);
+        }
+    }
+
+    // If no adjective is found, add one
+    return PrependRandomAdjective(str);
+}
+
+export function PrependRandomAdjective(name: string): string
+{
+    // Get a random index from the array
+    const randomIndex = Math.floor(Math.random() * Constants.ADJECTIVES.length);
+
+    // Prepend the random adjective to the given name
+    const randomAdjective = Constants.ADJECTIVES[randomIndex];
+    const modifiedName = `${randomAdjective} ${name}`;
+
+    return modifiedName;
+}
+
+export function Debounce(func: (args: any) => any, delay: number): (args: any) => void
 {
     let timeoutId: number;
 
-    return function debounced(): void
+    return function debounced(args: any): void
     {
         clearTimeout(timeoutId);
 
         timeoutId = setTimeout(() =>
         {
-            func();
+            func(args);
         }, delay);
     };
 }

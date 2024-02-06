@@ -1,6 +1,6 @@
 export class Constants
 {
-    static VERSION = "whatsnew-clash-210";
+    static VERSION = "whatsnew-clash-220";
     static EXTENSIONID = "com.battle-system.clash";
     static DISCORDID = "com.battle-system.discord";
     static DICEWINDOW = "com.battle-system.dicewindow";
@@ -30,6 +30,90 @@ export class Constants
     static MAINSETTINGS = document.querySelector<HTMLDivElement>('#clash-main-body-settings') as HTMLDivElement;
     static MAINLOG = document.querySelector<HTMLDivElement>('#clash-main-body-log') as HTMLDivElement;
 
+    static ADJECTIVES: string[] = [
+        "Grizzled",
+        "Wily",
+        "Stoic",
+        "Mellow",
+        "Pensive",
+        "Shrewd",
+        "Cautious",
+        "Hardy",
+        "Nimble",
+        "Tenacious",
+        "Gritty",
+        "Tolerant",
+        "Hardy",
+        "Adroit",
+        "Resilient",
+        "Slight",
+        "Stout",
+        "Durable",
+        "Subtle",
+        "Sober",
+        "Clever",
+        "Brave",
+        "Calm",
+        "Wise",
+        "Cunning",
+        "Alert",
+        "Swift",
+        "Agile",
+        "Loyal",
+        "Sturdy",
+        "Stable",
+        "Sneaky",
+        "Clever",
+        "Resourceful",
+        "Shady",
+        "Stalwart",
+        "Vigilant",
+        "Staunch",
+        "Fierce",
+        "Vigorous",
+        "Robust",
+        "Fearless",
+        "Dauntless",
+        "Resolute",
+        "Sagacious",
+        "Prudent",
+        "Judicious",
+        "Astute",
+        "Savvy",
+        "Sharp",
+        "Quick",
+        "Witty",
+        "Smart",
+        "Snippy",
+        "Crafty",
+        "Deft",
+        "Sly",
+        "Artful",
+        "Clever",
+        "Sneering",
+        "Tough",
+        "Rugged",
+        "Solid",
+        "Strong",
+        "Sturdy",
+        "Tough",
+        "Gritty",
+        "Rough",
+        "Hardened",
+        "Burly",
+        "Muscular",
+        "Brawny",
+        "Rowdy",
+        "Forceful",
+        "Snorting",
+        "Potent",
+        "Martial",
+        "Speckled",
+        "Mottled",
+        "Disheveled"
+    ];
+    
+    
     static BASELIST = `
     <div id="contextMenu" class="context-menu" style="display: none">
         <ul id="playerListing"></ul>

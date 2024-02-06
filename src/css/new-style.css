@@ -151,6 +151,12 @@ a:active {
     text-decoration: underline;
 }
 
+.news-image
+{
+    border: 1px solid white;
+    border-radius: 6px;
+    margin: 30px;
+}
 .timer {
     background: -webkit-linear-gradient(left, var(--OBR-Purple-Highlight) 50%, #eee 50%);
     border-radius: 100%;

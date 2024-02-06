@@ -4,7 +4,7 @@ import { PLVIEW } from "../views/clashPlayerView";
 import { Labeler } from "../utilities/clashLabeler";
 import * as Utilities from '../utilities/bsUtilities';
 import { MESSAGES } from "./bsMessageTracker";
-import { Constants, SettingsConstants } from "../clashConstants";
+import { Constants, SettingsConstants, UnitConstants } from "../clashConstants";
 
 class BSCache
 {
@@ -144,8 +144,8 @@ class BSCache
             {
                 this.sceneMetadataHandler = OBR.scene.onMetadataChange(async (metadata) =>
                 {
-                    this.sceneMetadata = metadata;
                     this.debouncedOnSceneMetadataChange(metadata);
+                    this.sceneMetadata = metadata;
                 });
             }
         }
@@ -156,8 +156,8 @@ class BSCache
             {
                 this.sceneItemsHandler = OBR.scene.items.onChange(async (items) =>
                 {
-                    this.sceneItems = items;
                     this.debouncedOnSceneItemsChange(items);
+                    this.sceneItems = items;
                 });
             }
         }
@@ -262,12 +262,51 @@ class BSCache
         }
     }
 
-    public async OnSceneItemsChange(_items: Item[])
+    public async OnSceneItemsChange(items: Item[])
     {
         if (this.sceneReady)
         {
             if (this.playerRole === "GM")
             {
+                // Check for name duplicates
+                const namesChecked: string[] = [];
+                const dupesFound: Item[] = [];
+                for (const item of items)
+                {
+                    if (item.metadata[UnitConstants.ONLIST] !== true) continue;
+
+                    const itemName = item.name;
+                    if (namesChecked.includes(itemName))
+                    {
+                        dupesFound.push(item);
+                    }
+                    else
+                    {
+                        namesChecked.push(itemName);
+                    }
+                }
+
+                for (let dupe of dupesFound)
+                {
+                    dupe.name = Utilities.AddOrReplaceAdjective(dupe.name);
+                }
+                if (dupesFound.length > 0)
+                {
+                    await OBR.scene.items.updateItems(dupesFound.map(x => x.id), (items) =>
+                    {
+                        for (let item of items)
+                        {
+                            const dupe = dupesFound.find(d => d.id === item.id);
+                            if (dupe)
+                            {
+                                item.name = dupe.name;
+                                item.metadata[UnitConstants.UNITNAME] = dupe.name;
+                                console.log("hit")
+                            }
+                        }
+                    });
+                }
+
                 await GMVIEW.RefreshList()
             }
             else
@@ -287,7 +326,7 @@ class BSCache
     public async OnSceneReadyChange(ready: boolean)
     {
         this.playerRole === "GM" ? GMVIEW.RenderWaiting(!ready) : PLVIEW.RenderWaiting(!ready);
-        
+
         if (ready)
         {
             this.SetupHandlers();
