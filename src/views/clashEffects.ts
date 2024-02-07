@@ -15,7 +15,7 @@ OBR.onReady(async () =>
         const table = document.getElementById('clashEffectsTableBody') as HTMLTableElement;
         const footer = document.getElementById('clashEffectsButtons') as HTMLDivElement;
         const effectData = units[0].metadata[UnitConstants.EFFECTS] as TurnEffect[];
-        const currentRound = scene[SettingsConstants.ROUNDCOUNT] as number;
+        const currentRound = scene[SettingsConstants.ROUNDCOUNT] as number ?? 1;
 
         for (let i = 0; i < 5; i++)
         {
