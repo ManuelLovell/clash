@@ -1,9 +1,9 @@
 import OBR, { Item } from "@owlbear-rodeo/sdk";
-import { Meta, Seta } from "./../utilities/bsUtilities";
+import { Meta, Reta, Seta } from "./../utilities/bsUtilities";
 import { Constants, SettingsConstants, UnitConstants } from "../clashConstants";
 import { db } from "../local-database";
 import { BSCACHE } from "../utilities/bsSceneCache";
-import { GetACHeader, GetArmorInput, GetHPHeader, GetInitativeHeader, GetInitiativeInput, GetMinHPInput, GetMoveHeader, GetNameHeader, GetNameInput, GetRollInput, GetRollerHeader, GetStatInput, GetTempHPHeader, GetWhatsNewHeader, GetMaxHPInput, GetTempHPInput, GetMoveInput, ConfigureViewFooterButtons, RenderRollLog } from '../buttons/clashListButtons';
+import { GetACHeader, GetArmorInput, GetHPHeader, GetInitativeHeader, GetInitiativeInput, GetMinHPInput, GetMoveHeader, GetNameHeader, GetNameInput, GetRollInput, GetRollerHeader, GetStatInput, GetTempHPHeader, GetWhatsNewHeader, GetMaxHPInput, GetTempHPInput, GetMoveInput, ConfigureViewFooterButtons, RenderRollLog, GetElevationInput, GetElevateHeader, GetEFXHeader, GetEFXInput } from '../buttons/clashListButtons';
 import { RenderSettings } from "./clashSettingsView";
 import { ViewportFunctions } from "../utilities/bsViewport";
 import { Labeler } from "../utilities/clashLabeler";
@@ -12,6 +12,8 @@ class GMView
 {
     // Current Turn Unit
     currentTurnUnit?: Item;
+    startEffectsDone = false;
+    lastTurnUnit?: Item;
     // Counter per round
     roundCounter: number = 1;
     // Counter per turn
@@ -79,6 +81,7 @@ class GMView
         const playerContextMenu = document.getElementById("playerListing")!;
 
         playerContextMenu.appendChild(this.GetEmptyContextItem());
+        playerContextMenu.appendChild(this.GetRemoveContextItem());
         for (const player of BSCACHE.party)
         {
             const listItem = document.createElement("li");
@@ -103,6 +106,8 @@ class GMView
         if (BSCACHE.roomMetadata[SettingsConstants.TEMPHPROW]) useColumns.push("TEMPHP");
         if (BSCACHE.roomMetadata[SettingsConstants.ACROW] ?? true) useColumns.push("AC");
         if (BSCACHE.roomMetadata[SettingsConstants.MOVEROW]) useColumns.push("MOVE");
+        if (BSCACHE.roomMetadata[SettingsConstants.ELEVATEROW]) useColumns.push("ELEVATE");
+        if (BSCACHE.roomMetadata[SettingsConstants.EFXROW]) useColumns.push("EFX");
         if (BSCACHE.roomMetadata[SettingsConstants.BLOCKROW] ?? true) useColumns.push("BLOCK");
 
         // Sort units based on Reverse Setting or not
@@ -165,6 +170,20 @@ class GMView
         {
             const moveHeader = GetMoveHeader();
             row.appendChild(moveHeader);
+            listWidth += 1;
+        }
+
+        if (useColumns.includes("ELEVATE"))
+        {
+            const elevateHeader = GetElevateHeader();
+            row.appendChild(elevateHeader);
+            listWidth += 1;
+        }
+
+        if (useColumns.includes("EFX"))
+        {
+            const efxHeader = GetEFXHeader();
+            row.appendChild(efxHeader);
             listWidth += 1;
         }
 
@@ -266,12 +285,35 @@ class GMView
                 cellNumber++;
             }
 
+            // ELEVATION
+            if (useColumns.includes("ELEVATE"))
+            {
+                const elCell = row.insertCell(cellNumber);
+                const elInput = GetElevationInput(unit);
+                elCell.appendChild(elInput);
+                cellNumber++;
+            }
+
+            // EFX
+            if (useColumns.includes("EFX"))
+            {
+                const efxCell = row.insertCell(cellNumber);
+                efxCell.style.textAlign = "center";
+                const efxInput = GetEFXInput(unit);
+                efxCell.appendChild(efxInput);
+                cellNumber++;
+            }
+
             // STAT BLOCK
             if (useColumns.includes("BLOCK"))
             {
                 const optionCell = row.insertCell(cellNumber);
                 const triangleImg = GetStatInput(unit);
                 optionCell.appendChild(triangleImg);
+            }
+            else
+            {
+                row.insertCell(cellNumber);
             }
         }
         this.ShowTurnSelection();
@@ -304,12 +346,56 @@ class GMView
 
                 const counterHtml = document.getElementById("roundCounter")!;
                 counterHtml.innerText = `Round: ${this.roundCounter}`;
+
+                if (this.currentTurnUnit && !this.startEffectsDone) this.HandleEffects(this.currentTurnUnit, "Start");
             }
         }
         else
         {
             // There's no one on the list
             this.currentTurnUnit = undefined;
+        }
+    }
+
+    public async HandleEffects(unit: Item, when: string)
+    {
+        this.startEffectsDone = true;
+
+        if (Reta(SettingsConstants.EFXROW) === true)
+        {
+            const newPackage: TurnEffect[] = [];
+            const expired: string[] = [];
+
+            const effectPackage = unit.metadata[UnitConstants.EFFECTS] as TurnEffect[];
+            if (effectPackage && effectPackage.length > 0)
+            {
+                for (let index = 0; index < effectPackage.length; index++)
+                {
+                    const effect = effectPackage[index];
+
+                    if (effect.EndingRound === this.roundCounter && effect.StartOfTurn === when) expired.push(effect.Name);
+                    else newPackage.push(effect);
+                }
+
+                await OBR.scene.items.updateItems([unit.id], (units) =>
+                {
+                    for (const unit of units)
+                    {
+                        if (newPackage.length > 0)
+                            unit.metadata[UnitConstants.EFFECTS] = newPackage;
+                        else
+                            unit.metadata[UnitConstants.EFFECTS] = undefined;
+                    }
+                });
+            }
+            if (expired.length > 0)
+            {
+                const now = new Date().toISOString();
+                const message = `The following effects have expired for ${unit.metadata[UnitConstants.UNITNAME]}: ${expired.join(", ")}`;
+                
+                await OBR.player.setMetadata({ [`${Constants.EXTENSIONID}/metadata_effect_notify`]: { message: message, created: now } });
+
+            }
         }
     }
 
@@ -330,6 +416,14 @@ class GMView
         const listItem = document.createElement("li");
         listItem.id = BSCACHE.playerId;
         listItem.textContent = "No Owner";
+        return listItem;
+    }
+
+    public GetRemoveContextItem()
+    {
+        const listItem = document.createElement("li");
+        listItem.id = "REMOVE";
+        listItem.textContent = "Remove Unit";
         return listItem;
     }
 }

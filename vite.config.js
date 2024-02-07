@@ -8,6 +8,7 @@ export default {
         main: path.resolve(__dirname, 'index.html'),
         subindex: path.resolve(__dirname, 'submenu/subindex.html'),
         whatsnew: path.resolve(__dirname, 'submenu/whatsnew.html'),
+        whaeffectstsnew: path.resolve(__dirname, 'submenu/effects.html'),
         dicewindow: path.resolve(__dirname, 'dicewindow.html')
       }
     }

@@ -86,32 +86,104 @@ export class Labeler
         }
     }
 
+    static async UpdateElevation(): Promise<void>
+    {
+        const activeUnits = BSCACHE.sceneItems.filter(unit => unit.metadata[UnitConstants.ONLIST] === true);
+        const localItems = await OBR.scene.local.getItems(x => x.id.startsWith("ELE"));
+        const localElevation = localItems.map(x => x.id);
+
+        if (localItems.length > 0 || Reta(SettingsConstants.ELEVATEROW))
+        {
+            if (Reta(SettingsConstants.ELEVATEROW) === false) // Hide Elevation
+            {
+                if (localElevation.length > 0) await OBR.scene.local.deleteItems(localElevation);
+            }
+            else
+            {
+                await OBR.scene.local.deleteItems(localElevation);
+                // Create bars for active units
+                let newHeights: Text[] = [];
+                for (const unit of activeUnits)
+                {
+                    const elevation = Labeler.GetElevation(unit);
+                    if (elevation) newHeights.push(elevation);
+                }
+
+                //Update
+                await OBR.scene.local.addItems(newHeights);
+            }
+        }
+    }
+
     public static async UpdateHealthBars(): Promise<void>
     {
         // Find all Units who are active
         const activeUnits = BSCACHE.sceneItems.filter(unit => unit.metadata[UnitConstants.ONLIST] === true);
+
         // Flush any existing HP bars - Should be prepending with LBL
-        const localLabels = activeUnits.map(unit => "LBL" + unit.id.slice(3));
-        if (Reta(SettingsConstants.HIDEHPBAR) === true) // Hide Bars
+        const localItems = await OBR.scene.local.getItems(x => x.id.startsWith("LBL"));
+        if (localItems.length > 0 || !Reta(SettingsConstants.HIDEHPBAR))
         {
-            if (localLabels.length > 0) await OBR.scene.local.deleteItems(localLabels);
-        }
-        else
-        {
-            await OBR.scene.local.deleteItems(localLabels);
-
-            // Create bars for active units
-            let newBars: Text[] = [];
-            for (const unit of activeUnits)
+            const localLabels = localItems.map(x => x.id);
+            if (Reta(SettingsConstants.HIDEHPBAR) === true) // Hide Bars
             {
-                newBars.push(Labeler.GetHPBar(unit));
+                if (localLabels.length > 0) await OBR.scene.local.deleteItems(localLabels);
             }
+            else
+            {
+                await OBR.scene.local.deleteItems(localLabels);
 
-            //Update
-            await OBR.scene.local.addItems(newBars);
+                // Create bars for active units
+                let newBars: Text[] = [];
+                for (const unit of activeUnits)
+                {
+                    newBars.push(Labeler.GetHPBar(unit));
+                }
+
+                //Update
+                await OBR.scene.local.addItems(newBars);
+            }
         }
+
     }
-    static GetHPBar(unit: Item): Text
+
+    static GetElevation(unit: Item)
+    {
+        const unitImage = unit as Image;
+        const bounds = GetImageBounds(unitImage, BSCACHE.gridDpi);
+        const unitHeight = Meta(unit, UnitConstants.ELEVATION) ?? null;
+        if (unitHeight === null || unitHeight === 0 || unitHeight === "0" || isNaN(unitHeight)) return;
+
+        let indicator = "";
+        if (Meta(unit, UnitConstants.ELEVATION) > 0) indicator = "🡹";
+        else if (Meta(unit, UnitConstants.ELEVATION) < 0) indicator = "🡻";
+
+        let positiveHeight = unitHeight < 0 ? -unitHeight : unitHeight;
+
+        const elevationLabel = `${indicator}${positiveHeight}`;
+
+        const label = buildText().plainText(elevationLabel).fontWeight(900).fillOpacity(.95).fillColor("white").strokeWidth(2).strokeColor("black").strokeOpacity(1).build();
+        label.position = {
+            x: bounds.min.x - 40,
+            y: bounds.min.y
+        };
+        label.text.style.fontSize = 36;
+        label.id = "ELE" + unit.id.slice(3);
+        label.metadata[UnitConstants.ELEVATION] = true;
+        label.metadata[UnitConstants.ID] = unit.id;
+        label.type = "TEXT"; // Set Item Type
+        label.attachedTo = unit.id; // Set Token Attached To
+        label.visible = unit.visible ? true : false; // Set Visibility
+        label.locked = true; // Set Lock, Don't want people to touch
+        label.disableAttachmentBehavior = ["ROTATION", "SCALE"];
+        label.text.style.fontFamily = "Segoe UI";
+        label.text.type = "PLAIN";
+        label.text.style.textAlign = "CENTER";
+
+        return label;
+    }
+
+    static GetHPBar(unit: Item)
     {
         const unitImage = unit as Image;
         const bounds = GetImageBounds(unitImage, BSCACHE.gridDpi);
@@ -133,7 +205,7 @@ export class Labeler
             label = buildText().plainText(unitHealth.health).fontWeight(800).fillOpacity(.85).fillColor(unitHealth.color).strokeWidth(1).strokeColor("black").strokeOpacity(1).build();
             label.position = {
                 x: bounds.max.x - ((bounds.max.x - bounds.min.x) / 2) - 85,
-                y: bounds.max.y - 40
+                y: bounds.max.y - 44
             };
             label.text.style.fontSize = 24;
         }

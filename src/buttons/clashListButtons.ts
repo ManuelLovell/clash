@@ -133,6 +133,34 @@ export function GetMoveHeader()
     return moveHeader;
 }
 
+export function GetElevateHeader()
+{
+    const elevateHeader = document.createElement('th');
+    elevateHeader.style.width = smediumWidth;
+    elevateHeader.style.minWidth = smediumColMinWidth;
+    const elevateElement = document.createElement('img');
+    elevateElement.setAttribute('class', 'icon');
+    elevateElement.setAttribute('title', 'Unit Elevation');
+    elevateElement.setAttribute('src', '/elevation.svg');
+    elevateHeader.appendChild(elevateElement);
+
+    return elevateHeader;
+}
+
+export function GetEFXHeader()
+{
+    const efxHeader = document.createElement('th');
+    efxHeader.style.width = smediumWidth;
+    efxHeader.style.minWidth = smediumColMinWidth;
+    const efxElement = document.createElement('img');
+    efxElement.setAttribute('class', 'icon');
+    efxElement.setAttribute('title', 'Effects');
+    efxElement.setAttribute('src', '/effectheader.svg');
+    efxHeader.appendChild(efxElement);
+
+    return efxHeader;
+}
+
 export function GetWhatsNewHeader()
 {
     const whatsNewHeader = document.createElement('th');
@@ -283,11 +311,22 @@ export function GetNameInput(unit: Item): HTMLInputElement
         const onClickListItem = async (e: MouseEvent) =>
         {
             const target = e.target as HTMLUListElement;
-            await UpdateUnit(element.id, [{ key: UnitConstants.OWNERID, value: target.id }]);
+            if (target.id === "REMOVE")
+            {
+                await OBR.scene.items.updateItems([element.id.substring(2)], (items) =>
+                {
+                    for (let item of items)
+                    {
+                        delete item.metadata[UnitConstants.ONLIST];
+                        delete item.metadata[UnitConstants.HPBAR];
+                    }
+                });
+            }
+            else
+            {
+                await UpdateUnit(element.id, [{ key: UnitConstants.OWNERID, value: target.id }]);
+            }
 
-            // Needs to update Item Metadata now!
-            //const target = event.target! as HTMLElement;
-            //const unitId = contextMenu.getAttribute("currentUnit")!;
             contextMenu.style.display = "none";
             e.stopPropagation();
 
@@ -521,6 +560,66 @@ export function GetArmorInput(unit: Item): HTMLInputElement
     return element;
 }
 
+export function GetElevationInput(unit: Item): HTMLInputElement
+{
+    const element = document.createElement('input');
+    element.classList.add("text-input");
+    element.inputMode = "numeric";
+    element.id = `eL${unit.id}`;
+    element.value = Meta(unit, UnitConstants.ELEVATION) ?? "-";
+    element.size = 3;
+    element.maxLength = 3;
+    element.style.width = smallColWidth;
+    element.style.minWidth = "25px";
+    element.onblur = async (event: Event) =>
+    {
+        const target = event.currentTarget as HTMLInputElement;
+        await UpdateUnit(target.id, [{ key: UnitConstants.ELEVATION, value: target.value }]);
+    };
+
+    return element;
+}
+
+export function GetEFXInput(unit: Item): HTMLInputElement
+{
+    const element = document.createElement('input');
+    element.type = 'image';
+    element.src = Meta(unit, UnitConstants.EFFECTS) ? '/effect-on.svg' : '/effect-off.svg';
+    element.classList.add("text-input");
+    element.classList.add("icon");
+    element.classList.add("clickable");
+    element.id = `eX${unit.id}`;
+    element.style.width = smallColWidth;
+    element.style.minWidth = "25px";
+    element.onclick = async (_event: Event) =>
+    {
+        await OBR.popover.open({
+            id: Constants.EXTENSIONEFFECTSID,
+            url: `/submenu/effects.html?unitid=${unit.id}`,
+            height: 220,
+            width: 300,
+            hidePaper: true
+        });
+    };
+
+    const unitEffects = Meta(unit, UnitConstants.EFFECTS) as TurnEffect[];
+    if (unitEffects?.length > 0)
+    {
+        const tooltips = [];
+        for (const effect of unitEffects)
+        {
+            const message = `'${effect.Name}' til ${effect.StartOfTurn.toLowerCase()} of Round ${effect.EndingRound}`;
+            tooltips.push(message);
+        }
+        element.title = tooltips.join("\r\n");
+    }
+    else
+    {
+        element.title = "No active effects";
+    }
+    return element;
+}
+
 export function GetMoveInput(unit: Item): HTMLDivElement
 {
     const walkSpeed = Meta(unit, UnitConstants.SPEEDWALK) as number;
@@ -657,6 +756,7 @@ function GetNextButton(): HTMLInputElement
     element.title = "Next Turn"
     element.onclick = async function () 
     {
+        if (GMVIEW.currentTurnUnit) GMVIEW.HandleEffects(GMVIEW.currentTurnUnit, "End");
         if (GMVIEW.viewBody!.rows?.length > 1)
         {
             GMVIEW.turnCounter++;
@@ -671,6 +771,7 @@ function GetNextButton(): HTMLInputElement
                     }
                 }
             }
+            GMVIEW.startEffectsDone = false;
             await OBR.scene.setMetadata({
                 [SettingsConstants.TURNCOUNT]: GMVIEW.turnCounter,
                 [SettingsConstants.ROUNDCOUNT]: GMVIEW.roundCounter

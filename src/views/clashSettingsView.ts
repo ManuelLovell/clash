@@ -65,6 +65,16 @@ export async function RenderSettings(): Promise<void>
                     </tr>
                     <tr>
                         <td>
+                            ${CreateSlider("EFXROW")}
+                            Effects </div>
+                        </td>
+                        <td>
+                            ${CreateSlider("ELEVATEROW")}
+                            Elevation </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
                             ${CreateSlider("ROLLERROW")}
                             Roller </div>
                         </td>
@@ -103,11 +113,15 @@ export async function RenderSettings(): Promise<void>
                 ${CreateSlider("DISABLEFOCUS")}
                 Disable Camera Focus (For Self)
             </div>
+            <div title="This will make it so Clash! will also add the name to the token's label. Turning it off will REMOVE visible names from any token on the Initiative List.">
+                ${CreateSlider("SHOWNAMES")}
+                Show Names on Token
+            </div>
             <div title="This removes the label applied to the token indicating it's their turn.">
                 ${CreateSlider("DISABLELABEL")}
                 Disable Turn Label
             </div>
-                <span style="display:flex;">Turn Label <div id="turnLabelTextContainer" style="padding-left: 6px;"></div></span>
+            <span style="display:flex;">Turn Label <div id="turnLabelTextContainer" style="padding-left: 6px;"></div></span>
             <div class="settings-header">Dice</div>
             <div title="This enables the integration with Rumble! so that roll results are shown for all to see.">
                 ${CreateSlider("RUMBLELOG")}
@@ -143,6 +157,7 @@ export async function RenderSettings(): Promise<void>
     SetCheckbox("HPBARNUMBERS", Reta(SettingsConstants.HPBARNUMBERS) ? true : false);
     SetCheckbox("REVERSELIST", Reta(SettingsConstants.REVERSELIST) ? true : false);
     SetCheckbox("DISABLEFOCUS", Reta(SettingsConstants.DISABLEFOCUS) ? true : false);
+    SetCheckbox("SHOWNAMES", Reta(SettingsConstants.NAMELABELS) ? true : false);
     SetCheckbox("DISABLELABEL", Reta(SettingsConstants.DISABLELABEL) ? true : false);
     SetCheckbox("RUMBLELOG", Reta(SettingsConstants.RUMBLELOG) ? true : false);
     SetCheckbox("VISUALDICE", Reta(SettingsConstants.VISUALDICE) ? true : false);
@@ -156,6 +171,8 @@ export async function RenderSettings(): Promise<void>
     SetCheckbox("MOVEROW", Reta(SettingsConstants.MOVEROW) ? true : false);
     SetCheckbox("ROLLERROW", Reta(SettingsConstants.ROLLERROW) ?? true);
     SetCheckbox("BLOCKROW", Reta(SettingsConstants.BLOCKROW) ?? true);
+    SetCheckbox("EFXROW", Reta(SettingsConstants.EFXROW) ? true : false);
+    SetCheckbox("ELEVATEROW", Reta(SettingsConstants.ELEVATEROW) ? true : false);
 
     //Create TextLabel Input
     const turnLabelTextContainer = document.getElementById("turnLabelTextContainer");
@@ -354,6 +371,9 @@ export async function RenderSettings(): Promise<void>
             for (let item of items)
             {
                 item.metadata[UnitConstants.INITIATIVE] = 1;
+                item.metadata[UnitConstants.CURRENTHP] = item.metadata[UnitConstants.MAXHP];
+                item.metadata[UnitConstants.ELEVATION] = null;
+                item.metadata[UnitConstants.EFFECTS] = null;
             }
         });
         await OBR.scene.setMetadata({
@@ -436,6 +456,9 @@ export async function RenderSettings(): Promise<void>
                 case "DISABLEFOCUS":
                     await OBR.room.setMetadata({ [SettingsConstants.DISABLEFOCUS]: target.checked });
                     break;
+                case "SHOWNAMES":
+                    await OBR.room.setMetadata({ [SettingsConstants.NAMELABELS]: target.checked });
+                    break;
                 case "DISABLELABEL":
                     await OBR.room.setMetadata({ [SettingsConstants.DISABLELABEL]: target.checked });
                     break;
@@ -474,6 +497,12 @@ export async function RenderSettings(): Promise<void>
                     break;
                 case "BLOCKROW":
                     await OBR.room.setMetadata({ [SettingsConstants.BLOCKROW]: target.checked });
+                    break;
+                case "EFXROW":
+                    await OBR.room.setMetadata({ [SettingsConstants.EFXROW]: target.checked });
+                    break;
+                case "ELEVATEROW":
+                    await OBR.room.setMetadata({ [SettingsConstants.ELEVATEROW]: target.checked });
                     break;
                 default:
                     break;

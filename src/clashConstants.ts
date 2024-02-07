@@ -1,12 +1,13 @@
 export class Constants
 {
-    static VERSION = "whatsnew-clash-220";
+    static VERSION = "whatsnew-clash-230";
     static EXTENSIONID = "com.battle-system.clash";
     static DISCORDID = "com.battle-system.discord";
     static DICEWINDOW = "com.battle-system.dicewindow";
     
     static BONESID = "com.battle-system.bones";
     static EXTENSIONSUBMENUID = "com.battle-system.clash-submenu";
+    static EXTENSIONEFFECTSID = "com.battle-system.clash-effects";
     static EXTENSIONWHATSNEW = "com.battle-system.clash-whatsnew";
     static EXTENSIONSCENEID = "com.battle-system.clash-scene";
     static EXTENSIONLOGID = "com.battle-system.clash-chatlog";
@@ -195,6 +196,7 @@ export class SettingsConstants
     static DISCORDHOOK = `${Constants.EXTENSIONID}/setting_discordhook`;
     static DISCORDURL = `${Constants.EXTENSIONID}/setting_discordurl`;
     static TURNTEXT = `${Constants.EXTENSIONID}/setting_turntext`;
+    static NAMELABELS = `${Constants.EXTENSIONID}/setting_namelabel`;
 
     static HPROW = `${Constants.EXTENSIONID}/setting_hpcol`;
     static ROLLERROW = `${Constants.EXTENSIONID}/setting_rollercol`;
@@ -202,6 +204,8 @@ export class SettingsConstants
     static ACROW = `${Constants.EXTENSIONID}/setting_accol`;
     static MOVEROW = `${Constants.EXTENSIONID}/setting_movecol`;
     static BLOCKROW = `${Constants.EXTENSIONID}/setting_blockcol`;
+    static EFXROW = `${Constants.EXTENSIONID}/setting_efxcol`;
+    static ELEVATEROW = `${Constants.EXTENSIONID}/setting_elevcol`;
 
     static TURNCOUNT = `${Constants.EXTENSIONID}/setting_turncounter`;
     static ROUNDCOUNT = `${Constants.EXTENSIONID}/setting_roundcounter`;
@@ -269,4 +273,7 @@ export class UnitConstants
     static SPEEDCLIMB = `${Constants.EXTENSIONID}/clash_speedClimb`;
     static SPEEDBURROW = `${Constants.EXTENSIONID}/clash_speedBurrow`;
     static SPEEDSWIM = `${Constants.EXTENSIONID}/clash_speedSwim`;
+
+    static ELEVATION = `${Constants.EXTENSIONID}/clash_elevation`;
+    static EFFECTS = `${Constants.EXTENSIONID}/clash_effects`;
 }

@@ -1,7 +1,7 @@
 import OBR, { Item } from "@owlbear-rodeo/sdk";
 import { Constants, SettingsConstants, UnitConstants } from "../clashConstants";
 import { BSCACHE } from "../utilities/bsSceneCache";
-import { ConfigureViewFooterPlayerButtons, GetACHeader, GetArmorInput, GetHPHeader, GetInitativeHeader, GetInitiativeInput, GetMaxHPInput, GetMinHPInput, GetMoveHeader, GetMoveInput, GetNameHeader, GetNameInput, GetRollInput, GetRollerHeader, GetTempHPHeader, GetTempHPInput, GetWhatsNewHeader, RenderRollLog } from "../buttons/clashListButtons";
+import { ConfigureViewFooterPlayerButtons, GetACHeader, GetArmorInput, GetEFXHeader, GetEFXInput, GetElevateHeader, GetElevationInput, GetHPHeader, GetInitativeHeader, GetInitiativeInput, GetMaxHPInput, GetMinHPInput, GetMoveHeader, GetMoveInput, GetNameHeader, GetNameInput, GetRollInput, GetRollerHeader, GetTempHPHeader, GetTempHPInput, GetWhatsNewHeader, RenderRollLog } from "../buttons/clashListButtons";
 import { Meta, Reta, Seta, HexToRgba } from "../utilities/bsUtilities";
 import { ViewportFunctions } from "../utilities/bsViewport";
 import { Labeler } from "../utilities/clashLabeler";
@@ -76,6 +76,8 @@ class PlayerView
         if (BSCACHE.roomMetadata[SettingsConstants.TEMPHPROW]) useColumns.push("TEMPHP");
         if (BSCACHE.roomMetadata[SettingsConstants.ACROW] ?? true) useColumns.push("AC");
         if (BSCACHE.roomMetadata[SettingsConstants.MOVEROW]) useColumns.push("MOVE");
+        if (BSCACHE.roomMetadata[SettingsConstants.ELEVATEROW]) useColumns.push("ELEVATE");
+        if (BSCACHE.roomMetadata[SettingsConstants.EFXROW]) useColumns.push("EFX");
 
         // Sort units based on Reverse Setting or not
         let sortedUnits;
@@ -92,7 +94,7 @@ class PlayerView
 
         //Clear the table
         this.viewHeader!.innerHTML = "";
-        this.viewBody!.innerHTML = ""; 
+        this.viewBody!.innerHTML = "";
 
         // Add the Table Header
         const row = this.viewHeader!.insertRow(-1);
@@ -137,6 +139,20 @@ class PlayerView
         {
             const moveHeader = GetMoveHeader();
             row.appendChild(moveHeader);
+            listWidth += 1;
+        }
+
+        if (useColumns.includes("ELEVATE"))
+        {
+            const elevateHeader = GetElevateHeader();
+            row.appendChild(elevateHeader);
+            listWidth += 1;
+        }
+
+        if (useColumns.includes("EFX"))
+        {
+            const efxHeader = GetEFXHeader();
+            row.appendChild(efxHeader);
             listWidth += 1;
         }
 
@@ -262,6 +278,7 @@ class PlayerView
                 acCell.appendChild(acInput);
                 cellNumber++;
             }
+
             // MOVE
             if (useColumns.includes("MOVE"))
             {
@@ -277,6 +294,30 @@ class PlayerView
                 moveCell.appendChild(moveInput);
                 cellNumber++;
             }
+
+            // ELEVATION
+            if (useColumns.includes("ELEVATE"))
+            {
+                const elCell = row.insertCell(cellNumber);
+                const elInput = GetElevationInput(unit);
+                this.Disable(elInput, myUnit);
+                elCell.appendChild(elInput);
+                cellNumber++;
+            }
+
+            // EFX
+            if (useColumns.includes("EFX"))
+            {
+                const efxCell = row.insertCell(cellNumber);
+                efxCell.style.textAlign = "center";
+                const efxInput = GetEFXInput(unit);
+                this.Disable(efxInput, myUnit);
+                efxCell.appendChild(efxInput);
+                cellNumber++;
+            }
+
+            row.insertCell(cellNumber);
+
         }
         this.ShowTurnSelection();
     }

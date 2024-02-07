@@ -21,3 +21,9 @@ export interface IChatLog
 
     color: string;
 }
+
+export interface IEffectLog
+{
+    message: string;
+    created: string;
+}

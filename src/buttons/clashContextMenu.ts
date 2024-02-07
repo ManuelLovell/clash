@@ -1,6 +1,7 @@
 import OBR, { isImage, Image, Metadata } from "@owlbear-rodeo/sdk";
-import { Constants, UnitConstants } from "../clashConstants";
+import { Constants, SettingsConstants, UnitConstants } from "../clashConstants";
 import { db } from "../local-database";
+import * as Utilities from '../utilities/bsUtilities';
 import UnitInfo from "./../unitinfo/clashUnitInfo";
 import { OpenSubMenu } from "./clashListButtons";
 
@@ -103,6 +104,11 @@ export function SetupContextMenu()
                         const mine = metadataPack.find(metadata => metadata[UnitConstants.ID] === item.id)
                         if (mine)
                         {
+                            if (Utilities.Reta(SettingsConstants.NAMELABELS))
+                            {
+                                const name = mine[UnitConstants.UNITNAME] as string;
+                                if (name) item.text.plainText = name;
+                            }
                             Object.assign(item.metadata, mine);
                         }
                     }

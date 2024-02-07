@@ -1,6 +1,6 @@
-import OBR, { Item, Metadata } from "@owlbear-rodeo/sdk";
+import OBR, { Metadata, isImage } from "@owlbear-rodeo/sdk";
 import { SUBVIEW } from '../views/clashSubView';
-import { Constants, UnitConstants } from "../clashConstants";
+import { Constants, SettingsConstants, UnitConstants } from "../clashConstants";
 import { QueryMonsterDatabase, RenderSearchForm } from "../views/clashSubSearchView";
 import { db } from "../local-database";
 import * as Utilities from './../utilities/bsUtilities';
@@ -104,7 +104,7 @@ export function AppendImportButtons(): void
         SUBVIEW.ShowSubMenu();
     }
 
-    
+
     //Create import Confirm Button
     const importConfirmButton = document.createElement('input');
     importConfirmButton.type = "button";
@@ -164,13 +164,17 @@ export function AppendUnitSaveButton(): void
                 metadataPack.push(newData);
             }
 
-            await OBR.scene.items.updateItems(SUBVIEW.multiIds, (items) =>
+            await OBR.scene.items.updateItems(SUBVIEW.multiIds && isImage, (items) =>
             {
                 for (let item of items)
                 {
                     const mine = metadataPack.find(metadata => metadata[UnitConstants.ID] === item.id)
                     if (mine)
                     {
+                        if (SUBVIEW.ROOMSETTINGS![SettingsConstants.NAMELABELS] === true)
+                        {
+                            item.text.plainText = mine[UnitConstants.UNITNAME] as string;
+                        }
                         item.name = mine[UnitConstants.UNITNAME] as string;
                         Object.assign(item.metadata, mine);
                     }
@@ -181,12 +185,15 @@ export function AppendUnitSaveButton(): void
         {
             const newData = SUBVIEW.currentUnit.GetMetadata();
 
-            await OBR.scene.items.updateItems(
-                (item: Item) => item.id == SUBVIEW.currentUnit.id,
-                (items: Item[]) =>
+            await OBR.scene.items.updateItems([SUBVIEW.currentUnit.id] && isImage,
+                (items) =>
                 {
                     for (let item of items)
                     {
+                        if (SUBVIEW.ROOMSETTINGS![SettingsConstants.NAMELABELS] === true)
+                        {
+                            item.text.plainText = newData[UnitConstants.UNITNAME] as string;
+                        }
                         item.name = newData[UnitConstants.UNITNAME] as string;
                         Object.assign(item.metadata, newData);
                     };

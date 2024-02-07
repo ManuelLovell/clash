@@ -1,6 +1,6 @@
 import OBR, { Metadata } from "@owlbear-rodeo/sdk";
 import { Constants, SettingsConstants } from "../clashConstants";
-import { IChatLog } from "../interfaces/chatlog";
+import { IChatLog, IEffectLog } from "../interfaces/chatlog";
 import { Reta } from "./bsUtilities";
 
 export class MessageTracker
@@ -37,6 +37,15 @@ export class MessageTracker
     {
         const chatLog = document.querySelector<HTMLDivElement>('#rollLog')!;
         const TIME_STAMP = new Date().toLocaleTimeString();
+
+        if (metadata[`${Constants.EXTENSIONID}/metadata_effect_notify`] != undefined)
+        {
+            const messageContainer = metadata[`${Constants.EXTENSIONID}/metadata_effect_notify`] as IEffectLog;
+            if (!this.IsThisOld(messageContainer.created, "CLASH", "EFFECT"))
+            {
+                await OBR.notification.show(messageContainer.message, "INFO");
+            }
+        }
 
         // Checks for own logs passing through
         if (metadata[`${Constants.EXTENSIONID}/metadata_rolllog`] != undefined)

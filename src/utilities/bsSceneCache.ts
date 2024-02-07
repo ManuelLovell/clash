@@ -1,4 +1,4 @@
-import OBR, { Grid, Item, Metadata, Player, Theme } from "@owlbear-rodeo/sdk";
+import OBR, { Grid, Item, Metadata, Player, Theme, isImage } from "@owlbear-rodeo/sdk";
 import { GMVIEW } from '../views/clashGMView';
 import { PLVIEW } from "../views/clashPlayerView";
 import { Labeler } from "../utilities/clashLabeler";
@@ -37,6 +37,7 @@ class BSCache
     sceneReady: boolean;
 
     roomMetadata: Metadata;
+    oldRoomMetadata: Metadata;
 
     theme: any;
 
@@ -68,6 +69,7 @@ class BSCache
         this.sceneReady = false;
         this.theme = "DARK";
         this.roomMetadata = {};
+        this.oldRoomMetadata = {};
 
         this.caches = caches;
 
@@ -292,16 +294,16 @@ class BSCache
                 }
                 if (dupesFound.length > 0)
                 {
-                    await OBR.scene.items.updateItems(dupesFound.map(x => x.id), (items) =>
+                    await OBR.scene.items.updateItems(dupesFound.map(x => x.id) && isImage, (items) =>
                     {
                         for (let item of items)
                         {
                             const dupe = dupesFound.find(d => d.id === item.id);
                             if (dupe)
                             {
+                                if (Utilities.Reta(SettingsConstants.NAMELABELS)) item.text.plainText = dupe.name;
                                 item.name = dupe.name;
                                 item.metadata[UnitConstants.UNITNAME] = dupe.name;
-                                console.log("hit")
                             }
                         }
                     });
@@ -314,6 +316,7 @@ class BSCache
                 await PLVIEW.RefreshList()
             }
             await Labeler.UpdateHealthBars();
+            await Labeler.UpdateElevation();
             await Labeler.UpdateLabel();
         }
     }
@@ -379,11 +382,23 @@ class BSCache
                 }
             }
         }
+
+        if (Utilities.Reta(SettingsConstants.EFXROW))
+        {
+            for (const player of party)
+            {
+                if (player.role === "GM")
+                {
+                    await MESSAGES.HandleMessage(player.metadata);
+                }
+            }
+        }
     }
 
-    public async OnRoomMetadataChange(_metadata: Metadata)
+    public async OnRoomMetadataChange(metadata: Metadata)
     {
         await Labeler.UpdateHealthBars();
+        await Labeler.UpdateElevation();
         await Labeler.UpdateLabel();
         if (this.playerRole === "PLAYER")
         {
@@ -402,6 +417,40 @@ class BSCache
                 Constants.MAINLOG.style.display = "none";
             }
         }
+
+        // If the setting was off, and is now on
+        if (this.oldRoomMetadata[SettingsConstants.NAMELABELS] !== true &&
+            metadata[SettingsConstants.NAMELABELS] === true)
+        {
+            const onList = this.sceneItems.filter(x => x.metadata[UnitConstants.ONLIST] === true);
+            if (onList.length > 0)
+            {
+                await OBR.scene.items.updateItems(onList && isImage, (items) =>
+                {
+                    for (const item of items)
+                    {
+                        item.text.plainText = item.name;
+                    }
+                });
+            }
+        }
+        else if (this.oldRoomMetadata[SettingsConstants.NAMELABELS] !== false &&
+            metadata[SettingsConstants.NAMELABELS] === false)
+        {
+            const onList = this.sceneItems.filter(x => x.metadata[UnitConstants.ONLIST] === true);
+            if (onList.length > 0)
+            {
+                await OBR.scene.items.updateItems(onList && isImage, (items) =>
+                {
+                    for (const item of items)
+                    {
+                        item.text.plainText = "";
+                    }
+                });
+            }
+        }
+        
+        this.oldRoomMetadata = metadata;
     }
 
     public async OnThemeChange(theme: Theme)
