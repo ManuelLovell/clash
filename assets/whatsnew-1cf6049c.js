@@ -1,5 +1,8 @@
-import{O as e,C as o}from"./clashConstants-9d97e8bc.js";const n=document.querySelector("#clash-whatsnew"),i=document.querySelector("#clash-whatsnew-notes");n.innerHTML=`
+import{O as e,C as o}from"./clashConstants-55f5c5ac.js";const n=document.querySelector("#clash-whatsnew"),i=document.querySelector("#clash-whatsnew-notes");n.innerHTML=`
   <div id="newsContainer">
+    <h1>Clash! 2/5</h1>
+    Sorry for the hiccup! Some weird bugs made it through release. Should be resolved..
+    </br>
     <h1>Clash! 2/5</h1>
     Lots of new things. Check Patreon link for details.
     </br> Highlights:
