@@ -1,4 +1,4 @@
-import OBR, { Metadata, isImage } from "@owlbear-rodeo/sdk";
+import OBR, { Metadata, Image } from "@owlbear-rodeo/sdk";
 import { SUBVIEW } from '../views/clashSubView';
 import { Constants, SettingsConstants, UnitConstants } from "../clashConstants";
 import { QueryMonsterDatabase, RenderSearchForm } from "../views/clashSubSearchView";
@@ -164,7 +164,7 @@ export function AppendUnitSaveButton(): void
                 metadataPack.push(newData);
             }
 
-            await OBR.scene.items.updateItems(SUBVIEW.multiIds && isImage, (items) =>
+            await OBR.scene.items.updateItems<Image>(SUBVIEW.multiIds, (items) =>
             {
                 for (let item of items)
                 {
@@ -185,7 +185,7 @@ export function AppendUnitSaveButton(): void
         {
             const newData = SUBVIEW.currentUnit.GetMetadata();
 
-            await OBR.scene.items.updateItems([SUBVIEW.currentUnit.id] && isImage,
+            await OBR.scene.items.updateItems<Image>([SUBVIEW.currentUnit.id],
                 (items) =>
                 {
                     for (let item of items)

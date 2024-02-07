@@ -1,4 +1,4 @@
-import OBR, { Grid, Item, Metadata, Player, Theme, isImage } from "@owlbear-rodeo/sdk";
+import OBR, { Grid, Item, Metadata, Player, Theme, Image } from "@owlbear-rodeo/sdk";
 import { GMVIEW } from '../views/clashGMView';
 import { PLVIEW } from "../views/clashPlayerView";
 import { Labeler } from "../utilities/clashLabeler";
@@ -294,7 +294,7 @@ class BSCache
                 }
                 if (dupesFound.length > 0)
                 {
-                    await OBR.scene.items.updateItems(dupesFound.map(x => x.id) && isImage, (items) =>
+                    await OBR.scene.items.updateItems<Image>(dupesFound.map(x => x.id), (items) =>
                     {
                         for (let item of items)
                         {
@@ -422,10 +422,10 @@ class BSCache
         if (this.oldRoomMetadata[SettingsConstants.NAMELABELS] !== true &&
             metadata[SettingsConstants.NAMELABELS] === true)
         {
-            const onList = this.sceneItems.filter(x => x.metadata[UnitConstants.ONLIST] === true);
+            const onList = this.sceneItems.filter(x => x.metadata[UnitConstants.ONLIST] === true) as Image[];
             if (onList.length > 0)
             {
-                await OBR.scene.items.updateItems(onList && isImage, (items) =>
+                await OBR.scene.items.updateItems<Image>(onList, (items) =>
                 {
                     for (const item of items)
                     {
@@ -437,10 +437,10 @@ class BSCache
         else if (this.oldRoomMetadata[SettingsConstants.NAMELABELS] !== false &&
             metadata[SettingsConstants.NAMELABELS] === false)
         {
-            const onList = this.sceneItems.filter(x => x.metadata[UnitConstants.ONLIST] === true);
+            const onList = this.sceneItems.filter(x => x.metadata[UnitConstants.ONLIST] === true) as Image[];
             if (onList.length > 0)
             {
-                await OBR.scene.items.updateItems(onList && isImage, (items) =>
+                await OBR.scene.items.updateItems<Image>(onList, (items) =>
                 {
                     for (const item of items)
                     {
@@ -449,7 +449,7 @@ class BSCache
                 });
             }
         }
-        
+
         this.oldRoomMetadata = metadata;
     }
 

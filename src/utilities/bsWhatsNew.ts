@@ -9,6 +9,9 @@ const footer = document.querySelector<HTMLElement>('#clash-whatsnew-notes')!;
 whatsnew.innerHTML = `
   <div id="newsContainer">
     <h1>Clash! 2/5</h1>
+    Sorry for the hiccup! Some weird bugs made it through release. Should be resolved..
+    </br>
+    <h1>Clash! 2/5</h1>
     Lots of new things. Check Patreon link for details.
     </br> Highlights:
     <li> New Setting: Show Names
