@@ -1,7 +1,7 @@
 import { Constants } from "../clashConstants";
 import UnitInfo from "../unitinfo/clashUnitInfo";
 import { SUBVIEW } from "./clashSubView";
-import { AppendAddActionButtons, AppendCollectionSaveButton, AppendFavoriteButton, AppendUnitExportButton, AppendUnitSaveButton, AppendWindowPinButton } from "../buttons/clashSubviewButtons";
+import { AppendAddActionButtons, AppendCloseWindowButton, AppendCollectionSaveButton, AppendFavoriteButton, AppendUnitExportButton, AppendUnitSaveButton, AppendWindowPinButton } from "../buttons/clashSubviewButtons";
 import { HandleDiceRoll } from "../dice/bsDiceHandler";
 
 const attributeArray: string[] = ["Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Charisma"];
@@ -236,6 +236,7 @@ export function BuildUnitStatBlock(clashUnit: UnitInfo)
     AppendCollectionSaveButton();
     AppendUnitExportButton();
     AppendUnitSaveButton();
+    AppendCloseWindowButton();
     SUBVIEW.ShowSubMenu();
 }
 

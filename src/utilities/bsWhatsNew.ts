@@ -9,6 +9,15 @@ const footer = document.querySelector<HTMLElement>('#clash-whatsnew-notes')!;
 whatsnew.innerHTML = `
   <div id="newsContainer">
     <h1>Clash! 2/5</h1>
+    Minor update. 
+    </br>Added a setting to change the Initiative Roller to any value 1-99.
+    <li> So if your game uses D10s for initiatve, just change it to 10.
+    </br>
+    </br>Added a setting to turn off adding your DEX bonus to the initiative roll.
+    </br>
+    </br> The stat block no longer closes on click-away. I should've done this awhile ago, but in some ways it seemed 'faster' to me. A close button is now in the top-right. No more accidentally losing changes.
+    </br>
+    <h1>Clash! 2/5</h1>
     Sorry for the hiccup! Some weird bugs made it through release. Should be resolved..
     </br>
     <h1>Clash! 2/5</h1>

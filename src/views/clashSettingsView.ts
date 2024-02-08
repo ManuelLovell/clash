@@ -122,6 +122,12 @@ export async function RenderSettings(): Promise<void>
                 Disable Turn Label
             </div>
             <span style="display:flex;">Turn Label <div id="turnLabelTextContainer" style="padding-left: 6px;"></div></span>
+            <div title="This makes it so any initiative rolled via Clash adds the unit's Dexterity modifier.">
+                ${CreateSlider("INITBONUS")}
+                Add DEX to Initiative Rolls
+            </div>
+            <span style="display:flex;">Initiative Dice <div id="initDiceContainer" style="padding-left: 6px;"></div></span>
+
             <div class="settings-header">Dice</div>
             <div title="This enables the integration with Rumble! so that roll results are shown for all to see.">
                 ${CreateSlider("RUMBLELOG")}
@@ -159,6 +165,7 @@ export async function RenderSettings(): Promise<void>
     SetCheckbox("DISABLEFOCUS", Reta(SettingsConstants.DISABLEFOCUS) ? true : false);
     SetCheckbox("SHOWNAMES", Reta(SettingsConstants.NAMELABELS) ? true : false);
     SetCheckbox("DISABLELABEL", Reta(SettingsConstants.DISABLELABEL) ? true : false);
+    SetCheckbox("INITBONUS", Reta(SettingsConstants.INITBONUS) ?? true);
     SetCheckbox("RUMBLELOG", Reta(SettingsConstants.RUMBLELOG) ? true : false);
     SetCheckbox("VISUALDICE", Reta(SettingsConstants.VISUALDICE) ? true : false);
     SetCheckbox("DICENOTIFICATION", Reta(SettingsConstants.DICENOTIFICATION) ? true : false);
@@ -240,6 +247,33 @@ export async function RenderSettings(): Promise<void>
         }
     };
     discordHookContainer?.appendChild(discordHookInput);
+
+    //Create Initiative Dice Input
+    const initDiceContainer = document.getElementById("initDiceContainer");
+    const initDiceButton = document.createElement('input');
+    initDiceButton.type = "number";
+    initDiceButton.id = "textLabelButton";
+    initDiceButton.classList.add("remove-number-arrow");
+    initDiceButton.title = "Change your Turn Label's text"
+    initDiceButton.placeholder = "Custom Turn Label";
+    initDiceButton.maxLength = 2;
+    initDiceButton.min = "2"; // Minimum value allowed
+    initDiceButton.max = "99"; // Maximum value allowed
+    initDiceButton.value = BSCACHE.roomMetadata[SettingsConstants.INITIATIVEDICE] as string ?? "20";
+    initDiceButton.size = 6;
+    initDiceButton.oninput = (event: Event) => 
+    {
+        const target = event.currentTarget as HTMLInputElement;
+        if (parseInt(target.value) < 1) target.value = "1";
+        else if (parseInt(target.value) > 99) target.value = "99";
+        else if (isNaN(parseInt(target.value))) target.value = "20";
+    };
+    initDiceButton.onblur = async (event: Event) =>
+    {
+        const target = event.currentTarget as HTMLInputElement;
+        await OBR.room.setMetadata({ [SettingsConstants.INITIATIVEDICE]: parseInt(target.value) });
+    };
+    initDiceContainer?.appendChild(initDiceButton);
 
     //Create Import ALL Button
     const importAllContainer = document.getElementById("importAllContainer");
@@ -503,6 +537,9 @@ export async function RenderSettings(): Promise<void>
                     break;
                 case "ELEVATEROW":
                     await OBR.room.setMetadata({ [SettingsConstants.ELEVATEROW]: target.checked });
+                    break;
+                case "INITBONUS":
+                    await OBR.room.setMetadata({ [SettingsConstants.INITBONUS]: target.checked });
                     break;
                 default:
                     break;

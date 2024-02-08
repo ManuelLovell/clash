@@ -49,8 +49,12 @@ export function GetRollerHeader()
             const unitId = unitNameInput.id.substring(2);
 
             const initElement = document.querySelector(`#iI${unitId}`) as HTMLInputElement;
-            const dexBonus = parseFloat(initElement.getAttribute("unit-dexbonus")!);
-            const result = (dexBonus + Math.floor(Math.random() * (20 - 1) + 1)).toString();
+            const useDex = Utilities.Reta(SettingsConstants.INITBONUS) ?? true;
+            const dexBonus = useDex ? parseFloat(initElement.getAttribute("unit-dexbonus")!) : 0;
+
+            const dice = Utilities.Reta(SettingsConstants.INITIATIVEDICE) ?? 20;
+
+            const result = (dexBonus + Math.floor(Math.random() * (dice - 1) + 1)).toString();
             initElement.value = result;
             unitsUpdated.push({ key: unitId, value: result })
         });
@@ -231,7 +235,7 @@ export function GetRollInput(unit: Item): HTMLInputElement
 {
     const element = document.createElement('input');
     element.type = "image";
-    element.title = "Roll this Unit's Iniative";
+    element.title = "Roll this Unit's Initiative";
     element.id = `rB${unit.id}`;
     element.className = "clickable";
     element.onclick = async (event: Event) =>
@@ -239,9 +243,14 @@ export function GetRollInput(unit: Item): HTMLInputElement
         const target = event.currentTarget as HTMLInputElement;
         const unitId = target.id.substring(2);
         const unit = BSCACHE.sceneItems.find(item => item.id === unitId)!;
+
         const dex = unit.metadata[UnitConstants.DEXSCORE] as number;
-        const dexBonus = Math.floor(((+dex) - 10) / 2);
-        const rollResult = (dexBonus + Math.floor(Math.random() * (20 - 1) + 1)).toString();
+        const useDex = Utilities.Reta(SettingsConstants.INITBONUS) ?? true;
+        const dexBonus = useDex ? Math.floor(((+dex) - 10) / 2) : 0;
+
+        const dice = Utilities.Reta(SettingsConstants.INITIATIVEDICE) ?? 20;
+
+        const rollResult = (dexBonus + Math.floor(Math.random() * (dice - 1) + 1)).toString();
 
         await UpdateUnit(target.id, [{ key: UnitConstants.INITIATIVE, value: rollResult }]);
     };
@@ -900,18 +909,21 @@ export async function OpenSubMenu(unitId: string, elementId?: string): Promise<v
             height: viewableHeight,
             width: 350,
             anchorElementId: elementId,
-            hidePaper: true
+            hidePaper: true,
+            disableClickAway: true
         });
     }
     else
     {
         await OBR.popover.close(`POP_${unitId}`);
-        await OBR.modal.open({
+        await OBR.popover.open({
             id: Constants.EXTENSIONSUBMENUID,
             url: `/submenu/subindex.html?unitid=${unitId}`,
             height: viewableHeight,
             width: 350,
             hidePaper: true,
+            disableClickAway: true
+
         });
         //}
     }

@@ -252,7 +252,8 @@ export function SetupContextMenu()
                     height: viewableHeight,
                     width: 350,
                     anchorElementId: elementId,
-                    hidePaper: true
+                    hidePaper: true,
+                    disableClickAway: true
                 });
             }
         }

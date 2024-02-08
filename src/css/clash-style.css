@@ -604,3 +604,15 @@ input:checked+.slider:before {
 .flash-input {
     animation: flash 1s ease;
 }
+
+input.remove-number-arrow[type="number"]::-webkit-inner-spin-button,
+input.remove-number-arrow[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input.remove-number-arrow[type="number"] {
+    /* Optionally, you can adjust styles to ensure consistency */
+    -moz-appearance: textfield;
+    appearance: textfield;
+}

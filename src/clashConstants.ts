@@ -1,6 +1,6 @@
 export class Constants
 {
-    static VERSION = "whatsnew-clash-231";
+    static VERSION = "whatsnew-clash-232";
     static EXTENSIONID = "com.battle-system.clash";
     static DISCORDID = "com.battle-system.discord";
     static DICEWINDOW = "com.battle-system.dicewindow";
@@ -197,6 +197,8 @@ export class SettingsConstants
     static DISCORDURL = `${Constants.EXTENSIONID}/setting_discordurl`;
     static TURNTEXT = `${Constants.EXTENSIONID}/setting_turntext`;
     static NAMELABELS = `${Constants.EXTENSIONID}/setting_namelabel`;
+    static INITIATIVEDICE = `${Constants.EXTENSIONID}/setting_initdice`;
+    static INITBONUS = `${Constants.EXTENSIONID}/setting_initbonus`;
 
     static HPROW = `${Constants.EXTENSIONID}/setting_hpcol`;
     static ROLLERROW = `${Constants.EXTENSIONID}/setting_rollercol`;

@@ -388,6 +388,29 @@ export function AppendWindowPinButton(): void
     buttonContainer?.appendChild(pinButton);
 }
 
+export function AppendCloseWindowButton(): void
+{
+    //Get Button Container
+    const buttonContainer = document.getElementById("buttonContainer");
+
+    //Create Export Button
+    const closeButton = document.createElement('input');
+    closeButton.type = "image";
+    closeButton.id = "closeSubMenuButton";
+    closeButton.classList.add("clickable");
+    closeButton.style.marginLeft = "5px";
+    closeButton.onclick = async function () 
+    {
+        await OBR.popover.close(Constants.EXTENSIONSUBMENUID);
+    }
+    closeButton.src =  "/close.svg";
+    closeButton.title = "Close Window";
+    closeButton.height = 20;
+    closeButton.width = 20;
+
+    buttonContainer?.appendChild(closeButton);
+}
+
 export function AppendAddActionButtons(): void
 {
     //Get Button Container
