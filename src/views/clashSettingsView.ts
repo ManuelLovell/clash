@@ -117,6 +117,10 @@ export async function RenderSettings(): Promise<void>
                 ${CreateSlider("SHOWNAMES")}
                 Show Names on Token
             </div>
+            <div title="This will give all duplicate tokens a random descripitor to tell them apart. Turn off if you hate fun.">
+                ${CreateSlider("RANDOMNAME")}
+                Descriptor Names for Duplicates
+            </div>
             <div title="This removes the label applied to the token indicating it's their turn.">
                 ${CreateSlider("DISABLELABEL")}
                 Disable Turn Label
@@ -164,6 +168,7 @@ export async function RenderSettings(): Promise<void>
     SetCheckbox("REVERSELIST", Reta(SettingsConstants.REVERSELIST) ? true : false);
     SetCheckbox("DISABLEFOCUS", Reta(SettingsConstants.DISABLEFOCUS) ? true : false);
     SetCheckbox("SHOWNAMES", Reta(SettingsConstants.NAMELABELS) ? true : false);
+    SetCheckbox("RANDOMNAME", Reta(SettingsConstants.RANDOMNAME) ?? true);
     SetCheckbox("DISABLELABEL", Reta(SettingsConstants.DISABLELABEL) ? true : false);
     SetCheckbox("INITBONUS", Reta(SettingsConstants.INITBONUS) ?? true);
     SetCheckbox("RUMBLELOG", Reta(SettingsConstants.RUMBLELOG) ? true : false);
@@ -492,6 +497,9 @@ export async function RenderSettings(): Promise<void>
                     break;
                 case "SHOWNAMES":
                     await OBR.room.setMetadata({ [SettingsConstants.NAMELABELS]: target.checked });
+                    break;
+                case "RANDOMNAME":
+                    await OBR.room.setMetadata({ [SettingsConstants.RANDOMNAME]: target.checked });
                     break;
                 case "DISABLELABEL":
                     await OBR.room.setMetadata({ [SettingsConstants.DISABLELABEL]: target.checked });

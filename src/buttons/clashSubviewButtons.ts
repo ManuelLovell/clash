@@ -158,7 +158,12 @@ export function AppendUnitSaveButton(): void
             {
                 SUBVIEW.currentUnit.id = id;
                 SUBVIEW.currentUnit.tokenId = id;
-                SUBVIEW.currentUnit.unitName = Utilities.AddOrReplaceAdjective(baseName);
+
+                const randomizeNames = Utilities.Reta(SettingsConstants.RANDOMNAME) ?? true;
+                if (randomizeNames)
+                {
+                    SUBVIEW.currentUnit.unitName = Utilities.AddOrReplaceAdjective(baseName);
+                }
 
                 const newData = SUBVIEW.currentUnit.GetMetadata();
                 metadataPack.push(newData);
@@ -403,7 +408,7 @@ export function AppendCloseWindowButton(): void
     {
         await OBR.popover.close(Constants.EXTENSIONSUBMENUID);
     }
-    closeButton.src =  "/close.svg";
+    closeButton.src = "/close.svg";
     closeButton.title = "Close Window";
     closeButton.height = 20;
     closeButton.width = 20;

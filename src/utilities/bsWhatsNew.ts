@@ -8,6 +8,11 @@ const footer = document.querySelector<HTMLElement>('#clash-whatsnew-notes')!;
 
 whatsnew.innerHTML = `
   <div id="newsContainer">
+    <h1>Clash! 2/8</h1>
+    Some people hate fun.
+    </br> So I added a toggle to turn off randomizing name descriptors. 
+    </br> Enjoy your five identical goblins.
+    </br>
     <h1>Clash! 2/5</h1>
     Minor update. 
     </br>Added a setting to change the Initiative Roller to any value 1-99.

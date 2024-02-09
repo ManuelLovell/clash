@@ -271,44 +271,47 @@ class BSCache
             if (this.playerRole === "GM")
             {
                 // Check for name duplicates
-                const namesChecked: string[] = [];
-                const dupesFound: Item[] = [];
-                for (const item of items)
+                const randomizeNames = Utilities.Reta(SettingsConstants.RANDOMNAME) ?? true;
+                if (randomizeNames)
                 {
-                    if (item.metadata[UnitConstants.ONLIST] !== true) continue;
+                    const namesChecked: string[] = [];
+                    const dupesFound: Item[] = [];
+                    for (const item of items)
+                    {
+                        if (item.metadata[UnitConstants.ONLIST] !== true) continue;
 
-                    const itemName = item.name;
-                    if (namesChecked.includes(itemName))
-                    {
-                        dupesFound.push(item);
-                    }
-                    else
-                    {
-                        namesChecked.push(itemName);
-                    }
-                }
-
-                for (let dupe of dupesFound)
-                {
-                    dupe.name = Utilities.AddOrReplaceAdjective(dupe.name);
-                }
-                if (dupesFound.length > 0)
-                {
-                    await OBR.scene.items.updateItems<Image>(dupesFound.map(x => x.id), (items) =>
-                    {
-                        for (let item of items)
+                        const itemName = item.name;
+                        if (namesChecked.includes(itemName))
                         {
-                            const dupe = dupesFound.find(d => d.id === item.id);
-                            if (dupe)
-                            {
-                                if (Utilities.Reta(SettingsConstants.NAMELABELS)) item.text.plainText = dupe.name;
-                                item.name = dupe.name;
-                                item.metadata[UnitConstants.UNITNAME] = dupe.name;
-                            }
+                            dupesFound.push(item);
                         }
-                    });
-                }
+                        else
+                        {
+                            namesChecked.push(itemName);
+                        }
+                    }
 
+                    for (let dupe of dupesFound)
+                    {
+                        dupe.name = Utilities.AddOrReplaceAdjective(dupe.name);
+                    }
+                    if (dupesFound.length > 0)
+                    {
+                        await OBR.scene.items.updateItems<Image>(dupesFound.map(x => x.id), (items) =>
+                        {
+                            for (let item of items)
+                            {
+                                const dupe = dupesFound.find(d => d.id === item.id);
+                                if (dupe)
+                                {
+                                    if (Utilities.Reta(SettingsConstants.NAMELABELS)) item.text.plainText = dupe.name;
+                                    item.name = dupe.name;
+                                    item.metadata[UnitConstants.UNITNAME] = dupe.name;
+                                }
+                            }
+                        });
+                    }
+                }
                 await GMVIEW.RefreshList()
             }
             else
