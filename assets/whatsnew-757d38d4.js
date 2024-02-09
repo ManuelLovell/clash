@@ -1,5 +1,10 @@
-import{O as e,C as o}from"./clashConstants-081c464e.js";const i=document.querySelector("#clash-whatsnew"),n=document.querySelector("#clash-whatsnew-notes");i.innerHTML=`
+import{O as e,C as o}from"./clashConstants-8fb2b9d4.js";const n=document.querySelector("#clash-whatsnew"),i=document.querySelector("#clash-whatsnew-notes");n.innerHTML=`
   <div id="newsContainer">
+    <h1>Clash! 2/8</h1>
+    Some people hate fun.
+    </br> So I added a toggle to turn off randomizing name descriptors. 
+    </br> Enjoy your five identical goblins.
+    </br>
     <h1>Clash! 2/5</h1>
     Minor update. 
     </br>Added a setting to change the Initiative Roller to any value 1-99.
@@ -72,7 +77,7 @@ import{O as e,C as o}from"./clashConstants-081c464e.js";const i=document.querySe
     More bug fixes.
     </br> - When loading into a fresh room, some settings weren't initializing correctly. Turn/Round counter - which wouldn't increment until you refreshed. The Roller column, which you would need to toggle off/on. Label-Text, which.. would just throw an error. Oops.  This was all corrected.
   </div>
-`;e.onReady(async()=>{n.innerHTML=`
+`;e.onReady(async()=>{i.innerHTML=`
     <a href="https://www.patreon.com/battlesystem" target="_blank">Patreon!</a>
     <a href="https://discord.gg/ANZKDmWzr6" target="_blank">Join the OBR Discord!</a>
     <div class="close"><img style="height:40px; width:40px;" src="/close-button.svg"</div>`;const t=document.querySelector(".close");t.onclick=async()=>{await e.modal.close(o.EXTENSIONWHATSNEW)}});
