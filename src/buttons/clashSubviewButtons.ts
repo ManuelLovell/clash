@@ -359,7 +359,6 @@ export function AppendWindowPinButton(): void
             const width = await OBR.viewport.getWidth() - 70;
 
             // Close any existing windows before pinning something
-            await OBR.modal.close(Constants.EXTENSIONSUBMENUID);
             await OBR.popover.close(Constants.EXTENSIONSUBMENUID);
             await OBR.popover.open({
                 id: `POP_${SUBVIEW.POPOVERSUBMENUID}`,
@@ -406,7 +405,10 @@ export function AppendCloseWindowButton(): void
     closeButton.style.marginLeft = "5px";
     closeButton.onclick = async function () 
     {
-        await OBR.popover.close(Constants.EXTENSIONSUBMENUID);
+        if (SUBVIEW.pinned)
+            await OBR.popover.close(`POP_${SUBVIEW.POPOVERSUBMENUID}`);
+        else
+            await OBR.popover.close(Constants.EXTENSIONSUBMENUID);
     }
     closeButton.src = "/close.svg";
     closeButton.title = "Close Window";

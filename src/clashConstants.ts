@@ -1,6 +1,6 @@
 export class Constants
 {
-    static VERSION = "whatsnew-clash-233";
+    static VERSION = "whatsnew-clash-234";
     static EXTENSIONID = "com.battle-system.clash";
     static DISCORDID = "com.battle-system.discord";
     static DICEWINDOW = "com.battle-system.dicewindow";
