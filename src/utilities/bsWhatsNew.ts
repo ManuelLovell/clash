@@ -8,6 +8,9 @@ const footer = document.querySelector<HTMLElement>('#clash-whatsnew-notes')!;
 
 whatsnew.innerHTML = `
   <div id="newsContainer">
+    <h1>Clash! 2/16</h1>
+    Minor fix for the 'Remove Unit' contextmenu item disappearing when a player joined/left the room.
+    </br>
     <h1>Clash! 2/8</h1>
     Minor fix for Pinned windows, where clicking close would close the wrong window.
     </br>

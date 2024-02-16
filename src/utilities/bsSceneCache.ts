@@ -363,6 +363,7 @@ class BSCache
         {
             GMVIEW.viewPlayerList.innerHTML = "";
             GMVIEW.viewPlayerList.appendChild(GMVIEW.GetEmptyContextItem());
+            GMVIEW.viewPlayerList.appendChild(GMVIEW.GetRemoveContextItem());
 
             for (const player of party)
             {
