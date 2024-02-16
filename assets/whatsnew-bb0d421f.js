@@ -1,5 +1,8 @@
-import{O as e,C as o}from"./clashConstants-e5912b2a.js";const n=document.querySelector("#clash-whatsnew"),i=document.querySelector("#clash-whatsnew-notes");n.innerHTML=`
+import{O as e,C as o}from"./clashConstants-42b45410.js";const n=document.querySelector("#clash-whatsnew"),i=document.querySelector("#clash-whatsnew-notes");n.innerHTML=`
   <div id="newsContainer">
+    <h1>Clash! 2/16</h1>
+    Minor fix for the 'Remove Unit' contextmenu item disappearing when a player joined/left the room.
+    </br>
     <h1>Clash! 2/8</h1>
     Minor fix for Pinned windows, where clicking close would close the wrong window.
     </br>
