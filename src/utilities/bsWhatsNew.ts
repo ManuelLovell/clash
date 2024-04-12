@@ -2,12 +2,14 @@ import OBR from "@owlbear-rodeo/sdk";
 import '/src/css/new-style.css'
 import { Constants } from "./../clashConstants";
 
-
-const whatsnew = document.querySelector<HTMLDivElement>('#clash-whatsnew')!;
-const footer = document.querySelector<HTMLElement>('#clash-whatsnew-notes')!;
+const whatsnew = document.querySelector<HTMLDivElement>('#bs-whatsnew')!;
+const footer = document.querySelector<HTMLElement>('#bs-whatsnew-notes')!;
 
 whatsnew.innerHTML = `
   <div id="newsContainer">
+    <h1>Clash! 4/12</h1>
+    Minor bug fix for Open5e not being available; It'll now show an error message if that's the case and not just tank your search. So you can still use the collection. Sorry!
+    </br>
     <h1>Clash! 2/16</h1>
     Minor fix for the 'Remove Unit' contextmenu item disappearing when a player joined/left the room.
     </br>
@@ -94,15 +96,40 @@ whatsnew.innerHTML = `
 `;
 
 OBR.onReady(async () =>
-{
-    footer.innerHTML = `
-    <a href="https://www.patreon.com/battlesystem" target="_blank">Patreon!</a>
-    <a href="https://discord.gg/ANZKDmWzr6" target="_blank">Join the OBR Discord!</a>
-    <div class="close"><img style="height:40px; width:40px;" src="/close-button.svg"</div>`;
-
-    const closebutton = document.querySelector<HTMLElement>('.close')!;
-    closebutton!.onclick = async () =>
     {
-        await OBR.modal.close(Constants.EXTENSIONWHATSNEW);
-    };
-});
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        const subscriberId = urlParams.get('subscriber')!;
+        const subscriber = subscriberId === "true";
+    
+        footer.innerHTML = `
+        <div id="footButtonContainer">
+            <button id="discordButton" type="button" title="Join the Owlbear-Rodeo Discord"><embed class="svg discord" src="/w-discord.svg" /></button>
+            <button id="patreonButton" type="button" ${subscriber ? 'title="Thank you for subscribing!"': 'title="Check out the Battle-System Patreon"'}>
+            ${subscriber ? '<embed id="patreonLogo" class="svg thankyou" src="/thankyou.svg" />'
+                : '<embed id="patreonLogo" class="svg patreon" src="/w-patreon.png" />'}</button>
+        </div>
+        <button id="closeButton" type="button" title="Close this window"><embed class="svg close" src="/w-close.svg" /></button>
+        `;
+    
+        const closebutton = document.getElementById('closeButton');
+        closebutton!.onclick = async () =>
+        {
+            await OBR.modal.close(Constants.EXTENSIONWHATSNEW);
+        };
+    
+        const discordButton = document.getElementById('discordButton');
+        discordButton!.onclick = async (e) =>
+        {
+            e.preventDefault();
+            window.open("https://discord.gg/ANZKDmWzr6", "_blank");
+        };
+    
+        const patreonButton = document.getElementById('patreonButton');
+        patreonButton!.onclick = async (e) =>
+        {
+            e.preventDefault();
+            window.open("https://www.patreon.com/battlesystem", "_blank");
+        };
+    });
+    

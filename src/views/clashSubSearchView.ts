@@ -72,29 +72,42 @@ export async function QueryMonsterDatabase()
 
     if (!collectionSearch)
     {
-        await fetch(`${Constants.OPEN5EAPI}${searchValueButton.value}`)
-            .then(function (response)
-            {
-                return response.json();
-            }).then(function (data: IOpen5eMonsterListResponse)
-            {
-                if (data.count > 0)
+        try
+        {
+            await fetch(`${Constants.OPEN5EAPI}${searchValueButton.value}`)
+                .then(function (response)
                 {
-                    data.results.forEach((monster) =>
+                    return response.json();
+                }).then(function (data: IOpen5eMonsterListResponse)
+                {
+                    if (data.count > 0)
                     {
-                        const importThis = document.createElement('input');
-                        importThis.type = "button";
-                        importThis.id = `${monster.slug}`;
-                        importThis.classList.add("monster-import-button-confirm");
-                        importThis.value = "Import";
-                        importThis.title = `Import ${monster.name} onto this Unit`;
+                        data.results.forEach((monster) =>
+                        {
+                            const importThis = document.createElement('input');
+                            importThis.type = "button";
+                            importThis.id = `${monster.slug}`;
+                            importThis.classList.add("monster-import-button-confirm");
+                            importThis.value = "Import";
+                            importThis.title = `Import ${monster.name} onto this Unit`;
 
-                        monsterInformationHtml += `<li style='--tooltip-color:${Utilities.ColorName(monster.document__slug)}' data-tag='🡆 from ${monster.document__slug}'>
-                        <div class='monster-name-list information' data-information='${TranslateOpen5eToHelpText(monster)}'>${Utilities.TruncateName(monster.name)}</div>
-                        <div class='float-right'>${importThis.outerHTML}</div></li>`;
-                    });
-                }
-            });
+                            monsterInformationHtml += `<li style='--tooltip-color:${Utilities.ColorName(monster.document__slug)}' data-tag='🡆 from ${monster.document__slug}'>
+                            <div class='monster-name-list information' data-information='${TranslateOpen5eToHelpText(monster)}'>${Utilities.TruncateName(monster.name)}</div>
+                            <div class='float-right'>${importThis.outerHTML}</div></li>`;
+                        });
+                    }
+                });
+        } catch (error)
+        {
+            const importThis = document.createElement('input');
+            importThis.type = "button";
+            importThis.id = `open5eError`;
+            importThis.classList.add("open-5e-error");
+            importThis.value = "Import";
+            importThis.title = `There was an error retrieving results from Open5e.com`;
+
+            monsterInformationHtml += `<li><div class='monster-name-list information'>Error retrieving from Open5e, the service may be down. Please try again later. Only collection items will be shown.</div></li>`;
+        }
     }
 
     const dexieSearch = collectionSearch ? await db.Creatures.toArray()
