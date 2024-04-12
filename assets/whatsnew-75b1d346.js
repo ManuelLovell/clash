@@ -1,5 +1,8 @@
-import{O as e,C as o}from"./clashConstants-42b45410.js";const n=document.querySelector("#clash-whatsnew"),i=document.querySelector("#clash-whatsnew-notes");n.innerHTML=`
+import{O as o,C as a}from"./clashConstants-0f9588e3.js";const l=document.querySelector("#bs-whatsnew"),h=document.querySelector("#bs-whatsnew-notes");l.innerHTML=`
   <div id="newsContainer">
+    <h1>Clash! 4/12</h1>
+    Minor bug fix for Open5e not being available; It'll now show an error message if that's the case and not just tank your search. So you can still use the collection. Sorry!
+    </br>
     <h1>Clash! 2/16</h1>
     Minor fix for the 'Remove Unit' contextmenu item disappearing when a player joined/left the room.
     </br>
@@ -83,7 +86,11 @@ import{O as e,C as o}from"./clashConstants-42b45410.js";const n=document.querySe
     More bug fixes.
     </br> - When loading into a fresh room, some settings weren't initializing correctly. Turn/Round counter - which wouldn't increment until you refreshed. The Roller column, which you would need to toggle off/on. Label-Text, which.. would just throw an error. Oops.  This was all corrected.
   </div>
-`;e.onReady(async()=>{i.innerHTML=`
-    <a href="https://www.patreon.com/battlesystem" target="_blank">Patreon!</a>
-    <a href="https://discord.gg/ANZKDmWzr6" target="_blank">Join the OBR Discord!</a>
-    <div class="close"><img style="height:40px; width:40px;" src="/close-button.svg"</div>`;const t=document.querySelector(".close");t.onclick=async()=>{await e.modal.close(o.EXTENSIONWHATSNEW)}});
+`;o.onReady(async()=>{const n=window.location.search,t=new URLSearchParams(n).get("subscriber")==="true";h.innerHTML=`
+        <div id="footButtonContainer">
+            <button id="discordButton" type="button" title="Join the Owlbear-Rodeo Discord"><embed class="svg discord" src="/w-discord.svg" /></button>
+            <button id="patreonButton" type="button" ${t?'title="Thank you for subscribing!"':'title="Check out the Battle-System Patreon"'}>
+            ${t?'<embed id="patreonLogo" class="svg thankyou" src="/thankyou.svg" />':'<embed id="patreonLogo" class="svg patreon" src="/w-patreon.png" />'}</button>
+        </div>
+        <button id="closeButton" type="button" title="Close this window"><embed class="svg close" src="/w-close.svg" /></button>
+        `;const i=document.getElementById("closeButton");i.onclick=async()=>{await o.modal.close(a.EXTENSIONWHATSNEW)};const s=document.getElementById("discordButton");s.onclick=async e=>{e.preventDefault(),window.open("https://discord.gg/ANZKDmWzr6","_blank")};const r=document.getElementById("patreonButton");r.onclick=async e=>{e.preventDefault(),window.open("https://www.patreon.com/battlesystem","_blank")}});
