@@ -216,12 +216,12 @@ export function GetInitiativeInput(unit: Item): HTMLInputElement
     element.setAttribute("unit-dexbonus", Math.floor((Meta(unit, UnitConstants.DEXSCORE) - 10) / 2).toString());
     element.value = Meta(unit, UnitConstants.INITIATIVE).toString();
     element.id = `iI${unit.id}`;
-    element.size = 2;
+    element.size = 4;
     element.min = "0";
     element.max = "99";
-    element.maxLength = 2;
+    element.maxLength = 4;
     element.style.width = smallColWidth;
-    element.style.minWidth = "25px";
+    element.style.minWidth = "28px";
     element.onblur = async (event: Event) =>
     {
         const target = event.currentTarget as HTMLInputElement;
