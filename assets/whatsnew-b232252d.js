@@ -1,5 +1,8 @@
-import{O as o,C as a}from"./clashConstants-0f9588e3.js";const l=document.querySelector("#bs-whatsnew"),h=document.querySelector("#bs-whatsnew-notes");l.innerHTML=`
+import{O as o,C as a}from"./clashConstants-c7ad4635.js";const l=document.querySelector("#bs-whatsnew"),h=document.querySelector("#bs-whatsnew-notes");l.innerHTML=`
   <div id="newsContainer">
+    <h1>Clash! 4/13</h1>
+    Allowed up to four 'characters' in the Initiative Input. In case you need to do a 12.3 and 12.4.
+    </br>
     <h1>Clash! 4/12</h1>
     Minor bug fix for Open5e not being available; It'll now show an error message if that's the case and not just tank your search. So you can still use the collection. Sorry!
     </br>
