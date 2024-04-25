@@ -289,6 +289,8 @@ class GMView
             if (useColumns.includes("ELEVATE"))
             {
                 const elCell = row.insertCell(cellNumber);
+                elCell.style.display = "flex";
+                elCell.style.justifyContent = "center";
                 const elInput = GetElevationInput(unit);
                 elCell.appendChild(elInput);
                 cellNumber++;

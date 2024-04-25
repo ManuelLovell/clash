@@ -14,3 +14,13 @@ interface IBonesRoll
     //   viewers: "GM"
     // };
 }
+
+interface IBonesLog
+{
+    created: string;
+    rollHtml: string;
+    senderColor: string;
+    senderId: string;
+    senderName: string;
+    viewers: string;
+}

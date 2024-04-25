@@ -137,9 +137,13 @@ export async function RenderSettings(): Promise<void>
                 ${CreateSlider("RUMBLELOG")}
                 Enable Rumble! Integratrion 
             </div>
+            <div title="This enables the integration with Bones! so that roll results are shown through the Bones! User Interface.">
+                ${CreateSlider("BONESROLL")}
+                Enable Bones! Integratrion 
+            </div>
             <div title="This enables the 3D dice window when rolling (To self only).">
                 ${CreateSlider("VISUALDICE")}
-                Enable 3D Dice Rolls (For Self)
+                Enable Clash! 3D Rolls (For Self)
             </div>
             <div title="This enables the dice notification showing the results at the top of the screen.">
                 ${CreateSlider("DICENOTIFICATION")}
@@ -172,6 +176,7 @@ export async function RenderSettings(): Promise<void>
     SetCheckbox("DISABLELABEL", Reta(SettingsConstants.DISABLELABEL) ? true : false);
     SetCheckbox("INITBONUS", Reta(SettingsConstants.INITBONUS) ?? true);
     SetCheckbox("RUMBLELOG", Reta(SettingsConstants.RUMBLELOG) ? true : false);
+    SetCheckbox("BONESROLL", Reta(SettingsConstants.BONESROLL) ? true : false);
     SetCheckbox("VISUALDICE", Reta(SettingsConstants.VISUALDICE) ? true : false);
     SetCheckbox("DICENOTIFICATION", Reta(SettingsConstants.DICENOTIFICATION) ? true : false);
     SetCheckbox("DICEEVERYONE", Reta(SettingsConstants.DICEEVERYONE) ? true : false);
@@ -509,6 +514,9 @@ export async function RenderSettings(): Promise<void>
                     break;
                 case "RUMBLELOG":
                     await OBR.room.setMetadata({ [SettingsConstants.RUMBLELOG]: target.checked });
+                    break;
+                case "BONESROLL":
+                    await OBR.room.setMetadata({ [SettingsConstants.BONESROLL]: target.checked });
                     break;
                 case "VISUALDICE":
                     await OBR.room.setMetadata({ [SettingsConstants.VISUALDICE]: target.checked });

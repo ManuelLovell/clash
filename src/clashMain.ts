@@ -30,6 +30,27 @@ Constants.MAINDISABLED.innerHTML = `
 // Setup OBR functions
 OBR.onReady(async () =>
 {
+    const sceneReady = await OBR.scene.isReady();
+
+    if (sceneReady === false)
+    {
+        const startup = OBR.scene.onReadyChange(async (ready) =>
+        {
+            if (ready)
+            {
+                startup(); // Kill startup Handler
+                await StartClash();
+            }
+        });
+    }
+    else
+    {
+        await StartClash();
+    }
+});
+
+async function StartClash()
+{
     await BSCACHE.InitializeCache();
     BSCACHE.SetupHandlers();
 
@@ -54,4 +75,4 @@ OBR.onReady(async () =>
     }
     Constants.MAINAPP!.hidden = false;
     Constants.MAINLOAD!.hidden = true;
-});
+}

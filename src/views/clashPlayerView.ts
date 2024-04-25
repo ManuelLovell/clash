@@ -299,6 +299,8 @@ class PlayerView
             if (useColumns.includes("ELEVATE"))
             {
                 const elCell = row.insertCell(cellNumber);
+                elCell.style.display = "flex";
+                elCell.style.justifyContent = "center";
                 const elInput = GetElevationInput(unit);
                 this.Disable(elInput, myUnit);
                 elCell.appendChild(elInput);

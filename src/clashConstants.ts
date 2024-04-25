@@ -1,6 +1,6 @@
 export class Constants
 {
-    static VERSION = "whatsnew-clash-237";
+    static VERSION = "whatsnew-clash-238";
     static EXTENSIONID = "com.battle-system.clash";
     static DISCORDID = "com.battle-system.discord";
     static DICEWINDOW = "com.battle-system.dicewindow";
@@ -190,6 +190,7 @@ export class SettingsConstants
     static DISABLEFOCUS = `${Constants.EXTENSIONID}/setting_disablefocus`;
     static REVERSELIST = `${Constants.EXTENSIONID}/setting_reverselist`;
     static RUMBLELOG = `${Constants.EXTENSIONID}/setting_rumblelog`;
+    static BONESROLL = `${Constants.EXTENSIONID}/setting_bonesroll`;
     static VISUALDICE = `${Constants.EXTENSIONID}/setting_visualdice`;
     static DICENOTIFICATION = `${Constants.EXTENSIONID}/setting_dicenotification`;
     static DICEEVERYONE = `${Constants.EXTENSIONID}/setting_dicetoall`;

@@ -364,7 +364,7 @@ export function AppendWindowPinButton(): void
                 id: `POP_${SUBVIEW.POPOVERSUBMENUID}`,
                 url: `/submenu/subindex.html?unitid=${SUBVIEW.POPOVERSUBMENUID}&pinned=true`,
                 height: 300,
-                width: 325,
+                width: 350,
                 anchorPosition: { top: 50, left: width },
                 anchorReference: "POSITION",
                 anchorOrigin: {

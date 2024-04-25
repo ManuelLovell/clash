@@ -7,6 +7,13 @@ const footer = document.querySelector<HTMLElement>('#bs-whatsnew-notes')!;
 
 whatsnew.innerHTML = `
   <div id="newsContainer">
+    <h1>Clash! 4/25</h1>
+    QoL Time! Slowly working through it all.
+    </br> As suggested by a user, clicking the UnitInfo button in the Initiative List while that unit's card is open will now close the window.
+    </br> Also, the close button is now 'static' so even if you scroll down, it's always easily accessible.
+    </br> Since Bones! is now in the OBR store, I've enabled the integration for it incase you want to use that roller with Clash.
+    </br> Some general stability updates, some seeing some extensions are loading before scenes are fully in.
+    </br> Enjoy!
     <h1>Clash! 4/13</h1>
     Allowed up to four 'characters' in the Initiative Input. In case you need to do a 12.3 and 12.4.
     </br>

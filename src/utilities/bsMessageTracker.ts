@@ -2,6 +2,7 @@ import OBR, { Metadata } from "@owlbear-rodeo/sdk";
 import { Constants, SettingsConstants } from "../clashConstants";
 import { IChatLog, IEffectLog } from "../interfaces/chatlog";
 import { Reta } from "./bsUtilities";
+import { SendtoChatLog } from "./bsRumbleHelper";
 
 export class MessageTracker
 {
@@ -30,6 +31,39 @@ export class MessageTracker
         {
             this.messageCounter[processCategory] = timeStamp;
             return false;
+        }
+    }
+
+    public async HandleBonesMessage(metadata: Metadata)
+    {
+        const chatLog = document.querySelector<HTMLDivElement>('#rollLog')!;
+        const TIME_STAMP = new Date().toLocaleTimeString();
+
+        const bonesContainer = metadata[`${Constants.BONESID}/metadata_logroll`] as IBonesLog;
+        if (bonesContainer !== undefined)
+        {
+            if (!this.IsThisOld(bonesContainer.created, "BONES", "DICE"))
+            {
+                // Flag to see if you're the sender
+                const author = document.createElement('li');
+                const log = document.createElement('li');
+
+                author.className = "clashAuthor";
+                author.style.color = bonesContainer.senderColor;
+                author.innerText = `[${TIME_STAMP}] - ${bonesContainer.senderName}`;
+                log.className = "clashLog";
+
+                // Remove sender name because the header above has it
+                log.innerHTML = bonesContainer.rollHtml;
+                chatLog.append(author);
+                chatLog.append(log);
+
+                const htmlTagRegex = /<\/?[^>]+>/gi;
+                const cleanString = bonesContainer.rollHtml.replace(htmlTagRegex, '');
+
+                const message = `${bonesContainer.senderName} ... ${cleanString}!`;
+                await SendtoChatLog(message, bonesContainer.senderName);
+            }
         }
     }
 

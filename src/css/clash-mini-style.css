@@ -26,6 +26,7 @@
     --invert: none;
     --invert-click: invert(52%) sepia(81%) saturate(5333%) hue-rotate(331deg) brightness(90%) contrast(88%);
     --slider-color: #ccc;
+    scrollbar-width: thin;
 }
 
 @media (prefers-color-scheme: light) {
@@ -78,13 +79,9 @@ td {
 #clash-sub-search,
 #clash-sub-import {
     overflow-y: scroll;
+    scrollbar-width: thin;
+    padding-right: 5px;
     height: calc(100% - 40px);
-}
-
-#clash-sub-main::-webkit-scrollbar,
-#clash-sub-search::-webkit-scrollbar,
-#clash-sub-import::-webkit-scrollbar {
-    display: none;
 }
 
 .footer-button {
@@ -166,6 +163,18 @@ h2 {
 }
 
 /* Icons */
+#buttonContainer
+{
+    margin-right: 20px;
+}
+#closeSubMenuButton
+{
+    right: 22px;
+    position: fixed;
+    background-color: #000000b2;
+    border-radius: 4px;
+}
+
 .clickable:active {
     filter: invert(52%) sepia(81%) saturate(5333%) hue-rotate(331deg) brightness(90%) contrast(88%);
     transform: scale(1.5);

@@ -900,31 +900,39 @@ export async function OpenSubMenu(unitId: string, elementId?: string): Promise<v
     const modalBuffer = 100;
     const viewableHeight = windowHeight > 800 ? 700 : windowHeight - modalBuffer; // Using 100 as a buffer to account for padding.
 
-    if (elementId)
+    if (unitId === BSCACHE.openUnitPopover)
     {
-        await OBR.popover.close(`POP_${unitId}`);
-        await OBR.popover.open({
-            id: Constants.EXTENSIONSUBMENUID,
-            url: `/submenu/subindex.html?unitid=${unitId}`,
-            height: viewableHeight,
-            width: 350,
-            anchorElementId: elementId,
-            hidePaper: true,
-            disableClickAway: true
-        });
+        await OBR.popover.close(Constants.EXTENSIONSUBMENUID);
+        BSCACHE.openUnitPopover = "";
     }
     else
     {
-        await OBR.popover.close(`POP_${unitId}`);
-        await OBR.popover.open({
-            id: Constants.EXTENSIONSUBMENUID,
-            url: `/submenu/subindex.html?unitid=${unitId}`,
-            height: viewableHeight,
-            width: 350,
-            hidePaper: true,
-            disableClickAway: true
-
-        });
-        //}
+        if (elementId)
+        {
+            await OBR.popover.close(Constants.EXTENSIONSUBMENUID);
+            await OBR.popover.open({
+                id: Constants.EXTENSIONSUBMENUID,
+                url: `/submenu/subindex.html?unitid=${unitId}`,
+                height: viewableHeight,
+                width: 350,
+                anchorElementId: elementId,
+                hidePaper: true,
+                disableClickAway: true
+            });
+            BSCACHE.openUnitPopover = unitId;
+        }
+        else
+        {
+            await OBR.popover.close(Constants.EXTENSIONSUBMENUID);
+            await OBR.popover.open({
+                id: Constants.EXTENSIONSUBMENUID,
+                url: `/submenu/subindex.html?unitid=${unitId}`,
+                height: viewableHeight,
+                width: 350,
+                hidePaper: true,
+                disableClickAway: true
+            });
+            BSCACHE.openUnitPopover = unitId;
+        }
     }
 }

@@ -39,6 +39,7 @@ class BSCache
     roomMetadata: Metadata;
     oldRoomMetadata: Metadata;
 
+    openUnitPopover: string;
     theme: any;
 
     caches: string[];
@@ -70,6 +71,7 @@ class BSCache
         this.theme = "DARK";
         this.roomMetadata = {};
         this.oldRoomMetadata = {};
+        this.openUnitPopover = "";
 
         this.caches = caches;
 
@@ -354,6 +356,12 @@ class BSCache
             const unitId = elementId.substring(2);
             const selected = this.sceneSelected.includes(unitId);
             selected ? toggle.classList.add("selected") : toggle.classList.remove("selected");
+        }
+
+        // Check for Bones Rolls
+        if (Utilities.Reta(SettingsConstants.BONESROLL))
+        {
+            await MESSAGES.HandleBonesMessage(player.metadata);
         }
     }
 

@@ -389,6 +389,7 @@ td {
     padding: 5px;
     height: calc(100% - 50px);
     overflow-y: scroll;
+    scrollbar-width: thin;
     flex-direction: column;
 }
 
@@ -539,9 +540,9 @@ input:checked+.slider:before {
     }
 }
 
+
 .whats-new-shine {
-    animation: battle-system-glow 1.5s infinite;
-    border-radius: 50%;
+    filter: invert(50%) sepia(44%) saturate(43) hue-rotate(-45deg) brightness(119%) contrast(80%) !important;
 }
 
 /* Tool tips*/
