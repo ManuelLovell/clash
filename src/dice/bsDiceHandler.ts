@@ -31,7 +31,7 @@ export async function HandleDiceRoll(roll: string, playername: string, playercol
         const now = new Date().toISOString();
         metadata[`${Constants.BONESID}/metadata_bonesroll`] // metadata[`com.battle-system.bones/metadata_bonesroll`]
             = {
-                notation: rollFormat, // "2d20kh1"
+                notation: rollFormat.trim(), // "2d20kh1"
                 created: now, // new Date().toISOString()
                 senderName: rollText, // Name to display for Roll
                 senderId: "0000", // PlayerId | Self-Tracking-Number
