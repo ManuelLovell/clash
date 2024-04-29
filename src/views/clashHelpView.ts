@@ -1,4 +1,4 @@
-import { ShowHelpMenu, ShowMainMenu } from "../buttons/clashListButtons";
+import { ShowHelpMenu } from "../buttons/clashListButtons";
 import { Constants } from "../clashConstants";
 import * as showdown from 'showdown';
 
