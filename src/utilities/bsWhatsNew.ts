@@ -7,6 +7,13 @@ const footer = document.querySelector<HTMLElement>('#bs-whatsnew-notes')!;
 
 whatsnew.innerHTML = `
   <div id="newsContainer">
+    <h1>Clash! 4/28</h1>
+    After .. months. And months. And months.
+    </br>I finally updated the help documents.
+    </br>The documents will be updated on the OBR store page after they do their next refresh.
+    </br>But for now you can access it via a new help button on the bottom on the list.
+    </br>Hope this helps!
+    </br>
     <h1>Clash! 4/25</h1>
     QoL Time! Slowly working through it all.
     </br> As suggested by a user, clicking the UnitInfo button in the Initiative List while that unit's card is open will now close the window.

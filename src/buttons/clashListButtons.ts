@@ -712,11 +712,13 @@ export function ConfigureViewFooterButtons()
     document.getElementById("nextContainer")?.appendChild(GetNextButton());
     document.getElementById("settingsContainer")?.appendChild(GetSettingsButton());
     document.getElementById("showLogContainer")?.appendChild(GetShowRollLogButton());
+    document.getElementById("showHelpContainer")?.appendChild(GetShowHelpButton());
 }
 
 export function ConfigureViewFooterPlayerButtons()
 {
     document.getElementById("showLogContainer")?.appendChild(GetShowRollLogButton());
+    document.getElementById("showHelpContainer")?.appendChild(GetShowHelpButton());
 }
 
 function GetPreviousButton(): HTMLInputElement
@@ -807,6 +809,22 @@ function GetShowRollLogButton(): HTMLInputElement
     return element;
 }
 
+function GetShowHelpButton(): HTMLInputElement
+{
+    const element = document.createElement('input');
+    element.type = "button";
+    element.id = "showHelpButton";
+    element.value = "Help"
+    element.title = "View Help Docs"
+    element.classList.add("footer-button");
+    element.onclick = async function () 
+    {
+        ShowHelpMenu(true);
+    }
+
+    return element;
+}
+
 export function RenderRollLog(): void
 {
     Constants.MAINLOG.innerHTML = Constants.ROLLLOG;
@@ -851,6 +869,12 @@ export function ShowSettingsMenu(show: boolean): void
     Constants.MAINAPP.style.display = !show ? "block" : "none";
 }
 
+export function ShowHelpMenu(show: boolean): void
+{
+    Constants.MAINHELP.style.display = show ? "contents" : "none";
+    Constants.MAINAPP.style.display = !show ? "block" : "none";
+}
+
 export function ShowRollLog(show: boolean): void
 {
     Constants.MAINLOG.style.display = show ? "contents" : "none";
@@ -860,6 +884,7 @@ export function ShowRollLog(show: boolean): void
 export function ShowMainMenu(show: boolean): void
 {
     Constants.MAINSETTINGS.style.display = !show ? "contents" : "none";
+    Constants.MAINHELP.style.display = !show ? "contents" : "none";
     Constants.MAINLOG.style.display = !show ? "contents" : "none";
     Constants.MAINAPP.style.display = show ? "block" : "none";
 }

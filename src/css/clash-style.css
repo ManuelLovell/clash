@@ -365,7 +365,16 @@ td {
     background-color: #204472;
 }
 
+/* Help Images */
+img {
+    width: 100%;
+}
+a{
+    color: var(--OBR-font);
+}
+
 /* Settings */
+.help-header,
 .settings-header {
     font-weight: bolder;
     font-size: x-large;
@@ -383,6 +392,7 @@ td {
 
 }
 
+#helpWindowContainer,
 #settingsWindowContainer {
     line-height: 2em;
     margin: 0;
@@ -407,6 +417,7 @@ td {
     line-height: 1.5em;
 }
 
+#helpReturnContainer,
 #rollLogReturnContainer,
 #settingsReturnContainer {
     width: 100%;

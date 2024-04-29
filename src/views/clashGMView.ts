@@ -7,6 +7,7 @@ import { GetACHeader, GetArmorInput, GetHPHeader, GetInitativeHeader, GetInitiat
 import { RenderSettings } from "./clashSettingsView";
 import { ViewportFunctions } from "../utilities/bsViewport";
 import { Labeler } from "../utilities/clashLabeler";
+import { RenderHelp } from "./clashHelpView";
 
 class GMView
 {
@@ -69,6 +70,7 @@ class GMView
         this.roundCounter = Seta(SettingsConstants.ROUNDCOUNT) ?? 1;
         this.turnCounter = Seta(SettingsConstants.TURNCOUNT) ?? 0;
         RenderSettings();
+        RenderHelp();
         RenderRollLog();
 
         const table = document.getElementById('clashGMViewBody');
@@ -197,7 +199,7 @@ class GMView
         if (listWidth > 7)
         {
             // 400 is base
-            const newWidth = 350 + ((listWidth - 7) * 25);
+            const newWidth = 360 + ((listWidth - 7) * 25);
             if (newWidth !== this.windowWidth)
             {
                 await OBR.action.setWidth(newWidth);
@@ -281,7 +283,6 @@ class GMView
                 const moveCell = row.insertCell(cellNumber);
                 const moveInput = GetMoveInput(unit);
                 moveCell.appendChild(moveInput);
-                if (!useColumns.includes("BLOCK")) moveCell.colSpan = 2;
                 cellNumber++;
             }
 
@@ -289,7 +290,6 @@ class GMView
             if (useColumns.includes("ELEVATE"))
             {
                 const elCell = row.insertCell(cellNumber);
-                elCell.style.display = "flex";
                 elCell.style.justifyContent = "center";
                 const elInput = GetElevationInput(unit);
                 elCell.appendChild(elInput);
@@ -303,6 +303,12 @@ class GMView
                 efxCell.style.textAlign = "center";
                 const efxInput = GetEFXInput(unit);
                 efxCell.appendChild(efxInput);
+                if (!useColumns.includes("BLOCK"))
+                {
+                    efxCell.colSpan = 2;
+                    efxCell.style.textAlign = "left";
+                    efxCell.style.paddingLeft = "10px";
+                }
                 cellNumber++;
             }
 
@@ -394,7 +400,7 @@ class GMView
             {
                 const now = new Date().toISOString();
                 const message = `The following effects have expired for ${unit.metadata[UnitConstants.UNITNAME]}: ${expired.join(", ")}`;
-                
+
                 await OBR.player.setMetadata({ [`${Constants.EXTENSIONID}/metadata_effect_notify`]: { message: message, created: now } });
 
             }

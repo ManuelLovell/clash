@@ -7,7 +7,8 @@ import { SendtoChatLog } from "../utilities/bsRumbleHelper";
 /** This is handled in SUBVIEW context and has access to it's properties */
 export async function HandleDiceRoll(roll: string, playername: string, playercolor: string, unitname: string, unitaction: string, bonus?: number, advantage?: boolean)
 {
-    if (SUBVIEW.ROOMSETTINGS![SettingsConstants.BONESROLL] === true)
+    const ROOMSETTINGS = await OBR.room.getMetadata();
+    if (ROOMSETTINGS![SettingsConstants.BONESROLL] === true)
     {
         let bonusFormat = '';
         if (bonus)
@@ -44,7 +45,7 @@ export async function HandleDiceRoll(roll: string, playername: string, playercol
     {
         // Check if 3d Dice or Not
         //// Then check if sending results to rumble or not
-        if (SUBVIEW.ROOMSETTINGS![SettingsConstants.VISUALDICE] === true)
+        if (ROOMSETTINGS![SettingsConstants.VISUALDICE] === true)
         {
             const convertRoll = encodeURIComponent(roll);
             const convertUnitName = encodeURIComponent(unitname);

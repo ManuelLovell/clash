@@ -5,6 +5,7 @@ import { ConfigureViewFooterPlayerButtons, GetACHeader, GetArmorInput, GetEFXHea
 import { Meta, Reta, Seta, HexToRgba } from "../utilities/bsUtilities";
 import { ViewportFunctions } from "../utilities/bsViewport";
 import { Labeler } from "../utilities/clashLabeler";
+import { RenderHelp } from "./clashHelpView";
 
 class PlayerView
 {
@@ -53,6 +54,7 @@ class PlayerView
         this.SetupFocusSlider();
         ConfigureViewFooterPlayerButtons();
         RenderRollLog();
+        RenderHelp();
 
         const table = document.getElementById('clashPLViewBody');
         if (table)
@@ -162,7 +164,7 @@ class PlayerView
         if (listWidth > 7)
         {
             // 400 is base
-            const newWidth = 350 + ((listWidth - 7) * 25);
+            const newWidth = 360 + ((listWidth - 7) * 25);
             if (newWidth !== this.windowWidth)
             {
                 await OBR.action.setWidth(newWidth);
@@ -284,7 +286,6 @@ class PlayerView
             {
                 const moveCell = row.insertCell(cellNumber);
                 const moveInput = GetMoveInput(unit);
-                moveCell.colSpan = 2;
                 if (!myUnit)
                 {
                     moveInput.innerText = "";
@@ -299,7 +300,6 @@ class PlayerView
             if (useColumns.includes("ELEVATE"))
             {
                 const elCell = row.insertCell(cellNumber);
-                elCell.style.display = "flex";
                 elCell.style.justifyContent = "center";
                 const elInput = GetElevationInput(unit);
                 this.Disable(elInput, myUnit);
@@ -311,7 +311,9 @@ class PlayerView
             if (useColumns.includes("EFX"))
             {
                 const efxCell = row.insertCell(cellNumber);
-                efxCell.style.textAlign = "center";
+                efxCell.style.textAlign = "left";
+                efxCell.style.paddingLeft = "10px";
+                efxCell.colSpan = 2;
                 const efxInput = GetEFXInput(unit);
                 this.Disable(efxInput, myUnit);
                 efxCell.appendChild(efxInput);
