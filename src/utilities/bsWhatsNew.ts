@@ -7,6 +7,9 @@ const footer = document.querySelector<HTMLElement>('#bs-whatsnew-notes')!;
 
 whatsnew.innerHTML = `
   <div id="newsContainer">
+    <h1>Clash! 4/29</h1>
+    Minor fix; Apparently negative 'to-hit' rolls didn't work when you put '-5'.
+    </br> Thank you Wisdom Hunter for the report. I never knew about it. 😬
     <h1>Clash! 4/28</h1>
     After .. months. And months. And months.
     </br>I finally updated the help documents.

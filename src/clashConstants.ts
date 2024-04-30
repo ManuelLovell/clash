@@ -1,6 +1,6 @@
 export class Constants
 {
-    static VERSION = "whatsnew-clash-240";
+    static VERSION = "whatsnew-clash-241";
     static EXTENSIONID = "com.battle-system.clash";
     static DISCORDID = "com.battle-system.discord";
     static DICEWINDOW = "com.battle-system.dicewindow";
@@ -21,7 +21,7 @@ export class Constants
     static DICENOTATION = /(\d+)[dD](\d+)(.*)$/i;
     static DICEMODIFIER = /([+-])(\d+)/;
     static PARENTHESESMATCH = /\((\d*d\d+\s*([+-]\s*\d+)?)\)/g;
-    static PLUSMATCH = /\s?((?<!\d)\+\d+)\s?/g;
+    static PLUSMATCH = /\s?((?<!\d)[\+\-]\d+)\s?/g;
     static ALPHANUMERICTEXTMATCH = /\s[\da-zA-Z]$/;
 
 
