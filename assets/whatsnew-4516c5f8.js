@@ -1,5 +1,8 @@
-import{O as o,C as a}from"./clashConstants-55509ae8.js";const l=document.querySelector("#bs-whatsnew"),h=document.querySelector("#bs-whatsnew-notes");l.innerHTML=`
+import{O as o,C as a}from"./clashConstants-48b00619.js";const l=document.querySelector("#bs-whatsnew"),h=document.querySelector("#bs-whatsnew-notes");l.innerHTML=`
   <div id="newsContainer">
+    <h1>Clash! 4/29</h1>
+    Minor fix; Apparently negative 'to-hit' rolls didn't work when you put '-5'.
+    </br> Thank you Wisdom Hunter for the report. I never knew about it. 😬
     <h1>Clash! 4/28</h1>
     After .. months. And months. And months.
     </br>I finally updated the help documents.
