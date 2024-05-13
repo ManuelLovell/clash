@@ -40,6 +40,7 @@ export class Labeler
                 label.visible = currentUnit!.visible ? true : false;
                 label.text.plainText = label.visible ? labelText : labelText + "\r\n(Hidden)";
                 label.attachedTo = currentUnit!.id;
+                label.disableAttachmentBehavior = ["ROTATION", "SCALE"];
                 label.locked = true;
                 await OBR.scene.local.addItems([label]);
             }
