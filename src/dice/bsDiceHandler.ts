@@ -3,7 +3,6 @@ import { Constants, SettingsConstants } from "../clashConstants";
 import { SUBVIEW } from "../views/clashSubView";
 import { DiceRoller } from "./bsDiceCalculator";
 import { SendtoChatLog } from "../utilities/bsRumbleHelper";
-import { BSCACHE } from "../utilities/bsSceneCache";
 
 /** This is handled in SUBVIEW context and has access to it's properties */
 export async function HandleDiceRoll(roll: string, playername: string, playercolor: string, unitname: string, unitaction: string, bonus?: number, advantage?: boolean)
