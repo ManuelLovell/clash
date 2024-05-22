@@ -8,6 +8,7 @@ import { BSCACHE } from "../utilities/bsSceneCache";
 /** This is handled in SUBVIEW context and has access to it's properties */
 export async function HandleDiceRoll(roll: string, playername: string, playercolor: string, unitname: string, unitaction: string, bonus?: number, advantage?: boolean)
 {
+    const PLAYERID = await OBR.player.getId();
     const ROOMSETTINGS = await OBR.room.getMetadata();
     if (ROOMSETTINGS![SettingsConstants.BONESROLL] === true)
     {
@@ -36,7 +37,7 @@ export async function HandleDiceRoll(roll: string, playername: string, playercol
                 notation: rollFormat.trim(), // "2d20kh1"
                 created: now, // new Date().toISOString()
                 senderName: rollText, // Name to display for Roll
-                senderId: BSCACHE.playerId, // PlayerId | Self-Tracking-Number
+                senderId: PLAYERID, // PlayerId | Self-Tracking-Number
                 viewers: "ALL" // "ALL" | "GM" | "SELF"
             } as IBonesRoll;
 
