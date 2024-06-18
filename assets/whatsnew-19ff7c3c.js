@@ -1,5 +1,13 @@
-import{O as o,C as a}from"./clashConstants-c8ada5a8.js";const l=document.querySelector("#bs-whatsnew"),c=document.querySelector("#bs-whatsnew-notes");l.innerHTML=`
+import{O as o,C as i}from"./clashConstants-35a65084.js";const l=document.querySelector("#bs-whatsnew"),c=document.querySelector("#bs-whatsnew-notes");l.innerHTML=`
   <div id="newsContainer">
+    <h1>Clash! 6/17</h1>
+    Changes ahoy.
+    Minor bug was fixed when closing the subcard and trying to re-open the same one (Required double clicking.)
+    </br>
+    Larger change, expanded the base size of the 'Pinned' Window to make it a bit more different than the regular subcard. (Which now doesn't close by default anyway.)
+    </br> This was to make way for adding tabs, so you don't need to open/close/click-too-far to get to the next monster when doing your rolls.
+    </br> The new size isn't HUGE, and likely won't be until I find a clever way to allow for resizing.
+    </br> Enjoy.
     <h1>Clash! 4/29</h1>
     Minor fix; Stopped the turn label from scaling/spinning with it's parent token.
     </br>
@@ -27,11 +35,11 @@ import{O as o,C as a}from"./clashConstants-c8ada5a8.js";const l=document.querySe
     Minor bug fix for Open5e not being available; It'll now show an error message if that's the case and not just tank your search. So you can still use the collection. Sorry!
     </br>
   </div>
-`;o.onReady(async()=>{const n=window.location.search,e=new URLSearchParams(n).get("subscriber")==="true";c.innerHTML=`
+`;o.onReady(async()=>{const n=window.location.search,t=new URLSearchParams(n).get("subscriber")==="true";c.innerHTML=`
         <div id="footButtonContainer">
             <button id="discordButton" type="button" title="Join the Owlbear-Rodeo Discord"><embed class="svg discord" src="/w-discord.svg" /></button>
-            <button id="patreonButton" type="button" ${e?'title="Thank you for subscribing!"':'title="Check out the Battle-System Patreon"'}>
-            ${e?'<embed id="patreonLogo" class="svg thankyou" src="/thankyou.svg" />':'<embed id="patreonLogo" class="svg patreon" src="/w-patreon.png" />'}</button>
+            <button id="patreonButton" type="button" ${t?'title="Thank you for subscribing!"':'title="Check out the Battle-System Patreon"'}>
+            ${t?'<embed id="patreonLogo" class="svg thankyou" src="/thankyou.svg" />':'<embed id="patreonLogo" class="svg patreon" src="/w-patreon.png" />'}</button>
         </div>
         <button id="closeButton" type="button" title="Close this window"><embed class="svg close" src="/w-close.svg" /></button>
-        `;const s=document.getElementById("closeButton");s.onclick=async()=>{await o.modal.close(a.EXTENSIONWHATSNEW)};const r=document.getElementById("discordButton");r.onclick=async t=>{t.preventDefault(),window.open("https://discord.gg/ANZKDmWzr6","_blank")};const i=document.getElementById("patreonButton");i.onclick=async t=>{t.preventDefault(),window.open("https://www.patreon.com/battlesystem","_blank")}});
+        `;const s=document.getElementById("closeButton");s.onclick=async()=>{await o.modal.close(i.EXTENSIONWHATSNEW)};const r=document.getElementById("discordButton");r.onclick=async e=>{e.preventDefault(),window.open("https://discord.gg/ANZKDmWzr6","_blank")};const a=document.getElementById("patreonButton");a.onclick=async e=>{e.preventDefault(),window.open("https://www.patreon.com/battlesystem","_blank")}});
