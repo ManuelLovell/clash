@@ -1,9 +1,10 @@
 export class Constants
 {
-    static VERSION = "whatsnew-clash-242";
+    static VERSION = "whatsnew-clash-250";
     static EXTENSIONID = "com.battle-system.clash";
     static DISCORDID = "com.battle-system.discord";
     static DICEWINDOW = "com.battle-system.dicewindow";
+    static SUBCLOSE = "com.battle-system.subclose";
     
     static BONESID = "com.battle-system.bones";
     static EXTENSIONSUBMENUID = "com.battle-system.clash-submenu";

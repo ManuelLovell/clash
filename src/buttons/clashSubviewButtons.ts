@@ -344,6 +344,7 @@ export function AppendUnitExportButton(): void
 
 export function AppendWindowPinButton(): void
 {
+    if (SUBVIEW.multiSheet) return;
     //Get Button Container
     const buttonContainer = document.getElementById("buttonContainer");
 
@@ -363,8 +364,8 @@ export function AppendWindowPinButton(): void
             await OBR.popover.open({
                 id: `POP_${SUBVIEW.POPOVERSUBMENUID}`,
                 url: `/submenu/subindex.html?unitid=${SUBVIEW.POPOVERSUBMENUID}&pinned=true`,
-                height: 300,
-                width: 350,
+                height: 460,
+                width: 400,
                 anchorPosition: { top: 50, left: width },
                 anchorReference: "POSITION",
                 anchorOrigin: {
@@ -382,6 +383,7 @@ export function AppendWindowPinButton(): void
         else
         {
             await OBR.popover.close(`POP_${SUBVIEW.POPOVERSUBMENUID}`);
+            await OBR.broadcast.sendMessage(Constants.SUBCLOSE, true, { destination: "LOCAL" });
         }
     }
     pinButton.src = SUBVIEW.pinned ? "/pinfill.svg" : "/pin.svg";
@@ -394,28 +396,38 @@ export function AppendWindowPinButton(): void
 
 export function AppendCloseWindowButton(): void
 {
-    //Get Button Container
-    const buttonContainer = document.getElementById("buttonContainer");
-
-    //Create Export Button
-    const closeButton = document.createElement('input');
-    closeButton.type = "image";
-    closeButton.id = "closeSubMenuButton";
-    closeButton.classList.add("clickable");
-    closeButton.style.marginLeft = "5px";
-    closeButton.onclick = async function () 
+    if (!SUBVIEW.pinned)
     {
-        if (SUBVIEW.pinned)
-            await OBR.popover.close(`POP_${SUBVIEW.POPOVERSUBMENUID}`);
-        else
-            await OBR.popover.close(Constants.EXTENSIONSUBMENUID);
-    }
-    closeButton.src = "/close.svg";
-    closeButton.title = "Close Window";
-    closeButton.height = 20;
-    closeButton.width = 20;
+        //Get Button Container
+        const buttonContainer = document.getElementById("buttonContainer");
 
-    buttonContainer?.appendChild(closeButton);
+        //Create Export Button
+        const closeButton = document.createElement('input');
+        closeButton.type = "image";
+        closeButton.id = "closeSubMenuButton";
+        closeButton.classList.add("clickable");
+        closeButton.style.marginLeft = "5px";
+        closeButton.onclick = async function () 
+        {
+            if (SUBVIEW.pinned)
+                await OBR.popover.close(`POP_${SUBVIEW.POPOVERSUBMENUID}`);
+            else
+            {
+                await OBR.popover.close(Constants.EXTENSIONSUBMENUID);
+                await OBR.broadcast.sendMessage(Constants.SUBCLOSE, true, { destination: "LOCAL" });
+            }
+        }
+        closeButton.src = "/close.svg";
+        closeButton.title = "Close Window";
+        closeButton.height = 20;
+        closeButton.width = 20;
+
+        buttonContainer?.appendChild(closeButton);
+    }
+    else
+    {
+
+    }
 }
 
 export function AppendAddActionButtons(): void

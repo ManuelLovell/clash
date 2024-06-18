@@ -22,6 +22,7 @@
     --OBR-dark-blue-transparent: rgba(30, 34, 49, 0.5);
     --OBR-Purple-Select: rgb(187, 153, 255);
     --OBR-Purple-Select-transparent: rgb(187, 153, 255, 0.5);
+    --OBR-Dark-Background: rgb(29, 29, 29);
 
     --invert: none;
     --invert-click: invert(52%) sepia(81%) saturate(5333%) hue-rotate(331deg) brightness(90%) contrast(88%);
@@ -39,6 +40,7 @@
         --OBR-dark-blue-transparent: rgba(183, 184, 189, 0.5);
         --OBR-Purple-Select: rgb(153, 102, 255);
         --OBR-Purple-Select-transparent: rgb(153, 102, 255, 0.5);
+        --OBR-Dark-Background: rgb(192, 192, 192);
 
         --OBR-font: black;
         --invert: invert(1);
@@ -163,12 +165,11 @@ h2 {
 }
 
 /* Icons */
-#buttonContainer
-{
+#buttonContainer {
     margin-right: 20px;
 }
-#closeSubMenuButton
-{
+
+#closeSubMenuButton {
     right: 22px;
     position: fixed;
     background-color: #000000b2;
@@ -347,4 +348,73 @@ h2 {
 
 .context-menu ul li:hover {
     background: var(--OBR-light-blue);
+}
+
+#clash-sub-pin-header {
+    width: 100%;
+    height: 30px;
+}
+
+#clash-sub-tab-container {
+    display: flex;
+    height: 30px;
+    width: 94%;
+    padding-bottom: 4px;
+    overflow-x: scroll;
+}
+
+#clash-sub-tab-container::-webkit-scrollbar {
+    width: 6px;
+    /* Width of the scrollbar */
+    height: 6px;
+    /* Height of the scrollbar */
+}
+
+#clash-sub-tab-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    /* Track background */
+}
+
+#clash-sub-tab-container::-webkit-scrollbar-thumb {
+    background: #888;
+    /* Scrollbar thumb background */
+    border-radius: 3px;
+    /* Rounded corners of the scrollbar thumb */
+}
+
+#clash-sub-tab-container::-webkit-scrollbar-thumb:hover {
+    background: #555;
+    /* Thumb background on hover */
+}
+
+.unit_select_button {
+    color: var(--OBR-font);
+    background-color: rgb(29, 29, 29);
+    font-weight: bold;
+    display: inline-block;
+    cursor: pointer;
+    border-radius: 6px;
+    border-color: var(--OBR-Purple-Select);
+    border-style: solid;
+    border-width: 1px;
+    min-width: 60px;
+    max-width: 80px;
+    text-overflow: ellipsis;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    white-space: nowrap;
+    margin-left: 2px;
+    margin-right: 2px;
+}
+
+#clash-sub-close-container {
+
+    align-self: center;
+}
+
+#closeSubMenuPinButton {
+    right: 12px;
+    background-color: #000000b2;
+    border-radius: 4px;
+    align-items: center;
 }

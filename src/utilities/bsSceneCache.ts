@@ -141,6 +141,11 @@ class BSCache
 
     public SetupHandlers()
     {
+        OBR.broadcast.onMessage(Constants.SUBCLOSE, (data) =>
+        {
+            if (data.data === true)
+                BSCACHE.openUnitPopover = "";
+        });
 
         if (this.sceneMetadataHandler === undefined || this.sceneMetadataHandler.length === 0)
         {

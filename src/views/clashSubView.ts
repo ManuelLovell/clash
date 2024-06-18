@@ -1,4 +1,4 @@
-import { Constants } from './../clashConstants';
+import { Constants, UnitConstants } from './../clashConstants';
 import OBR, { Metadata } from '@owlbear-rodeo/sdk';
 import UnitInfo from "./../unitinfo/clashUnitInfo";
 import { getDatabase } from './../local-database';
@@ -6,7 +6,7 @@ import * as Utilities from './../utilities/bsUtilities';
 import { IUnitInfo } from './../interfaces/unit-info';
 import { BuildUnitStatBlock } from './clashSubViewBuildBlock';
 import '/src/css/clash-mini-style.css'
-import {  AppendImportButtons, AppendSearchButtons, AppendSubMainFooterButtons } from '../buttons/clashSubviewButtons';
+import { AppendImportButtons, AppendSearchButtons, AppendSubMainFooterButtons } from '../buttons/clashSubviewButtons';
 
 export class SubMenu
 {
@@ -23,11 +23,13 @@ export class SubMenu
     multiSheet: boolean = false;
     multiIds: string[] = [];
     pinned = false;
-    
+
     VIEWPORTWIDTH = 0;
     VIEWPORTHEIGHT = 0;
 
     SUBMAIN: HTMLDivElement;
+    SUBMAINPINBUTTONMENU: HTMLDivElement;
+    SUBMAINPINHEADERMENU: HTMLDivElement;
     SUBMAINCARD: HTMLDivElement;
     SUBMAINFOOTER: HTMLDivElement;
 
@@ -50,6 +52,8 @@ export class SubMenu
         this.favorite = false;
 
         this.SUBMAIN = document.getElementById("clash-sub-main") as HTMLDivElement;
+        this.SUBMAINPINBUTTONMENU = document.getElementById("clash-sub-tab-container") as HTMLDivElement;
+        this.SUBMAINPINHEADERMENU = document.getElementById("clash-sub-pin-header") as HTMLDivElement;
         this.SUBMAINCARD = document.getElementById("subMainCard") as HTMLDivElement;
         this.SUBMAINFOOTER = document.getElementById("subMainFooter") as HTMLDivElement;
 
@@ -94,7 +98,10 @@ export class SubMenu
         if (this.pinned)
         {
             this.SUBMAINFOOTER.style.display = "none";
-            this.SUBMAIN.style.height = "100%";
+            /// CHANGES HERE
+            this.SUBMAINPINHEADERMENU.style.display = "flex";
+            this.SUBMAIN.style.height = "calc(100% - 36px)";
+            this.SUBMAIN.style.marginTop = "6px";
         }
     }
 
@@ -171,6 +178,26 @@ export class SubMenu
         this.SUBIMPORT.style.display = "block";
         this.SUBSEARCH.style.display = "none";
     }
+
+    public AddUnitSelectButton(unitid: string, unitname: string): void
+    {
+        const newUnitButon = document.createElement('button');
+        newUnitButon.id = `unitSelect_${unitid}`;
+        newUnitButon.classList.add('unit_select_button');
+        newUnitButon.innerText = unitname;
+        newUnitButon.onclick = async (e) =>
+        {
+            e.preventDefault();
+            if (unitid === SUBVIEW.POPOVERSUBMENUID) return; // Do nothing if we're already on this unit
+            else
+            {
+                SUBVIEW.POPOVERSUBMENUID = unitid;
+                await SUBVIEW.RenderUnitInfo();
+            }
+        };
+
+        SUBVIEW.SUBMAINPINBUTTONMENU.appendChild(newUnitButon);
+    }
 }
 
 // Render from main list
@@ -178,5 +205,42 @@ export const SUBVIEW = new SubMenu();
 
 OBR.onReady(async () =>
 {
+    if (SUBVIEW.pinned)
+    {
+        // Get all OTHER units aside from the one this list is for.
+        const thisUnit = await OBR.scene.items.getItems(x => x.id === SUBVIEW.POPOVERSUBMENUID);
+        const otherUnits = (await OBR.scene.items.getItems(x => x.metadata[UnitConstants.ONLIST] === true)).filter(x => x.id !== SUBVIEW.POPOVERSUBMENUID);
+
+        SUBVIEW.AddUnitSelectButton(thisUnit[0].id, thisUnit[0].metadata[UnitConstants.UNITNAME] as string);
+        for (const unit of otherUnits)
+        {
+            SUBVIEW.AddUnitSelectButton(unit.id, unit.metadata[UnitConstants.UNITNAME] as string);
+        }
+
+        const buttonContainer = document.getElementById("clash-sub-close-container");
+
+        //Create Export Button
+        const closeButton = document.createElement('input');
+        closeButton.type = "image";
+        closeButton.id = "closeSubMenuPinButton";
+        closeButton.classList.add("clickable");
+        closeButton.style.marginLeft = "5px";
+        closeButton.onclick = async function () 
+        {
+            if (SUBVIEW.pinned)
+                await OBR.popover.close(`POP_${SUBVIEW.POPOVERSUBMENUID}`);
+            else
+            {
+                await OBR.popover.close(Constants.EXTENSIONSUBMENUID);
+                await OBR.broadcast.sendMessage(Constants.SUBCLOSE, true, { destination: "LOCAL" });
+            }
+        }
+        closeButton.src = "/close.svg";
+        closeButton.title = "Close Window";
+        closeButton.height = 20;
+        closeButton.width = 20;
+
+        buttonContainer?.appendChild(closeButton);
+    }
     await SUBVIEW.RenderUnitInfo();
 });
