@@ -31,7 +31,7 @@ export class Labeler
 
             if (labelItemExists.length === 0) // There is no current label item.
             {
-                const label = buildLabel().fillColor("#ffffff").plainText(labelText).build();
+                const label = buildLabel().fillColor("#ffffff").plainText(labelText).build() as any;
                 label.visible = false;
                 label.type = "LABEL";
                 label.id = Constants.LABEL;
@@ -163,7 +163,7 @@ export class Labeler
 
         const elevationLabel = `${indicator}${positiveHeight}`;
 
-        const label = buildText().plainText(elevationLabel).fontWeight(900).fillOpacity(.95).fillColor("white").strokeWidth(2).strokeColor("black").strokeOpacity(1).build();
+        const label = buildText().plainText(elevationLabel).fontWeight(900).fillOpacity(.95).fillColor("white").strokeWidth(2).strokeColor("black").strokeOpacity(1).build() as any;
         label.position = {
             x: bounds.min.x - 40,
             y: bounds.min.y
@@ -194,7 +194,7 @@ export class Labeler
         if (Reta(SettingsConstants.HPBARNUMBERS) === true)
         {
             // Using NUMBERS
-            label = buildText().plainText(unitHealth.health).fontWeight(900).fillOpacity(.95).fillColor(unitHealth.color).strokeWidth(2).strokeColor("black").strokeOpacity(1).build();
+            label = buildText().plainText(unitHealth.health).fontWeight(900).fillOpacity(.95).fillColor(unitHealth.color).strokeWidth(2).strokeColor("black").strokeOpacity(1).build() as any;
             label.position = {
                 x: bounds.max.x - ((bounds.max.x - bounds.min.x) / 2) - 30,
                 y: bounds.max.y - 55
@@ -203,7 +203,7 @@ export class Labeler
         }
         else
         {
-            label = buildText().plainText(unitHealth.health).fontWeight(800).fillOpacity(.85).fillColor(unitHealth.color).strokeWidth(1).strokeColor("black").strokeOpacity(1).build();
+            label = buildText().plainText(unitHealth.health).fontWeight(800).fillOpacity(.85).fillColor(unitHealth.color).strokeWidth(1).strokeColor("black").strokeOpacity(1).build() as any;
             label.position = {
                 x: bounds.max.x - ((bounds.max.x - bounds.min.x) / 2) - 85,
                 y: bounds.max.y - 44
